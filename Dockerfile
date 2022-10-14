@@ -1,6 +1,5 @@
 FROM ubuntu:22.04
 
-#libuv1-dev 
 RUN apt-get update -y \
     && apt-get install -y g++ make cmake libssl-dev libuv1-dev zlib1g-dev pkg-config \
     && apt-get clean
