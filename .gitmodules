@@ -1,0 +1,9 @@
+[submodule "vendor/LuaJIT"]
+	path = vendor/LuaJIT
+	url = https://github.com/LuaJIT/LuaJIT.git
+[submodule "vendor/cpp-driver"]
+	path = vendor/cpp-driver
+	url = https://github.com/datastax/cpp-driver.git
+[submodule "vendor/libuv"]
+	path = vendor/libuv
+	url = https://github.com/libuv/libuv.git
