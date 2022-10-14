@@ -1,8 +1,14 @@
 #include "library.h"
 #include <iostream>
-#include "cassandra.h"
 #include "luajit-2.1/lua.h"
+#include "cassandra.h"
+
+CassSession *session;
 
 void hello() {
     std::cout << "Hello, World!" << std::endl;
+}
+
+int luaopen_helper(lua_State *l) {
+    return 0;
 }
