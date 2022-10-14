@@ -5,7 +5,7 @@
 
 CassSession *session;
 
-void hello() {
+void connect() {
     std::cout << "Hello, World!" << std::endl;
 }
 
