@@ -5,11 +5,11 @@
     "customizations": {
         "vscode": {
             "extensions": [
-				"EditorConfig.EditorConfig",
-				"ms-vscode.cpptools",
-				"ms-vscode.cmake-tools",
-				"ms-azuretools.vscode-docker"
-			]
+                "EditorConfig.EditorConfig",
+                "ms-vscode.cpptools",
+                "ms-vscode.cmake-tools",
+                "ms-azuretools.vscode-docker"
+            ]
         }
     },
     "features": {
