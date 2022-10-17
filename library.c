@@ -1,5 +1,6 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "include/library.h"
-#include <iostream>
 #include "luajit-2.1/lua.h"
 #include "cassandra.h"
 
@@ -10,7 +11,7 @@ const int QUERY_POSITION = 1;
 const int PARAMETERS_POSITION = 2;
 
 int connect(lua_State *L) {
-    std::cout << "Hello, World!" << std::endl;
+    // std::cout << "Hello, World!" << std::endl;
     CassError err;
     session = cass_session_new();
     cluster = cass_cluster_new();
@@ -39,7 +40,8 @@ int query(lua_State *L) {
     }
 }
 
-int luaopen_helper(lua_State *L) {
+int luaopen_luacassandra(lua_State *L) {
+    printf("hello\n");
     lua_newtable(L);
     
     lua_pushcfunction(L, connect);
