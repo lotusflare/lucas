@@ -1,6 +1,8 @@
 #ifndef CMAKE_CASSANDRA_LUA_LIBRARY_H
 #define CMAKE_CASSANDRA_LUA_LIBRARY_H
 
-void hello();
+#include <luajit-2.1/lua.h>
 
-#endif //CMAKE_CASSANDRA_LUA_LIBRARY_H
+int luaopen_luacassandra(lua_State *l);
+
+#endif
