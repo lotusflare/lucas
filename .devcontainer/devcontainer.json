@@ -2,6 +2,9 @@
     "build": {
         "dockerfile": "../Dockerfile"
     },
+    "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
+    "workspaceFolder": "/app",
+    "runArgs": ["--network=host"],
     "customizations": {
         "vscode": {
             "extensions": [
@@ -19,8 +22,5 @@
         "ghcr.io/devcontainers/features/common-utils:1": {
             "version": "latest"
         }
-    },
-    "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
-    "workspaceFolder": "/app",
-    "runArgs": ["--network=host"]
+    }
 }
