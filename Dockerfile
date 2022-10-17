@@ -1,7 +1,7 @@
 FROM ubuntu:22.04
 
 RUN apt-get update -y \
-    && apt-get install -y g++ make cmake libssl-dev libuv1-dev zlib1g-dev libluajit-5.1-dev luajit pkg-config \
+    && apt-get install -y g++ make cmake libssl-dev libuv1-dev zlib1g-dev libluajit-5.1-dev luajit luarocks pkg-config \
     && apt-get clean \
     && luarocks install busted
 
