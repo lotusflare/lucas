@@ -1,4 +1,4 @@
-#include "library.h"
+#include "include/library.h"
 #include <iostream>
 #include "luajit-2.1/lua.h"
 #include "cassandra.h"
