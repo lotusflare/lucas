@@ -3,8 +3,8 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/include"
-                "${workspaceFolder}/vendor/cpp-driver/include",
+                "${workspaceFolder}/include",
+                "${workspaceFolder}/vendor/cpp-driver/include"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
