@@ -7,7 +7,7 @@ RUN apt-get update -y \
 
 COPY . /app
 WORKDIR /app/build
-RUN cmake .. \
-  && make
+RUN cmake .. && make
+WORKDIR /app
 
 ENV LUA_CPATH "/app/build/?.so;/usr/local/lib/lua/5.1/?.so"
