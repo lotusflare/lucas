@@ -12,10 +12,11 @@ const int PARAMETERS_POSITION = 2;
 
 int connect(lua_State *L) {
     // std::cout << "Hello, World!" << std::endl;
+    const char *contact_points = lua_tostring(L, 1);
     CassError err;
     session = cass_session_new();
     cluster = cass_cluster_new();
-    err = cass_cluster_set_contact_points(cluster, getenv("CASSANDRA_DB"));
+    err = cass_cluster_set_contact_points(cluster, contact_points);
     if (err != CASS_OK) {
         return 0;
     }
