@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "include/library.h"
+#include "library.h"
 #include "luajit-2.1/lua.h"
 #include "cassandra.h"
 
