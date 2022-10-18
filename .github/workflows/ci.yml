@@ -23,8 +23,8 @@ jobs:
       - name: Bring up environment
         working-directory: integration
         run: |
-          docker compose up cassandra --wait --timeout=60
-          sleep 5
+          docker compose up cassandra --wait
+          sleep 10
           docker compose up cassandra_init
 
       - name: Integration tests
