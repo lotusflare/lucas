@@ -10,12 +10,14 @@ services:
     healthcheck:
       test: "[ $$(nodetool -h ::FFFF:127.0.0.1 statusgossip) = running ]"
 
-  cassandra_keyspaces:
+  cassandra_init:
     image: cassandra:4.0
     depends_on:
       cassandra:
         condition: service_healthy
-    command: ["cqlsh", "cassandra", "-e", "CREATE KEYSPACE IF NOT EXISTS testing WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};"]
+    volumes:
+      - "./init.cql:/init.cql:ro"
+    command: ["cqlsh", "cassandra", "-f", "/init.cql"]
 
   driver:
     build:

@@ -5,6 +5,8 @@ on: [push]
 jobs:
   test:
     runs-on: ubuntu-22.04
+    env:
+      DOCKER_BUILDKIT: "1"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -18,9 +20,14 @@ jobs:
       #     cache-from: type=gha
       #     cache-to: type=gha,mode=max
 
+      - name: Bring up environment
+        working-directory: integration
+        run: |
+          docker compose up cassandra --wait
+          sleep 10
+          docker compose up cassandra_init
+
       - name: Integration tests
         working-directory: integration
         run: |
-          docker compose up -d
-          docker compose up cassandra --wait --timeout=60
-          docker compose run driver busted integration
+          docker compose run driver busted --output=TAP .
