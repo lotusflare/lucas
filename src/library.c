@@ -58,7 +58,6 @@ static int query(lua_State *L)
     // Create statement
     const size_t param_count = lua_objlen(L, 2);
     const char *query = lua_tostring(L, QUERY_POSITION);
-    printf("creating statement `%s` with %ld parameter(s)\n", query, param_count);
     CassStatement *statement = cass_statement_new(query, param_count);
 
     for (size_t i = 0; i < param_count; i++)
@@ -82,7 +81,6 @@ static int query(lua_State *L)
     CassIterator *iterator = cass_iterator_from_result(execute_result);
     size_t row_count = cass_result_row_count(execute_result);
     size_t col_count = cass_result_column_count(execute_result);
-    printf("results: rows=%ld, cols=%ld\n", row_count, col_count);
 
     lua_newtable(L);
     int main_table = lua_gettop(L);
@@ -157,7 +155,6 @@ static int query(lua_State *L)
                 lua_settable(L, sub_table);
                 continue;
             default:
-                printf("could not find type for column: %s\n", terminated);
                 lua_pushstring(L, terminated);
                 lua_pushnil(L);
                 lua_settable(L, sub_table);
@@ -172,7 +169,6 @@ static int query(lua_State *L)
 int luaopen_luacassandra(lua_State *L)
 {
     cass_log_set_level(CASS_LOG_DISABLED);
-    printf("registering luacassandra\n");
     luaL_Reg reg[] = {
         {"connect", connect},
         {"query", query},

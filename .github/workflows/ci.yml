@@ -28,6 +28,5 @@ jobs:
           docker compose up cassandra_init
 
       - name: Integration tests
-        working-directory: integration
         run: |
           docker compose run driver busted integration
