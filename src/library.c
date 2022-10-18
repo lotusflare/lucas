@@ -171,6 +171,7 @@ static int query(lua_State *L)
 
 int luaopen_luacassandra(lua_State *L)
 {
+    cass_log_set_level(CASS_LOG_DISABLED);
     printf("registering luacassandra\n");
     luaL_Reg reg[] = {
         {"connect", connect},
