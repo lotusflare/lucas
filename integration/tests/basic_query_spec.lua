@@ -28,4 +28,9 @@ describe("luacassandra", function()
             }
         })
     end)
+
+    it("binding parameters", function ()
+        lucas.connect("127.0.0.1")
+
+    end)
 end)

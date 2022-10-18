@@ -56,7 +56,7 @@ static int query(lua_State *L)
     luaL_checktype(L, PARAMETERS_POSITION, LUA_TTABLE);
 
     // Create statement
-    const size_t param_count = lua_objlen(L, 2);
+    const size_t param_count = lua_objlen(L, PARAMETERS_POSITION);
     const char *query = lua_tostring(L, QUERY_POSITION);
     CassStatement *statement = cass_statement_new(query, param_count);
 
