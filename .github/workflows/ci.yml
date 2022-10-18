@@ -21,5 +21,6 @@ jobs:
       - name: Integration tests
         working-directory: integration
         run: |
-          docker compose up -d --wait
+          docker compose up -d
+          docker compose up cassandra --wait --timeout=60
           docker compose run driver busted integration
