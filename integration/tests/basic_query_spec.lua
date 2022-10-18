@@ -9,10 +9,9 @@ describe("luacassandra", function()
     end)
 
     it("error when cannot connect", function ()
-        local ok, err = pcall(function ()
+        assert.has.errors(function ()
             lucas.connect("example.com")
         end)
-        assert.is_false(ok)
     end)
 
     it("select statement", function ()
