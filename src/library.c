@@ -54,23 +54,11 @@ static int query(lua_State *L) {
 }
 
 int luaopen_luacassandra(lua_State *L) {
-    printf("hello\n");
-
-    // lua_newtable(L);
-
-    // lua_pushcfunction(L, connect);
-    // lua_setfield(L, -2, "connect");
-    // lua_pushcfunction(L, query);
-    // lua_setfield(L, -2, "query");
+    printf("registering luacassandra\n");
     luaL_Reg reg[] = {
         {"connect", connect},
         {NULL, NULL}
     };
-
     luaL_openlib(L, "luacassandra", reg, 0);
-
-    // lua_pushcfunction(L, connect);
-    // lua_setglobal(L, "connect");
-
     return 1;
 }
