@@ -22,7 +22,8 @@ jobs:
         working-directory: integration
         run: |
           docker compose up cassandra --wait --timeout=60
-          docker compose up -d
+          sleep 5
+          docker compose up cassandra_init
 
       - name: Integration tests
         working-directory: integration

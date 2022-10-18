@@ -17,6 +17,7 @@ describe("luacassandra", function()
 
     it("select statement", function ()
         lucas.connect("127.0.0.1")
-        lucas.execute_query("SELECT * FROM testing.data", {})
+        local results = lucas.execute_query("SELECT * FROM testing.data", {})
+        pretty.dump(results)
     end)
 end)
