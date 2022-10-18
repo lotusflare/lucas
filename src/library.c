@@ -26,7 +26,8 @@ static int connect(lua_State *L) {
     cluster = cass_cluster_new();
     err = cass_cluster_set_contact_points(cluster, contact_points);
     if (err != CASS_OK) {
-        return 0;
+        lua_pushstring(L, "could not set contact points");
+        lua_error(L);
     }
     CassFuture *future = cass_session_connect(session, cluster);
     cass_future_wait(future);
@@ -34,7 +35,7 @@ static int connect(lua_State *L) {
     cass_future_free(future);
     if (err != CASS_OK) {
         lua_pushstring(L, "could not connect");
-        return 1;
+        lua_error(L);
     }
     lua_newtable(L);
     return 0;
