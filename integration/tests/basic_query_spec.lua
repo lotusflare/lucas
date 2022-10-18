@@ -1,13 +1,17 @@
 require "busted.runner"()
-local lua_cassandra = require("luacassandra")
+local pretty = require "pl.pretty"
+local lucas = require("luacassandra")
 
-describe("basic query", function() 
-    it("runs", function()
-        assert.is_true(1 == 1)
+describe("luacassandra", function()
+    it("can connect", function()
+        local err = lucas.connect("127.0.0.1")
+        assert.is_nil(err)
     end)
-    
-    it("lua_cassandra", function()
-        -- lua_cassandra.connect("127.0.0.1")
-        -- lua_cassandra.query("", {})
+
+    it("error when cannot connect", function ()
+        local ok, err = pcall(function ()
+            lucas.connect("example.com")
+        end)
+        assert.is_false(ok)
     end)
 end)

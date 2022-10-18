@@ -2,13 +2,17 @@
     "build": {
         "dockerfile": "../Dockerfile"
     },
+    "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
+    "workspaceFolder": "/app",
+    "runArgs": ["--network=host"],
     "customizations": {
         "vscode": {
             "extensions": [
-				"ms-vscode.cpptools",
-				"EditorConfig.EditorConfig",
-				"ms-vscode.cmake-tools"
-			]
+                "EditorConfig.EditorConfig",
+                "ms-vscode.cpptools",
+                "ms-vscode.cmake-tools",
+                "ms-azuretools.vscode-docker"
+            ]
         }
     },
     "features": {
@@ -18,7 +22,5 @@
         "ghcr.io/devcontainers/features/common-utils:1": {
             "version": "latest"
         }
-    },
-    "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
-    "workspaceFolder": "/app"
+    }
 }
