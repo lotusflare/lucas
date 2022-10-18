@@ -1,0 +1,14 @@
+{
+    "files.exclude": {
+        ".cache": true
+    },
+    "files.associations": {
+        "library.h": "c",
+        ".clang-format": "yaml"
+    },
+    "editor.inlayHints.enabled": "off",
+    "[c]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
+    }
+}
