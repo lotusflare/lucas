@@ -18,9 +18,13 @@ jobs:
       #     cache-from: type=gha
       #     cache-to: type=gha,mode=max
 
+      - name: Bring up environment
+        working-directory: integration
+        run: |
+          docker compose up cassandra --wait --timeout=60
+          docker compose up -d
+
       - name: Integration tests
         working-directory: integration
         run: |
-          docker compose up -d
-          docker compose up cassandra --wait --timeout=60
           docker compose run driver busted integration

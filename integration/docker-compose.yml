@@ -10,7 +10,7 @@ services:
     healthcheck:
       test: "[ $$(nodetool -h ::FFFF:127.0.0.1 statusgossip) = running ]"
 
-  cassandra_keyspaces:
+  cassandra_init:
     image: cassandra:4.0
     depends_on:
       cassandra:
