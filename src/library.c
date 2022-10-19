@@ -44,43 +44,43 @@ static int connect(lua_State *L)
     return 0;
 }
 
-void bind_positional_parameter(lua_State *L, int i, CassStatement *statement, CassValueType type)
+void bind_positional_parameter(lua_State *L, int i, CassStatement *statement, CassValueType type, int index)
 {
     CassError err;
 
     if (type == CASS_VALUE_TYPE_UUID || type == CASS_VALUE_TYPE_TIMEUUID)
     {
         CassUuid uuid;
-        err = cass_uuid_from_string(lua_tostring(L, VALUE_OFFSET), &uuid);
+        err = cass_uuid_from_string(lua_tostring(L, index), &uuid);
         cass_statement_bind_uuid(statement, i, uuid);
-    }
-    else if (type == CASS_VALUE_TYPE_INT)
-    {
-        err = cass_statement_bind_int32(statement, i, lua_tointeger(L, VALUE_OFFSET));
-    }
-    else if (type == CASS_VALUE_TYPE_SMALL_INT)
-    {
-        err = cass_statement_bind_int16(statement, i, lua_tointeger(L, VALUE_OFFSET));
     }
     else if (type == CASS_VALUE_TYPE_TINY_INT)
     {
-        err = cass_statement_bind_int8(statement, i, lua_tointeger(L, VALUE_OFFSET));
+        err = cass_statement_bind_int8(statement, i, lua_tointeger(L, index));
+    }
+    else if (type == CASS_VALUE_TYPE_SMALL_INT)
+    {
+        err = cass_statement_bind_int16(statement, i, lua_tointeger(L, index));
+    }
+    else if (type == CASS_VALUE_TYPE_INT)
+    {
+        err = cass_statement_bind_int32(statement, i, lua_tointeger(L, index));
     }
     else if (type == CASS_VALUE_TYPE_BIGINT)
     {
-        err = cass_statement_bind_int64(statement, i, lua_tointeger(L, VALUE_OFFSET));
+        err = cass_statement_bind_int64(statement, i, lua_tointeger(L, index));
     }
     else if (type == CASS_VALUE_TYPE_FLOAT)
     {
-        err = cass_statement_bind_float(statement, i, lua_tonumber(L, VALUE_OFFSET));
+        err = cass_statement_bind_float(statement, i, lua_tonumber(L, index));
     }
     else if (type == CASS_VALUE_TYPE_DOUBLE)
     {
-        err = cass_statement_bind_double(statement, i, lua_tonumber(L, VALUE_OFFSET));
+        err = cass_statement_bind_double(statement, i, lua_tonumber(L, index));
     }
     else if (type == CASS_VALUE_TYPE_ASCII || type == CASS_VALUE_TYPE_TEXT || type == CASS_VALUE_TYPE_VARCHAR)
     {
-        err = cass_statement_bind_string(statement, i, lua_tostring(L, VALUE_OFFSET));
+        err = cass_statement_bind_string(statement, i, lua_tostring(L, index));
     }
     else
     {
@@ -93,43 +93,43 @@ void bind_positional_parameter(lua_State *L, int i, CassStatement *statement, Ca
     }
 }
 
-void bind_named_parameter(lua_State *L, const char *name, CassStatement *statement, CassValueType type)
+void bind_named_parameter(lua_State *L, const char *name, CassStatement *statement, CassValueType type, int index)
 {
     CassError err;
 
     if (type == CASS_VALUE_TYPE_UUID || type == CASS_VALUE_TYPE_TIMEUUID)
     {
         CassUuid uuid;
-        err = cass_uuid_from_string(lua_tostring(L, VALUE_OFFSET), &uuid);
+        err = cass_uuid_from_string(lua_tostring(L, index), &uuid);
         cass_statement_bind_uuid_by_name(statement, name, uuid);
     }
     else if (type == CASS_VALUE_TYPE_TINY_INT)
     {
-        err = cass_statement_bind_int8_by_name(statement, name, lua_tointeger(L, VALUE_OFFSET));
+        err = cass_statement_bind_int8_by_name(statement, name, lua_tointeger(L, index));
     }
     else if (type == CASS_VALUE_TYPE_SMALL_INT)
     {
-        err = cass_statement_bind_int16_by_name(statement, name, lua_tointeger(L, VALUE_OFFSET));
+        err = cass_statement_bind_int16_by_name(statement, name, lua_tointeger(L, index));
     }
     else if (type == CASS_VALUE_TYPE_INT)
     {
-        err = cass_statement_bind_int32_by_name(statement, name, lua_tointeger(L, VALUE_OFFSET));
+        err = cass_statement_bind_int32_by_name(statement, name, lua_tointeger(L, index));
     }
     else if (type == CASS_VALUE_TYPE_BIGINT)
     {
-        err = cass_statement_bind_int64_by_name(statement, name, lua_tointeger(L, VALUE_OFFSET));
+        err = cass_statement_bind_int64_by_name(statement, name, lua_tointeger(L, index));
     }
     else if (type == CASS_VALUE_TYPE_FLOAT)
     {
-        err = cass_statement_bind_float_by_name(statement, name, lua_tonumber(L, VALUE_OFFSET));
+        err = cass_statement_bind_float_by_name(statement, name, lua_tonumber(L, index));
     }
     else if (type == CASS_VALUE_TYPE_DOUBLE)
     {
-        err = cass_statement_bind_double_by_name(statement, name, lua_tonumber(L, VALUE_OFFSET));
+        err = cass_statement_bind_double_by_name(statement, name, lua_tonumber(L, index));
     }
     else if (type == CASS_VALUE_TYPE_ASCII || type == CASS_VALUE_TYPE_TEXT || type == CASS_VALUE_TYPE_VARCHAR)
     {
-        err = cass_statement_bind_string_by_name(statement, name, lua_tostring(L, VALUE_OFFSET));
+        err = cass_statement_bind_string_by_name(statement, name, lua_tostring(L, index));
     }
     else
     {
@@ -144,21 +144,42 @@ void bind_named_parameter(lua_State *L, const char *name, CassStatement *stateme
 
 CassStatement *create_statement(lua_State *L)
 {
+    printf("initial_top=%d", lua_gettop(L));
+
     const size_t parameter_count = lua_objlen(L, PARAMETERS_POSITION);
     const char *query = lua_tostring(L, QUERY_POSITION);
     CassStatement *statement = cass_statement_new(query, parameter_count);
 
-    for (size_t i = 0; i < parameter_count; i++)
+    for (lua_pushnil(L); lua_next(L, PARAMETERS_POSITION) != 0;)
     {
-        lua_rawgeti(L, PARAMETERS_POSITION, i + 1);
-        int current = lua_gettop(L);
-        lua_rawgeti(L, current, TYPE_POSITION);
-        lua_rawgeti(L, current, VALUE_POSITION);
-        luaL_checkinteger(L, TYPE_OFFSET);
-        const CassValueType type = lua_tointeger(L, TYPE_OFFSET);
-        bind_positional_parameter(L, i, statement, type);
-        lua_pop(L, 2);
+        int table_key_index = lua_gettop(L) - 1;
+        int table_value_index = lua_gettop(L);
+        int lt = lua_type(L, table_key_index);
+        lua_pushvalue(L, table_key_index); // copy the key
+        int table_key_copy_index = lua_gettop(L);
+
+        lua_rawgeti(L, table_value_index, TYPE_POSITION);
+        lua_rawgeti(L, table_value_index, VALUE_POSITION);
+        int type_index = lua_gettop(L) - 1;
+        int value_index = lua_gettop(L);
+        const CassValueType type = lua_tointeger(L, type_index);
+        const char *value = lua_tostring(L, value_index);
+
+        if (lt == LUA_TSTRING)
+        {
+            const char *name = lua_tostring(L, table_key_copy_index);
+            bind_named_parameter(L, name, statement, type, value_index);
+        }
+        else if (lt == LUA_TNUMBER)
+        {
+            const int index = lua_tointeger(L, table_key_copy_index) - 1; // lua base 1 indexing
+            bind_positional_parameter(L, index, statement, type, value_index);
+        }
+
+        lua_pop(L, 4);
     }
+
+    printf("final_top=%d", lua_gettop(L));
 
     return statement;
 }
@@ -244,7 +265,6 @@ static int query(lua_State *L)
 {
     luaL_checktype(L, QUERY_POSITION, LUA_TSTRING);
     luaL_checktype(L, PARAMETERS_POSITION, LUA_TTABLE);
-    CassError err;
 
     CassStatement *statement = create_statement(L);
     CassFuture *execute_future = cass_session_execute(session, statement);
