@@ -13,14 +13,20 @@ CassCluster *cluster;
 const int QUERY_POSITION = 1;
 const int PARAMETERS_POSITION = 2;
 
+const int TYPE_POSITION = 1;
+const int TYPE_OFFSET = -2;
+const int VALUE_POSITION = 2;
+const int VALUE_OFFSET = -1;
+
+const int CONTACT_POINTS_POSITION = 1;
+
 static int connect(lua_State *L)
 {
-    luaL_checkstring(L, 1);
-    const char *contact_points = lua_tostring(L, 1);
-    CassError err;
+    luaL_checkstring(L, CONTACT_POINTS_POSITION);
+    const char *contact_points = lua_tostring(L, CONTACT_POINTS_POSITION);
     session = cass_session_new();
     cluster = cass_cluster_new();
-    err = cass_cluster_set_contact_points(cluster, contact_points);
+    CassError err = cass_cluster_set_contact_points(cluster, contact_points);
     if (err != CASS_OK)
     {
         error_cass_to_lua(L, err, "could not set contact points");
@@ -37,17 +43,71 @@ static int connect(lua_State *L)
     return 0;
 }
 
+void bind_positional_parameter(lua_State *L, int i, CassStatement *statement, CassValueType type)
+{
+    CassError err;
+
+    if (type == CASS_VALUE_TYPE_UUID || type == CASS_VALUE_TYPE_TIMEUUID)
+    {
+        CassUuid uuid;
+        err = cass_uuid_from_string(lua_tostring(L, VALUE_OFFSET), &uuid);
+        cass_statement_bind_uuid(statement, i, uuid);
+    }
+    else if (type == CASS_VALUE_TYPE_INT)
+    {
+        err = cass_statement_bind_int32(statement, i, lua_tointeger(L, VALUE_OFFSET));
+    }
+    else if (type == CASS_VALUE_TYPE_SMALL_INT)
+    {
+        err = cass_statement_bind_int16(statement, i, lua_tointeger(L, VALUE_OFFSET));
+    }
+    else if (type == CASS_VALUE_TYPE_TINY_INT)
+    {
+        err = cass_statement_bind_int8(statement, i, lua_tointeger(L, VALUE_OFFSET));
+    }
+    else if (type == CASS_VALUE_TYPE_BIGINT)
+    {
+        err = cass_statement_bind_int64(statement, i, lua_tointeger(L, VALUE_OFFSET));
+    }
+    else if (type == CASS_VALUE_TYPE_DOUBLE)
+    {
+        err = cass_statement_bind_double(statement, i, lua_tonumber(L, VALUE_OFFSET));
+    }
+    else if (type == CASS_VALUE_TYPE_VARCHAR)
+    {
+        err = cass_statement_bind_string(statement, i, lua_tostring(L, VALUE_OFFSET));
+    }
+    else
+    {
+        error_to_lua(L, "invalid type: %d", type);
+    }
+
+    if (err != CASS_OK)
+    {
+        error_cass_to_lua(L, err, "error binding positional parameter: %d", type);
+    }
+}
+
+void bind_named_parameter(lua_State *L, const char *name, CassStatement *statement, CassValueType type)
+{
+    CassError err;
+
+    if (type == CASS_VALUE_TYPE_INT)
+    {
+        err = cass_statement_bind_int32_by_name(statement, name, lua_tointeger(L, VALUE_OFFSET));
+    }
+
+    if (err != CASS_OK)
+    {
+        error_cass_to_lua(L, err, "error binding named parameter: %d", type);
+    }
+}
+
 CassStatement *create_statement(lua_State *L)
 {
-    const int TYPE_POSITION = 1;
-    const int TYPE_OFFSET = -2;
-    const int VALUE_POSITION = 2;
-    const int VALUE_OFFSET = -1;
-
     const size_t parameter_count = lua_objlen(L, PARAMETERS_POSITION);
     const char *query = lua_tostring(L, QUERY_POSITION);
     CassStatement *statement = cass_statement_new(query, parameter_count);
-    CassError err;
 
     for (size_t i = 0; i < parameter_count; i++)
     {
@@ -56,50 +116,10 @@ CassStatement *create_statement(lua_State *L)
         lua_rawgeti(L, current, TYPE_POSITION);
         lua_rawgeti(L, current, VALUE_POSITION);
         const CassValueType type = lua_tointeger(L, TYPE_OFFSET);
-
-        if (type == CASS_VALUE_TYPE_UUID || type == CASS_VALUE_TYPE_TIMEUUID)
-        {
-            CassUuid uuid;
-            err = cass_uuid_from_string(lua_tostring(L, VALUE_OFFSET), &uuid);
-            cass_statement_bind_uuid(statement, i, uuid);
-        }
-        else if (type == CASS_VALUE_TYPE_INT)
-        {
-            lua_Integer lua_integer = lua_tointeger(L, VALUE_OFFSET);
-            err = cass_statement_bind_int32(statement, i, lua_integer);
-        }
-        else if (type == CASS_VALUE_TYPE_SMALL_INT)
-        {
-            err = cass_statement_bind_int16(statement, i, lua_tointeger(L, VALUE_OFFSET));
-        }
-        else if (type == CASS_VALUE_TYPE_TINY_INT)
-        {
-            err = cass_statement_bind_int8(statement, i, lua_tointeger(L, VALUE_OFFSET));
-        }
-        else if (type == CASS_VALUE_TYPE_BIGINT)
-        {
-            err = cass_statement_bind_int64(statement, i, lua_tointeger(L, VALUE_OFFSET));
-        }
-        else if (type == CASS_VALUE_TYPE_DOUBLE)
-        {
-            err = cass_statement_bind_double(statement, i, lua_tonumber(L, VALUE_OFFSET));
-        }
-        else if (type == CASS_VALUE_TYPE_VARCHAR)
-        {
-            err = cass_statement_bind_string(statement, i, lua_tostring(L, VALUE_OFFSET));
-        }
-        else
-        {
-            error_to_lua(L, "invalid type: %d", type);
-        }
-
-        if (err != CASS_OK)
-        {
-            error_cass_to_lua(L, err, "error binding: %d", type);
-        }
-
+        bind_positional_parameter(L, i, statement, type);
         lua_pop(L, 2);
     }
+
     return statement;
 }
 
@@ -114,22 +134,20 @@ void iterate_result(lua_State *L, const CassResult *result)
 
     while (cass_iterator_next(iterator) == cass_true)
     {
-        const CassRow *row = cass_iterator_get_row(iterator);
-
         lua_pushinteger(L, table_index++);
         lua_newtable(L);
         int sub_table = lua_gettop(L);
+        const CassRow *row = cass_iterator_get_row(iterator);
 
         for (size_t c = 0; c < col_count; c++)
         {
-            const CassValue *cass_value = cass_row_get_column(row, c);
-
             const char *col_name;
             size_t col_name_len;
             cass_result_column_name(result, c, &col_name, &col_name_len);
             char terminated[col_name_len + 1];
             strncpy(terminated, col_name, col_name_len + 1);
 
+            const CassValue *cass_value = cass_row_get_column(row, c);
             const CassDataType *dt = cass_result_column_data_type(result, c);
             const CassValueType vt = cass_data_type_type(dt);
 
