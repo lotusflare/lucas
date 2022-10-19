@@ -29,7 +29,7 @@ describe("luacassandra", function()
         }, results)
     end)
 
-    it("binding parameters", function ()
+    it("binding positional parameters", function ()
         lucas.connect("127.0.0.1")
         local results = lucas.query("SELECT * FROM testing.data WHERE asset_type = ? ALLOW FILTERING", {
             {"CASS_VALUE_TYPE_INT", 1}
@@ -45,4 +45,21 @@ describe("luacassandra", function()
             }
         }, results)
     end)
+
+    -- it("binding named parameters", function ()
+    --     lucas.connect("127.0.0.1")
+    --     local results = lucas.query("SELECT * FROM testing.data WHERE asset_type = :asset_id ALLOW FILTERING", {
+    --         asset_id = {"CASS_VALUE_TYPE_INT", 1}
+    --     })
+    --     assert.are.same({
+    --         {
+    --             approval_status = 2,
+    --             asset_id = "015e3714-a98b-11ec-9f51-0242ac150008",
+    --             asset_type = 1,
+    --             id = "9380816255dc45dfa1a57541db81df1d",
+    --             id_type = 1,
+    --             operator_name = "avantel"
+    --         }
+    --     }, results)
+    -- end)
 end)

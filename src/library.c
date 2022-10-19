@@ -54,6 +54,7 @@ static int query(lua_State *L)
     cass_log_set_level(CASS_LOG_DEBUG);
     luaL_checktype(L, QUERY_POSITION, LUA_TSTRING);
     luaL_checktype(L, PARAMETERS_POSITION, LUA_TTABLE);
+    CassError err;
 
     // Create statement
     const size_t param_count = lua_objlen(L, PARAMETERS_POSITION);
@@ -67,10 +68,25 @@ static int query(lua_State *L)
         lua_rawgeti(L, current, TYPE_POSITION);
         lua_rawgeti(L, current, VALUE_POSITION);
         const char *type = lua_tostring(L, -2);
-        const lua_Integer value = lua_tointeger(L, -1);
-        // printf("type=%s value=%ld\n", type, value);
-
-        bind_number(statement, i, CASS_VALUE_TYPE_INT, value);
+        if (strcmp(type, "CASS_VALUE_TYPE_INT") == 0)
+        {
+            const lua_Integer value = lua_tointeger(L, -1);
+            err = cass_statement_bind_int32(statement, i, value);
+        }
+        else if (strcmp(type, "CASS_VALUE_TYPE_VARCHAR") == 0)
+        {
+            const char *value = lua_tostring(L, -1);
+            err = cass_statement_bind_string(statement, i, value);
+        }
+        else if (strcmp(type, "CASS_VALUE_TYPE_DOUBLE") == 0)
+        {
+            const lua_Number value = lua_tonumber(L, -1);
+            err = cass_statement_bind_double(statement, i, value);
+        }
+        if (err != CASS_OK)
+        {
+            printf("binding error\n");
+        }
         lua_pop(L, 2);
     }
 
@@ -114,7 +130,6 @@ static int query(lua_State *L)
             cass_int32_t int32_val;
             cass_bool_t bool_val;
             cass_double_t double_val;
-            CassError err;
 
             switch (vt)
             {
@@ -122,44 +137,39 @@ static int query(lua_State *L)
                 cass_value_get_string(cass_value, &str_val, &str_len);
                 lua_pushstring(L, terminated);
                 lua_pushstring(L, str_val);
-                lua_settable(L, sub_table);
-                continue;
+                break;
             case CASS_VALUE_TYPE_UUID:
             case CASS_VALUE_TYPE_TIMEUUID:
                 cass_value_get_uuid(cass_value, &uuid_val);
                 cass_uuid_string(uuid_val, uuid_str_val);
                 lua_pushstring(L, terminated);
                 lua_pushstring(L, uuid_str_val);
-                lua_settable(L, sub_table);
-                continue;
+                break;
             case CASS_VALUE_TYPE_SMALL_INT:
             case CASS_VALUE_TYPE_TINY_INT:
             case CASS_VALUE_TYPE_BIGINT:
-                continue;
+                break;
             case CASS_VALUE_TYPE_INT:
                 cass_value_get_int32(cass_value, &int32_val);
                 lua_pushstring(L, terminated);
                 lua_pushinteger(L, int32_val);
-                lua_settable(L, sub_table);
-                continue;
+                break;
             case CASS_VALUE_TYPE_BOOLEAN:
                 cass_value_get_bool(cass_value, &bool_val);
                 lua_pushstring(L, terminated);
                 lua_pushboolean(L, bool_val);
-                lua_settable(L, sub_table);
-                continue;
+                break;
             case CASS_VALUE_TYPE_DOUBLE:
                 cass_value_get_double(cass_value, &double_val);
                 lua_pushstring(L, terminated);
                 lua_pushnumber(L, double_val);
-                lua_settable(L, sub_table);
-                continue;
+                break;
             default:
                 lua_pushstring(L, terminated);
                 lua_pushnil(L);
-                lua_settable(L, sub_table);
-                continue;
+                break;
             }
+            lua_settable(L, sub_table);
         }
         lua_settable(L, main_table);
     }
