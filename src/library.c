@@ -185,8 +185,6 @@ CassStatement *create_statement(lua_State *L)
         lua_pop(L, 4);
     }
 
-    printf("final_top=%d", lua_gettop(L));
-
     return statement;
 }
 
