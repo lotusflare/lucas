@@ -3,6 +3,7 @@
 #include "errors.c"
 #include "luajit-2.1/lauxlib.h"
 #include "luajit-2.1/lua.h"
+#include "types.c"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -151,7 +152,7 @@ void iterate_result(lua_State *L, const CassResult *result)
             const CassDataType *dt = cass_result_column_data_type(result, c);
             const CassValueType vt = cass_data_type_type(dt);
 
-            if (vt == CASS_VALUE_TYPE_VARCHAR)
+            if (vt == CASS_VALUE_TYPE_ASCII || vt == CASS_VALUE_TYPE_TEXT || vt == CASS_VALUE_TYPE_VARCHAR)
             {
                 const char *value;
                 size_t length;
@@ -221,6 +222,34 @@ int luaopen_luacassandra(lua_State *L)
     luaL_Reg reg[] = {
         {"connect", connect},
         {"query", query},
+
+        {"type_ascii", type_ascii},
+        {"type_bigint", type_bigint},
+        {"type_blob", type_blob},
+        {"type_boolean", type_boolean},
+        {"type_counter", type_counter},
+        {"type_decimal", type_decimal},
+        {"type_double", type_double},
+        {"type_float", type_float},
+        {"type_int", type_int},
+        {"type_text", type_text},
+        {"type_timestamp", type_timestamp},
+        {"type_uuid", type_uuid},
+        {"type_varchar", type_varchar},
+        {"type_varint", type_varint},
+        {"type_timeuuid", type_timeuuid},
+        {"type_inet", type_inet},
+        {"type_date", type_date},
+        {"type_time", type_time},
+        {"type_smallint", type_smallint},
+        {"type_tinyint", type_tinyint},
+        {"type_duration", type_duration},
+        {"type_list", type_list},
+        {"type_map", type_map},
+        {"type_set", type_set},
+        {"type_udt", type_udt},
+        {"type_tuple", type_tuple},
+
         {NULL, NULL},
     };
     luaL_openlib(L, "luacassandra", reg, 0);

@@ -10,4 +10,5 @@ WORKDIR /app/build
 RUN cmake .. && make
 
 WORKDIR /app
+RUN find src include -name *.h -o -iname *.c | xargs clang-format --dry-run
 ENV LUA_CPATH "/app/build/?.so;/usr/local/lib/lua/5.1/?.so"
