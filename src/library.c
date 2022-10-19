@@ -70,6 +70,10 @@ void bind_positional_parameter(lua_State *L, int i, CassStatement *statement, Ca
     {
         err = cass_statement_bind_int64(statement, i, lua_tointeger(L, VALUE_OFFSET));
     }
+    else if (type == CASS_VALUE_TYPE_FLOAT)
+    {
+        err = cass_statement_bind_float(statement, i, lua_tonumber(L, VALUE_OFFSET));
+    }
     else if (type == CASS_VALUE_TYPE_DOUBLE)
     {
         err = cass_statement_bind_double(statement, i, lua_tonumber(L, VALUE_OFFSET));
@@ -93,14 +97,48 @@ void bind_named_parameter(lua_State *L, const char *name, CassStatement *stateme
 {
     CassError err;
 
-    if (type == CASS_VALUE_TYPE_INT)
+    if (type == CASS_VALUE_TYPE_UUID || type == CASS_VALUE_TYPE_TIMEUUID)
+    {
+        CassUuid uuid;
+        err = cass_uuid_from_string(lua_tostring(L, VALUE_OFFSET), &uuid);
+        cass_statement_bind_uuid_by_name(statement, name, uuid);
+    }
+    else if (type == CASS_VALUE_TYPE_TINY_INT)
+    {
+        err = cass_statement_bind_int8_by_name(statement, name, lua_tointeger(L, VALUE_OFFSET));
+    }
+    else if (type == CASS_VALUE_TYPE_SMALL_INT)
+    {
+        err = cass_statement_bind_int16_by_name(statement, name, lua_tointeger(L, VALUE_OFFSET));
+    }
+    else if (type == CASS_VALUE_TYPE_INT)
     {
         err = cass_statement_bind_int32_by_name(statement, name, lua_tointeger(L, VALUE_OFFSET));
+    }
+    else if (type == CASS_VALUE_TYPE_BIGINT)
+    {
+        err = cass_statement_bind_int64_by_name(statement, name, lua_tointeger(L, VALUE_OFFSET));
+    }
+    else if (type == CASS_VALUE_TYPE_FLOAT)
+    {
+        err = cass_statement_bind_float_by_name(statement, name, lua_tonumber(L, VALUE_OFFSET));
+    }
+    else if (type == CASS_VALUE_TYPE_DOUBLE)
+    {
+        err = cass_statement_bind_double_by_name(statement, name, lua_tonumber(L, VALUE_OFFSET));
+    }
+    else if (type == CASS_VALUE_TYPE_VARCHAR)
+    {
+        err = cass_statement_bind_string_by_name(statement, name, lua_tostring(L, VALUE_OFFSET));
+    }
+    else
+    {
+        error_to_lua(L, "invalid type: %d", type);
     }
 
     if (err != CASS_OK)
     {
-        error_cass_to_lua(L, err, "error binding named parameter: %d", type);
+        error_cass_to_lua(L, err, "error binding positional parameter: %d", type);
     }
 }
 
@@ -116,6 +154,7 @@ CassStatement *create_statement(lua_State *L)
         int current = lua_gettop(L);
         lua_rawgeti(L, current, TYPE_POSITION);
         lua_rawgeti(L, current, VALUE_POSITION);
+        luaL_checkinteger(L, TYPE_OFFSET);
         const CassValueType type = lua_tointeger(L, TYPE_OFFSET);
         bind_positional_parameter(L, i, statement, type);
         lua_pop(L, 2);
@@ -203,7 +242,6 @@ void iterate_result(lua_State *L, const CassResult *result)
 
 static int query(lua_State *L)
 {
-    cass_log_set_level(CASS_LOG_DEBUG);
     luaL_checktype(L, QUERY_POSITION, LUA_TSTRING);
     luaL_checktype(L, PARAMETERS_POSITION, LUA_TTABLE);
     CassError err;
