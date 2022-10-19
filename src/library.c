@@ -68,7 +68,7 @@ static int query(lua_State *L)
         lua_rawgeti(L, current, VALUE_POSITION);
         const char *type = lua_tostring(L, -2);
         const lua_Integer value = lua_tointeger(L, -1);
-        printf("type=%s value=%ld\n", type, value);
+        // printf("type=%s value=%ld\n", type, value);
 
         bind_number(statement, i, CASS_VALUE_TYPE_INT, value);
         lua_pop(L, 2);
