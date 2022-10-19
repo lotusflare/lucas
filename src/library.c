@@ -150,8 +150,6 @@ void bind_named_parameter(lua_State *L, const char *name, CassStatement *stateme
 
 CassStatement *create_statement(lua_State *L)
 {
-    printf("initial_top=%d", lua_gettop(L));
-
     const size_t parameter_count = lua_objlen(L, PARAMETERS_POSITION);
     const char *query = lua_tostring(L, QUERY_POSITION);
     CassStatement *statement = cass_statement_new(query, parameter_count);
@@ -184,8 +182,6 @@ CassStatement *create_statement(lua_State *L)
 
         lua_pop(L, 4);
     }
-
-    printf("final_top=%d", lua_gettop(L));
 
     return statement;
 }
