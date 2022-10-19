@@ -32,7 +32,7 @@ describe("luacassandra", function()
     it("binding positional parameters", function ()
         lucas.connect("127.0.0.1")
         local results = lucas.query("SELECT * FROM testing.data WHERE asset_type = ? ALLOW FILTERING", {
-            {"CASS_VALUE_TYPE_INT", 1}
+            {9, 1}
         })
         assert.are.same({
             {

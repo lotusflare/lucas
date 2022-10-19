@@ -1,5 +1,6 @@
 #include "library.h"
 #include "cassandra.h"
+#include "errors.c"
 #include "luajit-2.1/lauxlib.h"
 #include "luajit-2.1/lua.h"
 #include <stdio.h>
@@ -8,6 +9,11 @@
 
 CassSession *session;
 CassCluster *cluster;
+
+const int QUERY_POSITION = 1;
+const int PARAMETERS_POSITION = 2;
+const int TYPE_POSITION = 1;
+const int VALUE_POSITION = 2;
 
 static int connect(lua_State *L)
 {
@@ -19,8 +25,7 @@ static int connect(lua_State *L)
     err = cass_cluster_set_contact_points(cluster, contact_points);
     if (err != CASS_OK)
     {
-        lua_pushstring(L, "could not set contact points");
-        lua_error(L);
+        error_cass_to_lua(L, err, "could not set contact points");
     }
     CassFuture *future = cass_session_connect(session, cluster);
     cass_future_wait(future);
@@ -28,71 +33,84 @@ static int connect(lua_State *L)
     cass_future_free(future);
     if (err != CASS_OK)
     {
-        lua_pushstring(L, "could not connect");
-        lua_error(L);
+        error_cass_to_lua(L, err, "could not connect");
     }
     lua_newtable(L);
     return 0;
 }
 
-void bind_number(CassStatement *statement, size_t index, CassValueType cass_type, lua_Number value)
+CassStatement *create_statement(lua_State *L)
 {
-    CassError err = cass_statement_bind_int32(statement, index, value);
-    if (err != CASS_OK)
+    const size_t parameter_count = lua_objlen(L, PARAMETERS_POSITION);
+    const char *query = lua_tostring(L, QUERY_POSITION);
+    CassStatement *statement = cass_statement_new(query, parameter_count);
+    CassError err;
+
+    for (size_t i = 0; i < parameter_count; i++)
     {
-        const char *desc = cass_error_desc(err);
-        fprintf(stderr, "error: %s\n", desc);
+        lua_rawgeti(L, PARAMETERS_POSITION, i + 1);
+        int current = lua_gettop(L);
+        lua_rawgeti(L, current, TYPE_POSITION);
+        lua_rawgeti(L, current, VALUE_POSITION);
+        const CassValueType type = lua_tointeger(L, -2);
+
+        if (type == CASS_VALUE_TYPE_UUID | type == CASS_VALUE_TYPE_TIMEUUID)
+        {
+            CassUuid uuid;
+            err = cass_uuid_from_string(lua_tostring(L, -1), &uuid);
+            cass_statement_bind_uuid(statement, i, uuid);
+        }
+        else if (type == CASS_VALUE_TYPE_INT)
+        {
+            lua_Integer lua_integer = lua_tointeger(L, -1);
+            err = cass_statement_bind_int32(statement, i, lua_integer);
+        }
+        else if (type == CASS_VALUE_TYPE_SMALL_INT)
+        {
+            err = cass_statement_bind_int16(statement, i, lua_tointeger(L, -1));
+        }
+        else if (type == CASS_VALUE_TYPE_TINY_INT)
+        {
+            err = cass_statement_bind_int8(statement, i, lua_tointeger(L, -1));
+        }
+        else if (type == CASS_VALUE_TYPE_BIGINT)
+        {
+            err = cass_statement_bind_int64(statement, i, lua_tointeger(L, -1));
+        }
+        else if (type == CASS_VALUE_TYPE_DOUBLE)
+        {
+            err = cass_statement_bind_double(statement, i, lua_tonumber(L, -1));
+        }
+        else if (type == CASS_VALUE_TYPE_VARCHAR)
+        {
+            err = cass_statement_bind_string(statement, i, lua_tostring(L, -1));
+        }
+        else
+        {
+            error_to_lua(L, "invalid type: %d", type);
+        }
+
+        if (err != CASS_OK)
+        {
+            error_cass_to_lua(L, err, "error binding: %d", type);
+        }
+
+        lua_pop(L, 2);
     }
+    return statement;
 }
 
 static int query(lua_State *L)
 {
-    const int QUERY_POSITION = 1;
-    const int PARAMETERS_POSITION = 2;
-    const int TYPE_POSITION = 1;
-    const int VALUE_POSITION = 2;
     cass_log_set_level(CASS_LOG_DEBUG);
     luaL_checktype(L, QUERY_POSITION, LUA_TSTRING);
     luaL_checktype(L, PARAMETERS_POSITION, LUA_TTABLE);
     CassError err;
 
     // Create statement
-    const size_t param_count = lua_objlen(L, PARAMETERS_POSITION);
-    const char *query = lua_tostring(L, QUERY_POSITION);
-    CassStatement *statement = cass_statement_new(query, param_count);
-
-    for (size_t i = 0; i < param_count; i++)
-    {
-        lua_rawgeti(L, PARAMETERS_POSITION, i + 1);
-        int current = lua_gettop(L);
-        lua_rawgeti(L, current, TYPE_POSITION);
-        lua_rawgeti(L, current, VALUE_POSITION);
-        const char *type = lua_tostring(L, -2);
-        if (strcmp(type, "CASS_VALUE_TYPE_INT") == 0)
-        {
-            const lua_Integer value = lua_tointeger(L, -1);
-            err = cass_statement_bind_int32(statement, i, value);
-        }
-        else if (strcmp(type, "CASS_VALUE_TYPE_VARCHAR") == 0)
-        {
-            const char *value = lua_tostring(L, -1);
-            err = cass_statement_bind_string(statement, i, value);
-        }
-        else if (strcmp(type, "CASS_VALUE_TYPE_DOUBLE") == 0)
-        {
-            const lua_Number value = lua_tonumber(L, -1);
-            err = cass_statement_bind_double(statement, i, value);
-        }
-        if (err != CASS_OK)
-        {
-            printf("binding error\n");
-        }
-        lua_pop(L, 2);
-    }
+    CassStatement *statement = create_statement(L);
 
     CassFuture *execute_future = cass_session_execute(session, statement);
-    cass_future_wait(execute_future);
-    printf("done executing\n");
     const CassResult *execute_result = cass_future_get_result(execute_future);
     CassIterator *iterator = cass_iterator_from_result(execute_result);
     size_t row_count = cass_result_row_count(execute_result);
