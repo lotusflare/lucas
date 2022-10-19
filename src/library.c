@@ -46,7 +46,6 @@ static int connect(lua_State *L)
     {
         error_cass_to_lua(L, err, "could not connect");
     }
-    lua_newtable(L);
     return 0;
 }
 
@@ -150,8 +149,6 @@ void bind_named_parameter(lua_State *L, const char *name, CassStatement *stateme
 
 CassStatement *create_statement(lua_State *L)
 {
-    lua_gettop(L);
-
     const size_t parameter_count = lua_objlen(L, PARAMETERS_POSITION);
     const char *query = lua_tostring(L, QUERY_POSITION);
     CassStatement *statement = cass_statement_new(query, parameter_count);
@@ -263,6 +260,8 @@ void iterate_result(lua_State *L, const CassResult *result)
         }
         lua_settable(L, main_table);
     }
+
+    cass_iterator_free(iterator);
 }
 
 static int query(lua_State *L)
@@ -271,9 +270,13 @@ static int query(lua_State *L)
     luaL_checktype(L, PARAMETERS_POSITION, LUA_TTABLE);
 
     CassStatement *statement = create_statement(L);
-    CassFuture *execute_future = cass_session_execute(session, statement);
-    const CassResult *result = cass_future_get_result(execute_future);
+    CassFuture *future = cass_session_execute(session, statement);
+    const CassResult *result = cass_future_get_result(future);
     iterate_result(L, result);
+
+    cass_future_free(future);
+    cass_result_free(result);
+    cass_statement_free(statement);
 
     return 1;
 }
