@@ -6,8 +6,6 @@ RUN apt-get update -y \
     && luarocks install busted
 
 COPY . /app
-RUN clang-format --dry-run --style=file:.clang-format {src,include}/**/*.{c,h}
-
 WORKDIR /app/build
 RUN cmake .. && make
 
