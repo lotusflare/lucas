@@ -150,8 +150,6 @@ void bind_named_parameter(lua_State *L, const char *name, CassStatement *stateme
 
 CassStatement *create_statement(lua_State *L)
 {
-    printf("initial_top=%d", lua_gettop(L));
-
     const size_t parameter_count = lua_objlen(L, PARAMETERS_POSITION);
     const char *query = lua_tostring(L, QUERY_POSITION);
     CassStatement *statement = cass_statement_new(query, parameter_count);
@@ -285,32 +283,32 @@ int luaopen_luacassandra(lua_State *L)
         {"connect", connect},
         {"query", query},
 
-        {"type_ascii", type_ascii},
-        {"type_bigint", type_bigint},
-        {"type_blob", type_blob},
-        {"type_boolean", type_boolean},
-        {"type_counter", type_counter},
-        {"type_decimal", type_decimal},
-        {"type_double", type_double},
-        {"type_float", type_float},
-        {"type_int", type_int},
-        {"type_text", type_text},
-        {"type_timestamp", type_timestamp},
-        {"type_uuid", type_uuid},
-        {"type_varchar", type_varchar},
-        {"type_varint", type_varint},
-        {"type_timeuuid", type_timeuuid},
-        {"type_inet", type_inet},
-        {"type_date", type_date},
-        {"type_time", type_time},
-        {"type_smallint", type_smallint},
-        {"type_tinyint", type_tinyint},
-        {"type_duration", type_duration},
-        {"type_list", type_list},
-        {"type_map", type_map},
-        {"type_set", type_set},
-        {"type_udt", type_udt},
-        {"type_tuple", type_tuple},
+        {"ascii", type_ascii},
+        {"bigint", type_bigint},
+        {"blob", type_blob},
+        {"boolean", type_boolean},
+        {"counter", type_counter},
+        {"decimal", type_decimal},
+        {"double", type_double},
+        {"float", type_float},
+        {"int", type_int},
+        {"text", type_text},
+        {"timestamp", type_timestamp},
+        {"uuid", type_uuid},
+        {"varchar", type_varchar},
+        {"varint", type_varint},
+        {"timeuuid", type_timeuuid},
+        {"inet", type_inet},
+        {"date", type_date},
+        {"time", type_time},
+        {"smallint", type_smallint},
+        {"tinyint", type_tinyint},
+        {"duration", type_duration},
+        {"list", type_list},
+        {"map", type_map},
+        {"set", type_set},
+        {"udt", type_udt},
+        {"tuple", type_tuple},
 
         {NULL, NULL},
     };
