@@ -78,7 +78,7 @@ void bind_positional_parameter(lua_State *L, int i, CassStatement *statement, Ca
     {
         err = cass_statement_bind_double(statement, i, lua_tonumber(L, VALUE_OFFSET));
     }
-    else if (type == CASS_VALUE_TYPE_VARCHAR)
+    else if (type == CASS_VALUE_TYPE_ASCII || type == CASS_VALUE_TYPE_TEXT || type == CASS_VALUE_TYPE_VARCHAR)
     {
         err = cass_statement_bind_string(statement, i, lua_tostring(L, VALUE_OFFSET));
     }
@@ -127,7 +127,7 @@ void bind_named_parameter(lua_State *L, const char *name, CassStatement *stateme
     {
         err = cass_statement_bind_double_by_name(statement, name, lua_tonumber(L, VALUE_OFFSET));
     }
-    else if (type == CASS_VALUE_TYPE_VARCHAR)
+    else if (type == CASS_VALUE_TYPE_ASCII || type == CASS_VALUE_TYPE_TEXT || type == CASS_VALUE_TYPE_VARCHAR)
     {
         err = cass_statement_bind_string_by_name(statement, name, lua_tostring(L, VALUE_OFFSET));
     }
