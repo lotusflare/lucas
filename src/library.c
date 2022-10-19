@@ -192,11 +192,10 @@ void iterate_result(lua_State *L, const CassResult *result)
 
     lua_newtable(L);
     int main_table = lua_gettop(L);
-    int table_index = 1;
 
-    while (cass_iterator_next(iterator) == cass_true)
+    for (int table_index = 1; cass_iterator_next(iterator); table_index++)
     {
-        lua_pushinteger(L, table_index++);
+        lua_pushinteger(L, table_index);
         lua_newtable(L);
         int sub_table = lua_gettop(L);
         const CassRow *row = cass_iterator_get_row(iterator);
@@ -260,7 +259,6 @@ void iterate_result(lua_State *L, const CassResult *result)
         }
         lua_settable(L, main_table);
     }
-
     cass_iterator_free(iterator);
 }
 
