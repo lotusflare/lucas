@@ -8,11 +8,11 @@ describe("luacassandra", function()
         assert.is_nil(err)
     end)
 
-    it("error when cannot connect", function ()
-        assert.has.errors(function ()
-            lucas.connect("example.com")
-        end)
-    end)
+    -- it("error when cannot connect", function ()
+    --     assert.has.errors(function ()
+    --         lucas.connect("example.com")
+    --     end)
+    -- end)
 
     it("select statement", function ()
         lucas.connect("127.0.0.1")
@@ -49,7 +49,7 @@ describe("luacassandra", function()
     -- it("binding named parameters", function ()
     --     lucas.connect("127.0.0.1")
     --     local results = lucas.query("SELECT * FROM testing.data WHERE asset_type = :asset_id ALLOW FILTERING", {
-    --         asset_id = {"CASS_VALUE_TYPE_INT", 1}
+    --         asset_id = {lucas.int(), 1}
     --     })
     --     assert.are.same({
     --         {

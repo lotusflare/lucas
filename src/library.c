@@ -21,6 +21,12 @@ const int VALUE_OFFSET = -1;
 
 const int CONTACT_POINTS_POSITION = 1;
 
+static int disconnect(lua_State *L)
+{
+    cass_session_close(session);
+    return 0;
+}
+
 static int connect(lua_State *L)
 {
     luaL_checkstring(L, CONTACT_POINTS_POSITION);
@@ -284,14 +290,12 @@ static int query(lua_State *L)
 
     const size_t parameter_count = lua_objlen(L, PARAMETERS_POSITION);
     const char *query = lua_tostring(L, QUERY_POSITION);
-    printf("%zu: %s", parameter_count, query);
     CassStatement *statement = cass_statement_new(query, parameter_count);
     create_statement(L, statement);
 
     CassFuture *future = cass_session_execute(session, statement);
     cass_future_wait(future);
     CassError err = cass_future_error_code(future);
-    printf("%d", err);
     const CassResult *result = cass_future_get_result(future);
     iterate_result(L, result);
 
