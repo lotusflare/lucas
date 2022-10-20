@@ -19,16 +19,9 @@ const int TYPE_OFFSET = -2;
 const int VALUE_POSITION = 2;
 const int VALUE_OFFSET = -1;
 
-const int CONTACT_POINTS_POSITION = 1;
-
-static int disconnect(lua_State *L)
-{
-    cass_session_close(session);
-    return 0;
-}
-
 static int connect(lua_State *L)
 {
+    const int CONTACT_POINTS_POSITION = 1;
     luaL_checkstring(L, CONTACT_POINTS_POSITION);
     const char *contact_points = lua_tostring(L, CONTACT_POINTS_POSITION);
     CassError err;
@@ -153,27 +146,6 @@ void bind_named_parameter(lua_State *L, const char *name, CassStatement *stateme
     }
 }
 
-CassStatement *create_statement_old(lua_State *L)
-{
-    const size_t parameter_count = lua_objlen(L, PARAMETERS_POSITION);
-    const char *query = lua_tostring(L, QUERY_POSITION);
-    CassStatement *statement = cass_statement_new(query, parameter_count);
-
-    for (size_t i = 0; i < parameter_count; i++)
-    {
-        lua_rawgeti(L, PARAMETERS_POSITION, i + 1);
-        int current = lua_gettop(L);
-        lua_rawgeti(L, current, TYPE_POSITION);
-        lua_rawgeti(L, current, VALUE_POSITION);
-        luaL_checkinteger(L, TYPE_OFFSET);
-        const CassValueType type = lua_tointeger(L, TYPE_OFFSET);
-        bind_positional_parameter(L, i, statement, type, VALUE_OFFSET);
-        lua_pop(L, 2);
-    }
-
-    return statement;
-}
-
 void create_statement(lua_State *L, CassStatement *statement)
 {
     for (lua_pushnil(L); lua_next(L, PARAMETERS_POSITION) != 0;)
@@ -246,8 +218,8 @@ void iterate_result(lua_State *L, CassFuture *future)
             }
             else if (vt == CASS_VALUE_TYPE_UUID || vt == CASS_VALUE_TYPE_TIMEUUID)
             {
-                char uuid_str_val[CASS_UUID_STRING_LENGTH];
                 CassUuid uuid_val;
+                char uuid_str_val[CASS_UUID_STRING_LENGTH];
                 cass_value_get_uuid(cass_value, &uuid_val);
                 cass_uuid_string(uuid_val, uuid_str_val);
                 lua_pushstring(L, terminated);
