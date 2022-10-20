@@ -24,10 +24,9 @@ jobs:
         working-directory: integration
         run: |
           docker compose up cassandra --wait
-          sleep 10
-          docker compose up cassandra_init
+          docker compose exec cassandra cqlsh -f /init.cql
 
       - name: Integration tests
         working-directory: integration
         run: |
-          docker compose run driver busted --output=TAP .
+          docker compose exec driver busted --output=TAP .

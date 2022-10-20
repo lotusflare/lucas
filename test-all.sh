@@ -4,11 +4,12 @@ set -e
 trap clean EXIT
 
 pushd integration
+
 docker compose rm -fs
-docker compose build driver
 docker compose up cassandra --wait
-docker compose up cassandra_init
-docker compose run driver busted --output=TAP .
+
+docker compose exec cassandra cqlsh -f /init.cql
+docker compose exec driver busted --output=TAP .
 
 function clean {
     echo "cleaning up"
