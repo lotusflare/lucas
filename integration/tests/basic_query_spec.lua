@@ -2,19 +2,8 @@ require "busted.runner"()
 local pretty = require "pl.pretty"
 local lucas = require("luacassandra")
 
-describe("luacassandra", function()
-    it("can connect", function()
-        local err = lucas.connect("127.0.0.1")
-        assert.is_nil(err)
-    end)
-
-    -- it("error when cannot connect", function ()
-    --     assert.has.errors(function ()
-    --         lucas.connect("example.com")
-    --     end)
-    -- end)
-
-    it("select statement", function ()
+describe("query", function()
+    it("basic select", function ()
         lucas.connect("127.0.0.1")
         local results = lucas.query("SELECT * FROM testing.data", {})
         assert.are.same({
@@ -29,7 +18,7 @@ describe("luacassandra", function()
         }, results)
     end)
 
-    it("binding positional parameters", function ()
+    it("select with positional parameters", function ()
         lucas.connect("127.0.0.1")
         local results = lucas.query("SELECT * FROM testing.data WHERE asset_type = ? ALLOW FILTERING", {
             {lucas.int(), 1}
@@ -46,7 +35,7 @@ describe("luacassandra", function()
         }, results)
     end)
 
-    -- it("binding named parameters", function ()
+    -- it("select with named parameters", function ()
     --     lucas.connect("127.0.0.1")
     --     local results = lucas.query("SELECT * FROM testing.data WHERE asset_type = :asset_id ALLOW FILTERING", {
     --         asset_id = {lucas.int(), 1}
