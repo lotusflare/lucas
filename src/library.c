@@ -168,10 +168,8 @@ CassStatement *create_statement_old(lua_State *L)
     return statement;
 }
 
-void bind_statement(lua_State *L, CassStatement *statement)
+void create_statement(lua_State *L, CassStatement *statement)
 {
-    printf("top=%d\n", lua_gettop(L));
-
     for (lua_pushnil(L); lua_next(L, PARAMETERS_POSITION) != 0;)
     {
         const int table_key_index = lua_gettop(L) - 1;
@@ -207,7 +205,7 @@ void iterate_result(lua_State *L, const CassResult *result)
     size_t col_count = cass_result_column_count(result);
 
     lua_newtable(L);
-    int main_table = lua_gettop(L);
+    const int main_table = lua_gettop(L);
 
     for (int table_index = 1; cass_iterator_next(iterator); table_index++)
     {
@@ -275,7 +273,8 @@ void iterate_result(lua_State *L, const CassResult *result)
         }
         lua_settable(L, main_table);
     }
-    cass_iterator_free(iterator);
+    // cass_result_free(result);
+    // cass_iterator_free(iterator);
 }
 
 static int query(lua_State *L)
@@ -283,20 +282,29 @@ static int query(lua_State *L)
     luaL_checktype(L, QUERY_POSITION, LUA_TSTRING);
     luaL_checktype(L, PARAMETERS_POSITION, LUA_TTABLE);
 
-    // printf("top=%d\n", lua_gettop(L));
-    // CassStatement *statement = cass_statement_new(lua_tostring(L, QUERY_POSITION), lua_objlen(L,
-    // PARAMETERS_POSITION)); bind_statement(L, statement);
+    const size_t parameter_count = lua_objlen(L, PARAMETERS_POSITION);
+    const char *query = lua_tostring(L, QUERY_POSITION);
+    printf("%zu: %s", parameter_count, query);
+    CassStatement *statement = cass_statement_new(query, parameter_count);
+    create_statement(L, statement);
 
-    CassStatement *statement = create_statement_old(L);
     CassFuture *future = cass_session_execute(session, statement);
+    cass_future_wait(future);
+    CassError err = cass_future_error_code(future);
+    printf("%d", err);
     const CassResult *result = cass_future_get_result(future);
     iterate_result(L, result);
 
-    cass_statement_free(statement);
-    cass_future_free(future);
-    cass_result_free(result);
+    // cass_future_free(future);
+    // cass_statement_free(statement);
+
+    cass_session_free(session);
 
     return 1;
+}
+
+void lua_Hook()
+{
 }
 
 int luaopen_luacassandra(lua_State *L)
