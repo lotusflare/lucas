@@ -20,11 +20,6 @@ jobs:
       #     cache-from: type=gha
       #     cache-to: type=gha,mode=max
 
-      - name: Build
-        working-directory: integration
-        run: |
-          docker compose build
-
       - name: Bring up environment
         working-directory: integration
         run: |
