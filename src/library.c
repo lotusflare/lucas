@@ -205,8 +205,12 @@ void create_statement(lua_State *L, CassStatement *statement)
     }
 }
 
-void iterate_result(lua_State *L, const CassResult *result)
+void iterate_result(lua_State *L, CassFuture *future)
 {
+    cass_future_wait(future);
+    CassError err = cass_future_error_code(future);
+    const CassResult *result = cass_future_get_result(future);
+
     CassIterator *iterator = cass_iterator_from_result(result);
     size_t col_count = cass_result_column_count(result);
 
@@ -279,30 +283,24 @@ void iterate_result(lua_State *L, const CassResult *result)
         }
         lua_settable(L, main_table);
     }
-    // cass_result_free(result);
-    // cass_iterator_free(iterator);
+    cass_result_free(result);
+    cass_iterator_free(iterator);
 }
 
 static int query(lua_State *L)
 {
     luaL_checktype(L, QUERY_POSITION, LUA_TSTRING);
     luaL_checktype(L, PARAMETERS_POSITION, LUA_TTABLE);
-
     const size_t parameter_count = lua_objlen(L, PARAMETERS_POSITION);
     const char *query = lua_tostring(L, QUERY_POSITION);
+
     CassStatement *statement = cass_statement_new(query, parameter_count);
     create_statement(L, statement);
-
     CassFuture *future = cass_session_execute(session, statement);
-    cass_future_wait(future);
-    CassError err = cass_future_error_code(future);
-    const CassResult *result = cass_future_get_result(future);
-    iterate_result(L, result);
+    iterate_result(L, future);
 
-    // cass_future_free(future);
-    // cass_statement_free(statement);
-
-    cass_session_free(session);
+    cass_future_free(future);
+    cass_statement_free(statement);
 
     return 1;
 }
