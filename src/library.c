@@ -147,42 +147,58 @@ void bind_named_parameter(lua_State *L, const char *name, CassStatement *stateme
     }
 }
 
-CassStatement *create_statement(lua_State *L)
+CassStatement *create_statement_old(lua_State *L)
 {
     const size_t parameter_count = lua_objlen(L, PARAMETERS_POSITION);
     const char *query = lua_tostring(L, QUERY_POSITION);
     CassStatement *statement = cass_statement_new(query, parameter_count);
 
+    for (size_t i = 0; i < parameter_count; i++)
+    {
+        lua_rawgeti(L, PARAMETERS_POSITION, i + 1);
+        int current = lua_gettop(L);
+        lua_rawgeti(L, current, TYPE_POSITION);
+        lua_rawgeti(L, current, VALUE_POSITION);
+        luaL_checkinteger(L, TYPE_OFFSET);
+        const CassValueType type = lua_tointeger(L, TYPE_OFFSET);
+        bind_positional_parameter(L, i, statement, type, VALUE_OFFSET);
+        lua_pop(L, 2);
+    }
+
+    return statement;
+}
+
+void bind_statement(lua_State *L, CassStatement *statement)
+{
+    printf("top=%d\n", lua_gettop(L));
+
     for (lua_pushnil(L); lua_next(L, PARAMETERS_POSITION) != 0;)
     {
-        int table_key_index = lua_gettop(L) - 1;
-        int table_value_index = lua_gettop(L);
-        int lt = lua_type(L, table_key_index);
+        const int table_key_index = lua_gettop(L) - 1;
+        const int table_value_index = lua_gettop(L);
+        const int table_key_type = lua_type(L, table_key_index);
         lua_pushvalue(L, table_key_index); // copy the key
-        int table_key_copy_index = lua_gettop(L);
+        const int table_key_copy_index = lua_gettop(L);
 
         lua_rawgeti(L, table_value_index, TYPE_POSITION);
         lua_rawgeti(L, table_value_index, VALUE_POSITION);
-        int type_index = lua_gettop(L) - 1;
-        int value_index = lua_gettop(L);
+        const int type_index = lua_gettop(L) - 1;
+        const int value_index = lua_gettop(L);
         const CassValueType type = lua_tointeger(L, type_index);
         const char *value = lua_tostring(L, value_index);
 
-        if (lt == LUA_TSTRING)
+        if (table_key_type == LUA_TSTRING)
         {
             const char *name = lua_tostring(L, table_key_copy_index);
             bind_named_parameter(L, name, statement, type, value_index);
         }
-        else if (lt == LUA_TNUMBER)
+        else if (table_key_type == LUA_TNUMBER)
         {
             const int index = lua_tointeger(L, table_key_copy_index) - 1; // lua base 1 indexing
             bind_positional_parameter(L, index, statement, type, value_index);
         }
-
         lua_pop(L, 4);
     }
-
-    return statement;
 }
 
 void iterate_result(lua_State *L, const CassResult *result)
@@ -267,14 +283,18 @@ static int query(lua_State *L)
     luaL_checktype(L, QUERY_POSITION, LUA_TSTRING);
     luaL_checktype(L, PARAMETERS_POSITION, LUA_TTABLE);
 
-    CassStatement *statement = create_statement(L);
+    // printf("top=%d\n", lua_gettop(L));
+    // CassStatement *statement = cass_statement_new(lua_tostring(L, QUERY_POSITION), lua_objlen(L,
+    // PARAMETERS_POSITION)); bind_statement(L, statement);
+
+    CassStatement *statement = create_statement_old(L);
     CassFuture *future = cass_session_execute(session, statement);
     const CassResult *result = cass_future_get_result(future);
     iterate_result(L, result);
 
+    cass_statement_free(statement);
     cass_future_free(future);
     cass_result_free(result);
-    cass_statement_free(statement);
 
     return 1;
 }
