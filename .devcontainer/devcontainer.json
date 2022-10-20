@@ -4,11 +4,14 @@
     },
     "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
     "workspaceFolder": "/app",
-    "runArgs": ["--network=host"],
+    "runArgs": [
+        "--network=host"
+    ],
     "customizations": {
         "vscode": {
             "extensions": [
                 "EditorConfig.EditorConfig",
+                "ms-vscode.cpptools",
                 "ms-vscode.cmake-tools",
                 "ms-azuretools.vscode-docker",
                 "redhat.vscode-yaml"

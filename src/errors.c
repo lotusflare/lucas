@@ -8,7 +8,6 @@ void error_to_lua(lua_State *L, const char *fmt, ...)
 {
     va_list args;
     char msg[MAX_ERROR_MESSAGE_LENGTH];
-    printf(fmt, args);
     sprintf(msg, fmt, args);
     lua_pushstring(L, msg);
     lua_error(L);
