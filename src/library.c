@@ -303,10 +303,6 @@ static int query(lua_State *L)
     return 1;
 }
 
-void lua_Hook()
-{
-}
-
 int luaopen_luacassandra(lua_State *L)
 {
     cass_log_set_level(CASS_LOG_DISABLED);
