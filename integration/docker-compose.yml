@@ -1,4 +1,4 @@
-name: luacassandra
+name: lucas
 
 services:
   cassandra:
