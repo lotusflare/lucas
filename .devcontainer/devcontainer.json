@@ -12,7 +12,6 @@
                 "ms-vscode.cpptools",
                 "ms-vscode.cmake-tools",
                 "ms-azuretools.vscode-docker",
-                "llvm-vs-code-extensions.vscode-clangd",
                 "redhat.vscode-yaml"
             ]
         }
