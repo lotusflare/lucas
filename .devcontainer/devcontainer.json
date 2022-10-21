@@ -10,13 +10,13 @@
     "customizations": {
         "vscode": {
             "extensions": [
-				"EditorConfig.EditorConfig",
-				"ms-vscode.cmake-tools",
-				"ms-azuretools.vscode-docker",
-				"redhat.vscode-yaml",
-				"llvm-vs-code-extensions.vscode-clangd",
-				"twxs.cmake"
-			]
+                "EditorConfig.EditorConfig",
+                "ms-vscode.cmake-tools",
+                "ms-azuretools.vscode-docker",
+                "redhat.vscode-yaml",
+                "llvm-vs-code-extensions.vscode-clangd",
+                "twxs.cmake"
+            ]
         }
     },
     "features": {
@@ -24,9 +24,6 @@
             "version": "latest"
         },
         "ghcr.io/devcontainers/features/common-utils:1": {
-            "version": "latest"
-        },
-        "ghcr.io/devcontainers/features/node:1": {
             "version": "latest"
         }
     }

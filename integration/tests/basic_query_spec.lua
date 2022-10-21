@@ -22,9 +22,10 @@ describe("query", function()
     it("select with positional parameters", function()
         lucas.connect("127.0.0.1")
         local results =
-            lucas.query("SELECT * FROM testing.data WHERE asset_type = ? ALLOW FILTERING", {
-                lucas.int(1),
-            })
+            lucas.query(
+                "SELECT * FROM testing.data WHERE asset_type = ? ALLOW FILTERING",
+                { lucas.int(1) }
+            )
         assert.are.same(
             { {
                 approval_status = 2,
@@ -41,9 +42,10 @@ describe("query", function()
     it("select with named parameters", function()
         lucas.connect("127.0.0.1")
         local results =
-            lucas.query("SELECT * FROM testing.data WHERE asset_type = :asset_id ALLOW FILTERING", {
-                asset_id = lucas.int(1),
-            })
+            lucas.query(
+                "SELECT * FROM testing.data WHERE asset_type = :asset_id ALLOW FILTERING",
+                { asset_id = lucas.int(1) }
+            )
         assert.are.same(
             { {
                 approval_status = 2,
