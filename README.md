@@ -1,6 +1,6 @@
-# Lua Cassandra Driver
+# Lucas
 
-A Cassandra library for Lua using the Lua C API and Datastax Cassandra C/C++ driver.
+_Lucas_ is a Lua library which wraps the [DataStax Cassandra C/C++ driver](https://github.com/datastax/cpp-driver) using the Lua C API.
 
 ## Development
 

@@ -1,4 +1,4 @@
-name: luacassandra
+# yaml-language-server: $schema=https://raw.githubusercontent.com/docker/compose/master/compose/config/compose_spec.json
 
 services:
   cassandra:
@@ -8,16 +8,8 @@ services:
     ports:
       - "9042:9042"
     healthcheck:
-      test: "[ $$(nodetool -h ::FFFF:127.0.0.1 statusgossip) = running ]"
-
-  cassandra_init:
-    image: cassandra:4.0
-    depends_on:
-      cassandra:
-        condition: service_healthy
-    volumes:
-      - "./init.cql:/init.cql:ro"
-    command: ["cqlsh", "cassandra", "-f", "/init.cql"]
+      test: ["CMD", "nodetool", "status"]
+      timeout: 2m
 
   driver:
     build:
