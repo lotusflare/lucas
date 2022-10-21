@@ -1,5 +1,5 @@
 require "busted.runner"()
-local lucas = require("luacassandra")
+local lucas = require("lucas")
 
 describe("connect", function()
     it("no error when server is available", function()

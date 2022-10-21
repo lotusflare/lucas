@@ -277,7 +277,7 @@ static int query(lua_State *L)
     return 1;
 }
 
-int luaopen_luacassandra(lua_State *L)
+int luaopen_lucas(lua_State *L)
 {
     cass_log_set_level(CASS_LOG_DISABLED);
     luaL_Reg reg[] = {
@@ -313,6 +313,6 @@ int luaopen_luacassandra(lua_State *L)
 
         {NULL, NULL},
     };
-    luaL_openlib(L, "luacassandra", reg, 0);
+    luaL_openlib(L, "lucas", reg, 0);
     return 1;
 }

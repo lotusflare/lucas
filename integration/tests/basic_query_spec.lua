@@ -1,6 +1,6 @@
 require "busted.runner"()
 local pretty = require "pl.pretty"
-local lucas = require("luacassandra")
+local lucas = require("lucas")
 
 describe("query", function()
     it("basic select", function ()
