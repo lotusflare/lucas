@@ -1,4 +1,4 @@
 services:
   driver:
     volumes:
-      - "../app:app"
+      - ".:/app"
