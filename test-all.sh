@@ -14,7 +14,8 @@ set -ex
 trap clean EXIT
 pushd integration > /dev/null
 
+docker compos build
 docker compose rm -fs
 docker compose up cassandra --wait
 cat init.cql | docker compose exec -T cassandra cqlsh
-docker compose exec driver busted --output=TAP .
+docker compose run driver busted --output=TAP .

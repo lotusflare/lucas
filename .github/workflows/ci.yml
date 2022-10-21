@@ -23,10 +23,11 @@ jobs:
       - name: Bring up environment
         working-directory: integration
         run: |
+          docker compose build
           docker compose up cassandra --wait
           cat init.cql | docker compose exec -T cassandra cqlsh
 
       - name: Integration tests
         working-directory: integration
         run: |
-          docker compose exec driver busted --output=TAP .
+          docker compose run driver busted --output=TAP .
