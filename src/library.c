@@ -283,7 +283,6 @@ static int query(lua_State *L)
     const size_t parameter_count = lua_objlen(L, PARAMETERS_POSITION);
     const char *query = lua_tostring(L, QUERY_POSITION);
 
-    // CassStatement *statement = cass_statement_new(query, parameter_count);
     CassStatement *statement = create_prepared_statement(L, query, parameter_count);
     create_statement(L, statement);
     CassFuture *future = cass_session_execute(session, statement);
