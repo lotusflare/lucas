@@ -1,4 +1,4 @@
-name: lucas
+# yaml-language-server: $schema=https://raw.githubusercontent.com/docker/compose/master/compose/config/compose_spec.json
 
 services:
   cassandra:

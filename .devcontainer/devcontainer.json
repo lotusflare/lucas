@@ -1,12 +1,10 @@
 {
-    "build": {
-        "dockerfile": "../Dockerfile"
-    },
-    "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
-    "workspaceFolder": "/app",
-    "runArgs": [
-        "--network=host"
+    "dockerComposeFile": [
+        "../integration/docker-compose.yml",
+        "docker-compose.devcontainer.yml"
     ],
+    "service": "driver",
+    "workspaceFolder": "/app",
     "customizations": {
         "vscode": {
             "extensions": [
