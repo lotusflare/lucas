@@ -30,12 +30,12 @@ static int connect(lua_State *L)
     err = cass_cluster_set_contact_points(cluster, contact_points);
     if (err != CASS_OK)
     {
-        error_cass_to_lua(L, err, "could not set contact points");
+        errorf_cass_to_lua(L, err, "could not set contact points");
     }
     err = cass_cluster_set_protocol_version(cluster, CASS_PROTOCOL_VERSION_V4);
     if (err != CASS_OK)
     {
-        error_cass_to_lua(L, err, "could not set protocol version");
+        errorf_cass_to_lua(L, err, "could not set protocol version");
     }
     CassFuture *future = cass_session_connect(session, cluster);
     cass_future_wait(future);
@@ -43,7 +43,7 @@ static int connect(lua_State *L)
     cass_future_free(future);
     if (err != CASS_OK)
     {
-        error_cass_to_lua(L, err, "could not connect");
+        errorf_cass_to_lua(L, err, "could not connect");
     }
     return 0;
 }
@@ -88,12 +88,12 @@ void bind_positional_parameter(lua_State *L, int i, CassStatement *statement, Ca
     }
     else
     {
-        error_to_lua(L, "invalid type: %d", type);
+        errorf_to_lua(L, "invalid type: %d", type);
     }
 
     if (err != CASS_OK)
     {
-        error_cass_to_lua(L, err, "error binding positional parameter: %d", type);
+        errorf_cass_to_lua(L, err, "could not bind positional parameter: %d", type);
     }
 }
 
@@ -137,12 +137,12 @@ void bind_named_parameter(lua_State *L, const char *name, CassStatement *stateme
     }
     else
     {
-        error_to_lua(L, "invalid type: %d", type);
+        errorf_to_lua(L, "invalid type: %d", type);
     }
 
     if (err != CASS_OK)
     {
-        error_cass_to_lua(L, err, "error binding positional parameter: %d", type);
+        errorf_cass_to_lua(L, err, "could not bind positional parameter: %d", type);
     }
 }
 
