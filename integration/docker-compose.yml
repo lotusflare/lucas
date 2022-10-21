@@ -7,10 +7,9 @@ services:
       CASSANDRA_LISTEN_ADDRESS: cassandra
     ports:
       - "9042:9042"
-    volumes:
-      - "./init.cql:/init.cql:ro"
     healthcheck:
-      test: "[ $$(nodetool -h ::FFFF:127.0.0.1 statusgossip) = running ]"
+      test: ["CMD", "nodetool", "status"]
+      timeout: 2m
 
   driver:
     build:

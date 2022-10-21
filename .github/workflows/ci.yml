@@ -24,8 +24,7 @@ jobs:
         working-directory: integration
         run: |
           docker compose up cassandra --wait
-          sleep 10
-          docker compose exec cassandra cqlsh -f /init.cql
+          cat init.cql | docker compose exec -T cassandra cqlsh
 
       - name: Integration tests
         working-directory: integration

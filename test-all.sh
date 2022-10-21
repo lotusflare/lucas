@@ -16,7 +16,5 @@ pushd integration > /dev/null
 
 docker compose rm -fs
 docker compose up cassandra --wait
-
-docker compose exec cassandra cqlsh -f /init.cql
-sleep 10
+cat init.cql | docker compose exec -T cassandra cqlsh
 docker compose exec driver busted --output=TAP .
