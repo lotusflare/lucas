@@ -1,15 +1,16 @@
 {
-    "dockerComposeFile": [
-        "../integration/docker-compose.yml",
-        "docker-compose.devcontainer.yml"
-    ],
-    "service": "driver",
+    "build": {
+        "dockerfile": "../Dockerfile"
+    },
+    "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
     "workspaceFolder": "/app",
+    "runArgs": [
+        "--network=host"
+    ],
     "customizations": {
         "vscode": {
             "extensions": [
                 "EditorConfig.EditorConfig",
-                "twxs.cmake",
                 "ms-vscode.cpptools",
                 "ms-vscode.cmake-tools",
                 "ms-azuretools.vscode-docker",
