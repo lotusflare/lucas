@@ -262,6 +262,20 @@ void iterate_result(lua_State *L, CassFuture *future)
     cass_iterator_free(iterator);
 }
 
+CassStatement *create_prepared_statement(lua_State *L, const char *query, int parameter_count)
+{
+    CassFuture *future = cass_session_prepare(session, query);
+    cass_future_wait(future);
+    CassError err = cass_future_error_code(future);
+    if (err != CASS_OK)
+    {
+        errorf_cass_future_to_lua(L, future, "failed to create prepared statement");
+    }
+    const CassPrepared *prepared = cass_future_get_prepared(future);
+    CassStatement *statement = cass_prepared_bind(prepared);
+    return statement;
+}
+
 static int query(lua_State *L)
 {
     luaL_checktype(L, QUERY_POSITION, LUA_TSTRING);
@@ -269,7 +283,8 @@ static int query(lua_State *L)
     const size_t parameter_count = lua_objlen(L, PARAMETERS_POSITION);
     const char *query = lua_tostring(L, QUERY_POSITION);
 
-    CassStatement *statement = cass_statement_new(query, parameter_count);
+    // CassStatement *statement = cass_statement_new(query, parameter_count);
+    CassStatement *statement = create_prepared_statement(L, query, parameter_count);
     create_statement(L, statement);
     CassFuture *future = cass_session_execute(session, statement);
     iterate_result(L, future);
