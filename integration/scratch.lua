@@ -7,9 +7,7 @@ local lucas = require("luacassandra")
 
 lucas.connect("127.0.0.1")
 local results =
-    lucas.query("SELECT * FROM testing.data WHERE asset_type = ?", {
-        { lucas.int(), 1 },
-    })
+    lucas.query("SELECT * FROM testing.data WHERE asset_type = ?", { { lucas.int(), 1 } })
 pretty.dump(results)
 
 -- print('hello')
