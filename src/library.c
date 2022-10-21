@@ -88,12 +88,12 @@ void bind_positional_parameter(lua_State *L, int i, CassStatement *statement, Ca
     }
     else
     {
-        errorf_to_lua(L, "invalid type: %d", type);
+        errorf_to_lua(L, "invalid type %d", type);
     }
 
     if (err != CASS_OK)
     {
-        errorf_cass_to_lua(L, err, "could not bind positional parameter: %d", type);
+        errorf_cass_to_lua(L, err, "could not bind positional parameter %d", type);
     }
 }
 
@@ -137,12 +137,12 @@ void bind_named_parameter(lua_State *L, const char *name, CassStatement *stateme
     }
     else
     {
-        errorf_to_lua(L, "invalid type: %d", type);
+        errorf_to_lua(L, "invalid type %d", type);
     }
 
     if (err != CASS_OK)
     {
-        errorf_cass_to_lua(L, err, "could not bind positional parameter: %d", type);
+        errorf_cass_to_lua(L, err, "could not bind named parameter %s", name);
     }
 }
 
@@ -180,7 +180,10 @@ void create_statement(lua_State *L, CassStatement *statement)
 void iterate_result(lua_State *L, CassFuture *future)
 {
     cass_future_wait(future);
-    CassError err = cass_future_error_code(future);
+    if (cass_future_error_code(future) != CASS_OK)
+    {
+        errorf_cass_future_to_lua(L, future, "execution error");
+    }
     const CassResult *result = cass_future_get_result(future);
 
     CassIterator *iterator = cass_iterator_from_result(result);
