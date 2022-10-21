@@ -294,12 +294,18 @@ static int query(lua_State *L)
     return 1;
 }
 
+static int batch(lua_State *L)
+{
+    return 0;
+}
+
 int luaopen_lucas(lua_State *L)
 {
     cass_log_set_level(CASS_LOG_DISABLED);
     luaL_Reg reg[] = {
         {"connect", connect},
         {"query", query},
+        {"batch", batch},
 
         {"ascii", type_ascii},
         {"bigint", type_bigint},
