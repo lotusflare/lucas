@@ -1,14 +1,36 @@
-#!/bin/sh -ex
+#!/bin/sh -e
 
-function clean() {
+clean=false
+
+clean() {
+    remove_containers
     popd > /dev/null
+}
+
+remove_containers() {
+    if $clean; then
+        docker compose rm -fs
+    fi
+}
+
+parse_flags() {
+    while getopts 'c' OPTION; do
+        case $OPTION in
+            c) clean=true;;
+            ?) exit 1;;
+        esac
+    done
+}
+
+run() {
+    remove_containers
+    docker compose build
+    docker compose up cassandra --wait
+    cat init.cql | docker compose exec -T cassandra cqlsh
+    docker compose run driver busted --output=TAP .
 }
 
 trap clean EXIT
 pushd integration > /dev/null
-
-docker compose build
-docker compose rm -fs
-docker compose up cassandra --wait
-cat init.cql | docker compose exec -T cassandra cqlsh
-docker compose run driver busted --output=TAP .
+parse_flags "$@"
+run

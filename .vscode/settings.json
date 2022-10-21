@@ -12,7 +12,8 @@
         "regex": "c",
         "tuple": "c",
         "type_traits": "c",
-        "utility": "c"
+        "utility": "c",
+        "typeinfo": "c"
     },
     "editor.inlayHints.enabled": "off",
     "[c]": {

@@ -30,12 +30,12 @@ static int connect(lua_State *L)
     err = cass_cluster_set_contact_points(cluster, contact_points);
     if (err != CASS_OK)
     {
-        error_cass_to_lua(L, err, "could not set contact points");
+        errorf_cass_to_lua(L, err, "could not set contact points");
     }
     err = cass_cluster_set_protocol_version(cluster, CASS_PROTOCOL_VERSION_V4);
     if (err != CASS_OK)
     {
-        error_cass_to_lua(L, err, "could not set protocol version");
+        errorf_cass_to_lua(L, err, "could not set protocol version");
     }
     CassFuture *future = cass_session_connect(session, cluster);
     cass_future_wait(future);
@@ -43,7 +43,7 @@ static int connect(lua_State *L)
     cass_future_free(future);
     if (err != CASS_OK)
     {
-        error_cass_to_lua(L, err, "could not connect");
+        errorf_cass_to_lua(L, err, "could not connect");
     }
     return 0;
 }
@@ -88,12 +88,12 @@ void bind_positional_parameter(lua_State *L, int i, CassStatement *statement, Ca
     }
     else
     {
-        error_to_lua(L, "invalid type: %d", type);
+        errorf_to_lua(L, "invalid type %d", type);
     }
 
     if (err != CASS_OK)
     {
-        error_cass_to_lua(L, err, "error binding positional parameter: %d", type);
+        errorf_cass_to_lua(L, err, "could not bind positional parameter %d", type);
     }
 }
 
@@ -137,12 +137,12 @@ void bind_named_parameter(lua_State *L, const char *name, CassStatement *stateme
     }
     else
     {
-        error_to_lua(L, "invalid type: %d", type);
+        errorf_to_lua(L, "invalid type %d", type);
     }
 
     if (err != CASS_OK)
     {
-        error_cass_to_lua(L, err, "error binding positional parameter: %d", type);
+        errorf_cass_to_lua(L, err, "could not bind named parameter %s", name);
     }
 }
 
@@ -180,7 +180,10 @@ void create_statement(lua_State *L, CassStatement *statement)
 void iterate_result(lua_State *L, CassFuture *future)
 {
     cass_future_wait(future);
-    CassError err = cass_future_error_code(future);
+    if (cass_future_error_code(future) != CASS_OK)
+    {
+        errorf_cass_future_to_lua(L, future, "execution error");
+    }
     const CassResult *result = cass_future_get_result(future);
 
     CassIterator *iterator = cass_iterator_from_result(result);
@@ -259,6 +262,20 @@ void iterate_result(lua_State *L, CassFuture *future)
     cass_iterator_free(iterator);
 }
 
+CassStatement *create_prepared_statement(lua_State *L, const char *query, int parameter_count)
+{
+    CassFuture *future = cass_session_prepare(session, query);
+    cass_future_wait(future);
+    CassError err = cass_future_error_code(future);
+    if (err != CASS_OK)
+    {
+        errorf_cass_future_to_lua(L, future, "failed to create prepared statement");
+    }
+    const CassPrepared *prepared = cass_future_get_prepared(future);
+    CassStatement *statement = cass_prepared_bind(prepared);
+    return statement;
+}
+
 static int query(lua_State *L)
 {
     luaL_checktype(L, QUERY_POSITION, LUA_TSTRING);
@@ -266,7 +283,7 @@ static int query(lua_State *L)
     const size_t parameter_count = lua_objlen(L, PARAMETERS_POSITION);
     const char *query = lua_tostring(L, QUERY_POSITION);
 
-    CassStatement *statement = cass_statement_new(query, parameter_count);
+    CassStatement *statement = create_prepared_statement(L, query, parameter_count);
     create_statement(L, statement);
     CassFuture *future = cass_session_execute(session, statement);
     iterate_result(L, future);
@@ -277,7 +294,7 @@ static int query(lua_State *L)
     return 1;
 }
 
-int luaopen_luacassandra(lua_State *L)
+int luaopen_lucas(lua_State *L)
 {
     cass_log_set_level(CASS_LOG_DISABLED);
     luaL_Reg reg[] = {
@@ -313,6 +330,6 @@ int luaopen_luacassandra(lua_State *L)
 
         {NULL, NULL},
     };
-    luaL_openlib(L, "luacassandra", reg, 0);
+    luaL_openlib(L, "lucas", reg, 0);
     return 1;
 }
