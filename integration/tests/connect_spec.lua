@@ -1,4 +1,4 @@
-require "busted.runner"()
+require"busted.runner"()
 local lucas = require("lucas")
 
 describe("connect", function()
@@ -6,8 +6,8 @@ describe("connect", function()
         local err = lucas.connect("127.0.0.1")
     end)
 
-    it("error when server is not available", function ()
-        assert.has.errors(function ()
+    it("error when server is not available", function()
+        assert.has.errors(function()
             lucas.connect("example.com")
         end)
     end)

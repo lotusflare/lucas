@@ -1,22 +1,18 @@
-local pretty = require "pl.pretty"
+local pretty = require"pl.pretty"
 local lucas = require("luacassandra")
-
-
 
 -- local results = lucas.query("SELECT * FROM testing.data WHERE asset_type = ? ALLOW FILTERING", {
 --     {lucas.type_int(), 1},
 -- })
 
 lucas.connect("127.0.0.1")
-local results = lucas.query("SELECT * FROM testing.data WHERE asset_type = ?", {
-    {lucas.int(), 1}
-})
+local results =
+    lucas.query("SELECT * FROM testing.data WHERE asset_type = ?", {
+        { lucas.int(), 1 },
+    })
 pretty.dump(results)
 
-
-
 -- print('hello')
-
 
 -- local results2 = lucas.query("SELECT operator_name FROM testing.data ", {
 
