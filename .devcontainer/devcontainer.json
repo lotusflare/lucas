@@ -4,19 +4,22 @@
     },
     "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
     "workspaceFolder": "/app",
+    "mounts": [
+        "build:/app/build"
+    ],
     "runArgs": [
         "--network=host"
     ],
     "customizations": {
         "vscode": {
             "extensions": [
-				"EditorConfig.EditorConfig",
-				"ms-vscode.cmake-tools",
-				"ms-azuretools.vscode-docker",
-				"redhat.vscode-yaml",
-				"llvm-vs-code-extensions.vscode-clangd",
-				"twxs.cmake"
-			]
+                "EditorConfig.EditorConfig",
+                "ms-vscode.cmake-tools",
+                "ms-azuretools.vscode-docker",
+                "redhat.vscode-yaml",
+                "llvm-vs-code-extensions.vscode-clangd",
+                "twxs.cmake"
+            ]
         }
     },
     "features": {

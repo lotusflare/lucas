@@ -3,6 +3,6 @@
 
 #include <luajit-2.1/lua.h>
 
-int luaopen_luacassandra(lua_State *L);
+int luaopen_lucas(lua_State *L);
 
 #endif
