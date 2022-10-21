@@ -10,8 +10,6 @@ RUN apt-get update -y \
 
 COPY . /app
 WORKDIR /app/build
-RUN cmake .. \
-    && make
-
+RUN cmake .. && make
 WORKDIR /app
 RUN ./format.sh
