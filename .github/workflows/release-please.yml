@@ -1,0 +1,32 @@
+on:
+  push:
+    branches: [master]
+
+name: release-please
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Build
+        working-directory: integration
+        run: |
+          docker compose build driver
+
+      - name: Copy
+        working-directory: integration
+        run: |
+          docker compose create driver
+          docker compose cp driver:/app/build/lucas.so ../lucas.so
+
+      - uses: google-github-actions/release-please-action@v3
+        with:
+          release-type: simple
+          package-name: lucas
+          extra-files: |
+            README.md
+            lucas.so
