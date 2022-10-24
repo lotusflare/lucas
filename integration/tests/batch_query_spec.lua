@@ -1,43 +1,49 @@
 require"busted.runner"()
 local lucas = require("lucas")
+local pretty = require("pl.pretty")
+
 
 describe("batch", function()
     it("insert", function()
         local err = lucas.connect("127.0.0.1")
 
-        lucas.batch()
-        -- lucas.batch(
-        --     "INSERT INTO testing.data (operator_name, id, id_type, asset_id, asset_type, approval_status) VALUES (?, ?)",
-        --     { {
-        --         approval_status = { lucas.int(2) },
-        --         asset_id = { lucas.varchar("015e3714-a98b-11ec-9f51-0242ac150008") },
-        --         asset_type = { lucas.int(1) },
-        --         id = { lucas.varchar("9380816255dc45dfa1a57541db81df1d") },
-        --         id_type = { lucas.int(1) },
-        --         operator_name = { lucas.varchar("avantel") },
-        --     }, {
-        --         approval_status = { lucas.int(2) },
-        --         asset_id = { lucas.varchar("015e3714-a98b-11ec-9f51-0242ac150008") },
-        --         asset_type = { lucas.int(1) },
-        --         id = { lucas.varchar("9380816255dc45dfa1a57541db81df1d") },
-        --         id_type = { lucas.int(1) },
-        --         operator_name = { lucas.varchar("tmo") },
-        --     } }
-        -- )
+        lucas.batch(
+            "INSERT INTO testing.data (operator_name, id, id_type, asset_id, asset_type, approval_status) VALUES (?, ?, ?, ?, ?, ?)",
+            {
+                {
+                    lucas.varchar("avantel"),
+                    lucas.varchar("9380816255dc45dfa1a57541db81df1d"),
+                    lucas.int(1),
+                    lucas.timeuuid("015e3714-a98b-11ec-9f51-0242ac150008"),
+                    lucas.int(2),
+                    lucas.int(1),
+                },
+                {
+                    lucas.varchar("tmo"),
+                    lucas.varchar("9380816255dc45dfa1a57541db81df1d"),
+                    lucas.int(1),
+                    lucas.timeuuid("015e3714-a98b-11ec-9f51-0242ac150008"),
+                    lucas.int(2),
+                    lucas.int(1),
+                },
+            }
+        )
 
-        -- local results =
-        --     lucas.query("SELECT * FROM testing.data WHERE operator_name = 'tmo' ALLOW FILTERING")
+        local results =
+            lucas.query("SELECT * FROM testing.data WHERE operator_name = 'tmo' ALLOW FILTERING", {})
 
-        -- assert.are.same(
-        --     { {
-        --         approval_status = 2,
-        --         asset_id = "015e3714-a98b-11ec-9f51-0242ac150008",
-        --         asset_type = 1,
-        --         id = "9380816255dc45dfa1a57541db81df1d",
-        --         id_type = 1,
-        --         operator_name = "tmo",
-        --     } },
-        --     results
-        -- )
+        pretty.dump(results)
+
+        assert.are.same(
+            { {
+                approval_status = 1,
+                asset_id = "015e3714-a98b-11ec-9f51-0242ac150008",
+                asset_type = 2,
+                id = "9380816255dc45dfa1a57541db81df1d",
+                id_type = 1,
+                operator_name = "tmo",
+            } },
+            results
+        )
     end)
 end)

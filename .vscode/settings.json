@@ -2,6 +2,9 @@
     "files.exclude": {
         ".cache": true
     },
+    "files.watcherExclude": {
+        "build": true
+    },
     "files.associations": {
         "library.h": "c",
         ".clang-format": "yaml",

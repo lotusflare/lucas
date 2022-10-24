@@ -6,7 +6,7 @@ describe("query", function()
     it("basic select", function()
         lucas.connect("127.0.0.1")
         local results = lucas.query("SELECT * FROM testing.data", {})
-        assert.are.same(
+        assert.array.has(
             { {
                 approval_status = 2,
                 asset_id = "015e3714-a98b-11ec-9f51-0242ac150008",
