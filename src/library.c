@@ -88,12 +88,12 @@ void bind_positional_parameter(lua_State *L, int i, CassStatement *statement, Ca
     }
     else
     {
-        errorf_to_lua(L, "invalid type %d", type);
+        errorf_to_lua(L, "invalid type %d for index %d", type, i);
     }
 
     if (err != CASS_OK)
     {
-        errorf_cass_to_lua(L, err, "could not bind positional parameter %d", type);
+        errorf_cass_to_lua(L, err, "could not bind positional parameter at index %d", i);
     }
 }
 
@@ -137,7 +137,7 @@ void bind_named_parameter(lua_State *L, const char *name, CassStatement *stateme
     }
     else
     {
-        errorf_to_lua(L, "invalid type %d", type);
+        errorf_to_lua(L, "invalid type %d for index %s", type, name);
     }
 
     if (err != CASS_OK)
@@ -146,9 +146,10 @@ void bind_named_parameter(lua_State *L, const char *name, CassStatement *stateme
     }
 }
 
-void create_statement(lua_State *L, CassStatement *statement)
+void create_statement(lua_State *L, int index, CassStatement *statement)
 {
-    for (lua_pushnil(L); lua_next(L, PARAMETERS_POSITION) != 0;)
+    lua_pushnil(L);
+    for (int previous_top = lua_gettop(L); lua_next(L, index) != 0; lua_pop(L, lua_gettop(L) - previous_top))
     {
         const int table_key_index = lua_gettop(L) - 1;
         const int table_value_index = lua_gettop(L);
@@ -173,7 +174,6 @@ void create_statement(lua_State *L, CassStatement *statement)
             const int index = lua_tointeger(L, table_key_copy_index) - 1; // lua base 1 indexing
             bind_positional_parameter(L, index, statement, type, value_index);
         }
-        lua_pop(L, 4);
     }
 }
 
@@ -284,7 +284,7 @@ static int query(lua_State *L)
     const char *query = lua_tostring(L, QUERY_POSITION);
 
     CassStatement *statement = create_prepared_statement(L, query, parameter_count);
-    create_statement(L, statement);
+    create_statement(L, lua_gettop(L), statement);
     CassFuture *future = cass_session_execute(session, statement);
     iterate_result(L, future);
 
@@ -294,12 +294,60 @@ static int query(lua_State *L)
     return 1;
 }
 
+void prepare_insert_into_batch(lua_State *L, CassSession *session, const char *query, const CassPrepared **prepared)
+{
+    CassFuture *future = cass_session_prepare(session, query);
+    cass_future_wait(future);
+    CassError err = cass_future_error_code(future);
+    if (err != CASS_OK)
+    {
+        errorf_cass_future_to_lua(L, future, "could not create prepared statement");
+    }
+    *prepared = cass_future_get_prepared(future);
+    cass_future_free(future);
+}
+
+int batch(lua_State *L)
+{
+    const int ARG_QUERY = 1;
+    const int ARG_BATCHES = 2;
+    const size_t parameter_count = lua_objlen(L, ARG_BATCHES);
+    const char *query = lua_tostring(L, ARG_QUERY);
+    CassBatch *batch = cass_batch_new(CASS_BATCH_TYPE_UNLOGGED);
+    const CassPrepared *prepared = NULL;
+    prepare_insert_into_batch(L, session, query, &prepared);
+
+    lua_pushnil(L);
+    for (int previous_top = lua_gettop(L); lua_next(L, ARG_BATCHES) != 0; lua_pop(L, lua_gettop(L) - previous_top))
+    {
+        CassStatement *statement = cass_prepared_bind(prepared);
+        create_statement(L, lua_gettop(L), statement);
+        CassError err = cass_batch_add_statement(batch, statement);
+        cass_statement_free(statement);
+        if (err != CASS_OK)
+        {
+            errorf_cass_to_lua(L, err, "failed to add statement to batch");
+        }
+    }
+
+    CassFuture *future = cass_session_execute_batch(session, batch);
+    cass_future_wait(future);
+    cass_prepared_free(prepared);
+    if (cass_future_error_code(future) != CASS_OK)
+    {
+        errorf_cass_future_to_lua(L, future, "executing batch query failed");
+    }
+
+    return 0;
+}
+
 int luaopen_lucas(lua_State *L)
 {
     cass_log_set_level(CASS_LOG_DISABLED);
     luaL_Reg reg[] = {
         {"connect", connect},
         {"query", query},
+        {"batch", batch},
 
         {"ascii", type_ascii},
         {"bigint", type_bigint},

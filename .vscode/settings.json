@@ -2,6 +2,9 @@
     "files.exclude": {
         ".cache": true
     },
+    "files.watcherExclude": {
+        "build": true
+    },
     "files.associations": {
         "library.h": "c",
         ".clang-format": "yaml",
@@ -18,6 +21,6 @@
     "editor.inlayHints.enabled": "off",
     "[c]": {
         "editor.formatOnSave": true,
-        "editor.defaultFormatter": "ms-vscode.cpptools"
+        "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
     }
 }

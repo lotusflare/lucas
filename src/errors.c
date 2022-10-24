@@ -1,3 +1,5 @@
+#pragma once
+
 #include "cassandra.h"
 #include <luajit-2.1/lua.h>
 #include <stdarg.h>

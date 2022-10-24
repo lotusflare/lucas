@@ -3,8 +3,8 @@
 fix=false
 
 parse_flags() {
-    while getopts 'f' OPTION; do
-        case $OPTION in
+    while getopts 'f' option; do
+        case $option in
             f) fix=true;;
             ?) exit 1;;
         esac
@@ -12,19 +12,15 @@ parse_flags() {
 }
 
 fix() {
-    find src include -iname *.h -o -iname *.c | xargs clang-format -i
+    find src include -iname *.h -o -iname *.c | xargs clang-format --verbose -i
     find integration -iname *.lua | xargs prettier -w
 }
 
 check() {
-    find src include -iname *.h -o -iname *.c | xargs clang-format -n
-    find integration -iname *.lua | xargs prettier --loglevel=silent -c
+    find src include -iname *.h -o -iname *.c | xargs clang-format --verbose -n
+    find integration -iname *.lua | xargs prettier -c
 }
 
-parse_flags
+parse_flags "$@"
 
-if $fix; then
-    fix
-else
-    check
-fi
+$fix && fix || check
