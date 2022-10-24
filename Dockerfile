@@ -9,9 +9,8 @@ RUN apt-get update -y \
     && npm install --global prettier https://github.com/prettier/plugin-lua
 
 COPY . /app
-WORKDIR /app/build
-RUN cmake .. \
-    && make
-
 WORKDIR /app
-RUN ./format.sh
+RUN ./format.sh \
+    && cmake -S . -B build \
+    && cmake --build build
+
