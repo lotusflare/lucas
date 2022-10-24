@@ -14,8 +14,8 @@ remove_containers() {
 }
 
 parse_flags() {
-    while getopts 'c' OPTION; do
-        case $OPTION in
+    while getopts 'c' option; do
+        case $option in
             c) clean=true;;
             ?) exit 1;;
         esac
