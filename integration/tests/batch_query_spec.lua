@@ -2,7 +2,6 @@ require"busted.runner"()
 local lucas = require("lucas")
 local pretty = require("pl.pretty")
 
-
 describe("batch", function()
     it("insert", function()
         local err = lucas.connect("127.0.0.1")
@@ -30,7 +29,10 @@ describe("batch", function()
         )
 
         local results =
-            lucas.query("SELECT * FROM testing.data WHERE operator_name = 'tmo' ALLOW FILTERING", {})
+            lucas.query(
+                "SELECT * FROM testing.data WHERE operator_name = 'tmo' ALLOW FILTERING",
+                {}
+            )
 
         pretty.dump(results)
 
