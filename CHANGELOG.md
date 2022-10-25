@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/lotusflare/lucas/compare/v0.3.1...v0.3.2) (2022-10-25)
+
+
+### Miscellaneous Chores
+
+* release 0.3.2 ([3e326fb](https://github.com/lotusflare/lucas/commit/3e326fb6e218d7d21d98ccc7ec155b801bbd9341))
+
 ## [0.3.1](https://github.com/lotusflare/lucas/compare/v0.3.0...v0.3.1) (2022-10-25)
 
 
