@@ -1,6 +1,11 @@
 cmake-build-debug
 build
+build.luarocks
 CMakeFiles
 .idea
 .vscode
 .cache
+/luarocks
+/lua
+/lua_modules
+/.luarocks

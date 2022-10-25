@@ -2,31 +2,31 @@ on:
   push:
     branches: [master]
 
-name: release-please
+name: release
 
 jobs:
-  release-please:
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: true
 
-      - name: Build
-        working-directory: integration
-        run: |
-          docker compose build driver
-
-      - name: Copy
-        working-directory: integration
-        run: |
-          docker compose create driver
-          docker compose cp driver:/app/build/lucas.so ../lucas.so
-
-      - uses: google-github-actions/release-please-action@v3
+      - name: Create release
+        uses: google-github-actions/release-please-action@v3
         with:
           release-type: simple
           package-name: lucas
-          extra-files: |
-            README.md
-            lucas.so
+
+      - name: Build artifact
+        run: |
+          docker compose build driver
+          docker compose create driver
+          docker compose cp driver:/app/build lucas.so
+
+      - name: Upload artifact
+        uses: softprops/action-gh-release@v1
+        if: steps.release.outputs.release_created
+        with:
+          tag_name: ${{ steps.release.outputs.tag_name }}
+          files: lucas.so

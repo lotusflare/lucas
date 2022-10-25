@@ -13,5 +13,5 @@ services:
 
   driver:
     build:
-      context: ..
+      context: .
     network_mode: host
