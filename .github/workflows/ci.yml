@@ -4,6 +4,7 @@ on: [push]
 
 jobs:
   test:
+    name: test
     runs-on: ubuntu-22.04
     env:
       DOCKER_BUILDKIT: "1"

@@ -1,158 +1,189 @@
+#include "errors.c"
 #include "luajit-2.1/lua.h"
 #include <cassandra.h>
 
+int string_helper(lua_State *L, CassValueType cass_type)
+{
+    const char *value = lua_tostring(L, 1);
+    lua_newtable(L);
+    int table = lua_gettop(L);
+
+    lua_pushinteger(L, 1);
+    lua_pushinteger(L, cass_type);
+    lua_settable(L, table);
+
+    lua_pushinteger(L, 2);
+    lua_pushstring(L, value);
+    lua_settable(L, table);
+
+    return 1;
+}
+
+int integer_helper(lua_State *L, CassValueType cass_type)
+{
+    lua_Integer value = lua_tointeger(L, 1);
+    lua_newtable(L);
+    int table = lua_gettop(L);
+
+    lua_pushinteger(L, 1);
+    lua_pushinteger(L, cass_type);
+    lua_settable(L, table);
+
+    lua_pushinteger(L, 2);
+    lua_pushinteger(L, value);
+    lua_settable(L, table);
+
+    return 1;
+}
+
+int number_helper(lua_State *L, CassValueType cass_type)
+{
+    lua_Number value = lua_tonumber(L, 1);
+    lua_newtable(L);
+    int table = lua_gettop(L);
+
+    lua_pushinteger(L, 1);
+    lua_pushinteger(L, cass_type);
+    lua_settable(L, table);
+
+    lua_pushinteger(L, 2);
+    lua_pushnumber(L, value);
+    lua_settable(L, table);
+
+    return 1;
+}
+
 static int type_ascii(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_ASCII);
-    return 1;
+    return string_helper(L, CASS_VALUE_TYPE_ASCII);
 }
 
 static int type_bigint(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_BIGINT);
-    return 1;
+    return integer_helper(L, CASS_VALUE_TYPE_BIGINT);
 }
 
 static int type_blob(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_BLOB);
-    return 1;
+    return string_helper(L, CASS_VALUE_TYPE_BLOB);
 }
 
 static int type_boolean(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_BOOLEAN);
-    return 1;
+    return integer_helper(L, CASS_VALUE_TYPE_BOOLEAN);
 }
 
 static int type_counter(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_COUNTER);
-    return 1;
+    return integer_helper(L, CASS_VALUE_TYPE_COUNTER);
 }
 
 static int type_decimal(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_DECIMAL);
-    return 1;
+    return number_helper(L, CASS_VALUE_TYPE_DECIMAL);
 }
 
 static int type_double(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_DOUBLE);
-    return 1;
+    return number_helper(L, CASS_VALUE_TYPE_DOUBLE);
 }
 
 static int type_float(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_FLOAT);
-    return 1;
+    return number_helper(L, CASS_VALUE_TYPE_FLOAT);
 }
 
 static int type_int(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_INT);
-    return 1;
+    return integer_helper(L, CASS_VALUE_TYPE_INT);
 }
 
 static int type_text(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_TEXT);
-    return 1;
+    return string_helper(L, CASS_VALUE_TYPE_TEXT);
 }
 
 static int type_timestamp(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_TIMESTAMP);
-    return 1;
+    return integer_helper(L, CASS_VALUE_TYPE_TIMESTAMP);
 }
 
 static int type_uuid(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_UUID);
-    return 1;
+    return string_helper(L, CASS_VALUE_TYPE_UUID);
 }
 
 static int type_varchar(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_VARCHAR);
-    return 1;
+    return string_helper(L, CASS_VALUE_TYPE_VARCHAR);
 }
 
 static int type_varint(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_VARINT);
-    return 1;
+    return integer_helper(L, CASS_VALUE_TYPE_VARINT);
 }
 
 static int type_timeuuid(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_TIMEUUID);
-    return 1;
+    return string_helper(L, CASS_VALUE_TYPE_TIMEUUID);
 }
 
 static int type_inet(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_INET);
-    return 1;
+    return integer_helper(L, CASS_VALUE_TYPE_INET);
 }
 
 static int type_date(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_DATE);
-    return 1;
+    return string_helper(L, CASS_VALUE_TYPE_DATE);
 }
 
 static int type_time(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_TIME);
-    return 1;
+    return integer_helper(L, CASS_VALUE_TYPE_TIME);
 }
 
 static int type_smallint(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_SMALL_INT);
-    return 1;
+    return integer_helper(L, CASS_VALUE_TYPE_SMALL_INT);
 }
 
 static int type_tinyint(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_TINY_INT);
-    return 1;
+    return integer_helper(L, CASS_VALUE_TYPE_TINY_INT);
 }
 
 static int type_duration(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_DURATION);
-    return 1;
+    return integer_helper(L, CASS_VALUE_TYPE_DURATION);
 }
 
 static int type_list(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_LIST);
-    return 1;
+    errorf_to_lua(L, "list type not supported");
+    return 0;
 }
 
 static int type_map(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_MAP);
-    return 1;
+    errorf_to_lua(L, "map type not supported");
+    return 0;
 }
 
 static int type_set(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_SET);
-    return 1;
+    errorf_to_lua(L, "set type not supported");
+    return 0;
 }
 
 static int type_udt(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_UDT);
-    return 1;
+    errorf_to_lua(L, "udt type not supported");
+    return 0;
 }
 
 static int type_tuple(lua_State *L)
 {
-    lua_pushinteger(L, CASS_VALUE_TYPE_TUPLE);
-    return 1;
+    errorf_to_lua(L, "tuple type not supported");
+    return 0;
 }
