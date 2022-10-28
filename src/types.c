@@ -53,6 +53,22 @@ int number_helper(lua_State *L, CassValueType cass_type)
     return 1;
 }
 
+static int type_boolean(lua_State *L)
+{
+    lua_newtable(L);
+    int table = lua_gettop(L);
+
+    lua_pushinteger(L, 1);
+    lua_pushinteger(L, CASS_VALUE_TYPE_BOOLEAN);
+    lua_settable(L, table);
+
+    lua_pushinteger(L, 2);
+    lua_pushboolean(L, lua_toboolean(L, 1));
+    lua_settable(L, table);
+
+    return 1;
+}
+
 static int type_ascii(lua_State *L)
 {
     return string_helper(L, CASS_VALUE_TYPE_ASCII);
@@ -66,11 +82,6 @@ static int type_bigint(lua_State *L)
 static int type_blob(lua_State *L)
 {
     return string_helper(L, CASS_VALUE_TYPE_BLOB);
-}
-
-static int type_boolean(lua_State *L)
-{
-    return integer_helper(L, CASS_VALUE_TYPE_BOOLEAN);
 }
 
 static int type_counter(lua_State *L)

@@ -5,7 +5,7 @@
     "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
     "workspaceFolder": "/app",
     "runArgs": [
-        "--network=lucas_default"
+        "--network=host"
     ],
     "containerEnv": {
         "CASSANDRA_HOST": "cassandra"

@@ -89,7 +89,7 @@ void bind_positional_parameter(lua_State *L, int i, CassStatement *statement, Ca
     }
     else
     {
-        errorf_to_lua(L, "invalid type %d for index %d", type, i);
+        errorf_to_lua(L, "invalid type %d for parameter %d", type, i);
     }
 
     if (err != CASS_OK)
@@ -138,7 +138,7 @@ void bind_named_parameter(lua_State *L, const char *name, CassStatement *stateme
     }
     else
     {
-        errorf_to_lua(L, "invalid type %d for index %s", type, name);
+        errorf_to_lua(L, "invalid type %d for parameter %s", type, name);
     }
 
     if (err != CASS_OK)
