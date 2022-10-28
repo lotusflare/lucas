@@ -7,6 +7,9 @@
     "runArgs": [
         "--network=lucas_default"
     ],
+    "containerEnv": {
+        "CASSANDRA_HOST": "cassandra"
+    },
     "customizations": {
         "vscode": {
             "extensions": [
