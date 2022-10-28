@@ -1,4 +1,0 @@
-services:
-  driver:
-    volumes:
-      - ".:/app"

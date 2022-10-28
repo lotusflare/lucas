@@ -4,7 +4,7 @@ local lucas = require("lucas")
 
 describe("query", function()
     it("basic select", function()
-        lucas.connect("127.0.0.1")
+        lucas.connect(os.getenv("CASSANDRA_HOST"))
         local results = lucas.query("SELECT * FROM testing.data", {})
         assert.array.has(
             { {
@@ -20,7 +20,7 @@ describe("query", function()
     end)
 
     it("select with positional parameters", function()
-        lucas.connect("127.0.0.1")
+        lucas.connect(os.getenv("CASSANDRA_HOST"))
         local results =
             lucas.query(
                 "SELECT * FROM testing.data WHERE asset_type = ? ALLOW FILTERING",
@@ -40,7 +40,7 @@ describe("query", function()
     end)
 
     it("select with named parameters", function()
-        lucas.connect("127.0.0.1")
+        lucas.connect(os.getenv("CASSANDRA_HOST"))
         local results =
             lucas.query(
                 "SELECT * FROM testing.data WHERE asset_type = :asset_id ALLOW FILTERING",

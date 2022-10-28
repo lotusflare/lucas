@@ -1,12 +1,15 @@
 {
     "build": {
-        "dockerfile": "../Dockerfile"
+        "dockerfile": "${localWorkspaceFolder}/Dockerfile"
     },
     "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
     "workspaceFolder": "/app",
     "runArgs": [
-        "--network=host"
+        "--network=lucas_default"
     ],
+    "containerEnv": {
+        "CASSANDRA_HOST": "cassandra"
+    },
     "customizations": {
         "vscode": {
             "extensions": [

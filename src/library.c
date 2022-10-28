@@ -1,6 +1,7 @@
 #include "library.h"
 #include "cassandra.h"
 #include "errors.c"
+#include "logging.c"
 #include "luajit-2.1/lauxlib.h"
 #include "luajit-2.1/lua.h"
 #include "types.c"
@@ -343,11 +344,11 @@ int batch(lua_State *L)
 
 int luaopen_lucas(lua_State *L)
 {
-    cass_log_set_level(CASS_LOG_DISABLED);
     luaL_Reg reg[] = {
         {"connect", connect},
         {"query", query},
         {"batch", batch},
+        {"log_callback", log_callback},
 
         {"ascii", type_ascii},
         {"bigint", type_bigint},
