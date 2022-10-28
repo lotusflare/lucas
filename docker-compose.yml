@@ -12,4 +12,5 @@ services:
   driver:
     build:
       context: ..
-    network_mode: host
+    environment:
+      CASSANDRA_HOST: cassandra

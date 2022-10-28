@@ -1,6 +1,6 @@
 {
     "build": {
-        "dockerfile": "../Dockerfile"
+        "dockerfile": "${localWorkspaceFolder}/Dockerfile"
     },
     "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
     "workspaceFolder": "/app",
