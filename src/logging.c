@@ -12,7 +12,7 @@ void callback(const CassLogMessage *log, void *data)
     lua_call(log_context, 2, 0);
 }
 
-int log_callback(lua_State *L)
+int logger(lua_State *L)
 {
     luaL_checktype(L, 1, LUA_TFUNCTION);
     log_context = lua_newthread(L);

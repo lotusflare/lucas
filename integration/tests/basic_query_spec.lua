@@ -1,10 +1,10 @@
-require"busted.runner"()
-local pretty = require"pl.pretty"
+require("busted.runner")()
+local pretty = require("pl.pretty")
 local lucas = require("lucas")
 
 describe("query", function()
     it("basic select", function()
-        lucas.connect(os.getenv("CASSANDRA_HOST"))
+        lucas.connect("cassandra")
         local results = lucas.query("SELECT * FROM testing.data", {})
         assert.array.has(
             { {

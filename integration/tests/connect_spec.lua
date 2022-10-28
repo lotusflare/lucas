@@ -1,4 +1,4 @@
-require"busted.runner"()
+require("busted.runner")()
 local lucas = require("lucas")
 
 describe("connect", function()

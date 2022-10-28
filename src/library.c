@@ -348,7 +348,7 @@ int luaopen_lucas(lua_State *L)
         {"connect", connect},
         {"query", query},
         {"batch", batch},
-        {"log_callback", log_callback},
+        {"logger", logger},
 
         {"ascii", type_ascii},
         {"bigint", type_bigint},
@@ -380,5 +380,6 @@ int luaopen_lucas(lua_State *L)
         {NULL, NULL},
     };
     luaL_openlib(L, "lucas", reg, 0);
+    cass_log_set_level(CASS_LOG_DISABLED);
     return 1;
 }
