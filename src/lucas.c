@@ -1,4 +1,4 @@
-#include "library.h"
+#include "lucas.h"
 #include "cassandra.h"
 #include "errors.c"
 #include "logging.c"
@@ -207,6 +207,7 @@ void iterate_result(lua_State *L, CassFuture *future)
             cass_result_column_name(result, c, &col_name, &col_name_len);
             char terminated[col_name_len + 1];
             strncpy(terminated, col_name, col_name_len + 1);
+            lua_pushstring(L, terminated);
 
             const CassValue *cass_value = cass_row_get_column(row, c);
             const CassDataType *dt = cass_result_column_data_type(result, c);
@@ -217,7 +218,6 @@ void iterate_result(lua_State *L, CassFuture *future)
                 const char *value;
                 size_t length;
                 cass_value_get_string(cass_value, &value, &length);
-                lua_pushstring(L, terminated);
                 lua_pushstring(L, value);
             }
             else if (vt == CASS_VALUE_TYPE_UUID || vt == CASS_VALUE_TYPE_TIMEUUID)
@@ -226,33 +226,34 @@ void iterate_result(lua_State *L, CassFuture *future)
                 char uuid_str_val[CASS_UUID_STRING_LENGTH];
                 cass_value_get_uuid(cass_value, &uuid_val);
                 cass_uuid_string(uuid_val, uuid_str_val);
-                lua_pushstring(L, terminated);
                 lua_pushstring(L, uuid_str_val);
             }
             else if (vt == CASS_VALUE_TYPE_INT)
             {
                 cass_int32_t value;
                 cass_value_get_int32(cass_value, &value);
-                lua_pushstring(L, terminated);
                 lua_pushinteger(L, value);
             }
             else if (vt == CASS_VALUE_TYPE_BOOLEAN)
             {
                 cass_bool_t value;
                 cass_value_get_bool(cass_value, &value);
-                lua_pushstring(L, terminated);
                 lua_pushboolean(L, value);
+            }
+            else if (vt == CASS_VALUE_TYPE_FLOAT)
+            {
+                cass_float_t value;
+                cass_value_get_float(cass_value, &value);
+                lua_pushnumber(L, value);
             }
             else if (vt == CASS_VALUE_TYPE_DOUBLE)
             {
                 cass_double_t value;
                 cass_value_get_double(cass_value, &value);
-                lua_pushstring(L, terminated);
                 lua_pushnumber(L, value);
             }
             else
             {
-                lua_pushstring(L, terminated);
                 lua_pushnil(L);
             }
             lua_settable(L, sub_table);
@@ -338,6 +339,8 @@ int batch(lua_State *L)
     {
         errorf_cass_future_to_lua(L, future, "executing batch query failed");
     }
+
+    // cass_future_free(future);
 
     return 0;
 }
