@@ -1,7 +1,6 @@
 local lucas = require("lucas")
 local clock = os.clock
-local pretty
-require("pl.pretty")
+local pretty = require("pl.pretty")
 
 lucas.log_callback(function(message, level)
     if level >= 5 then
