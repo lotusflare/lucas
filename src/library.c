@@ -342,12 +342,6 @@ int batch(lua_State *L)
     return 0;
 }
 
-void bail(lua_State *L, char *msg)
-{
-    fprintf(stderr, "\nFATAL ERROR:\n  %s: %s\n\n", msg, lua_tostring(L, -1));
-    exit(1);
-}
-
 int luaopen_lucas(lua_State *L)
 {
     luaL_Reg reg[] = {

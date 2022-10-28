@@ -5,7 +5,7 @@
     "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
     "workspaceFolder": "/app",
     "runArgs": [
-        "--network=host"
+        "--network=lucas_default"
     ],
     "customizations": {
         "vscode": {
