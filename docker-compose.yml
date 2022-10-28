@@ -11,6 +11,6 @@ services:
 
   driver:
     build:
-      context: ..
+      context: .
     environment:
       CASSANDRA_HOST: cassandra
