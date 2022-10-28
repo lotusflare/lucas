@@ -3,7 +3,7 @@ local lucas = require("lucas")
 
 describe("batch", function()
     it("insert", function()
-        local err = lucas.connect("127.0.0.1")
+        local err = lucas.connect(os.getenv("CASSANDRA_HOST"))
 
         lucas.batch(
             "INSERT INTO testing.data (operator_name, id, id_type, asset_id, asset_type, approval_status) VALUES (?, ?, ?, ?, ?, ?)",

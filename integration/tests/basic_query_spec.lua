@@ -40,7 +40,7 @@ describe("query", function()
     end)
 
     it("select with named parameters", function()
-        lucas.connect("127.0.0.1")
+        lucas.connect(os.getenv("CASSANDRA_HOST"))
         local results =
             lucas.query(
                 "SELECT * FROM testing.data WHERE asset_type = :asset_id ALLOW FILTERING",

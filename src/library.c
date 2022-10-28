@@ -1,6 +1,7 @@
 #include "library.h"
 #include "cassandra.h"
 #include "errors.c"
+#include "logging.c"
 #include "luajit-2.1/lauxlib.h"
 #include "luajit-2.1/lua.h"
 #include "types.c"
@@ -10,8 +11,6 @@
 
 CassSession *session;
 CassCluster *cluster;
-
-static lua_State *log_context = NULL;
 
 const int QUERY_POSITION = 1;
 const int PARAMETERS_POSITION = 2;
@@ -347,31 +346,6 @@ void bail(lua_State *L, char *msg)
 {
     fprintf(stderr, "\nFATAL ERROR:\n  %s: %s\n\n", msg, lua_tostring(L, -1));
     exit(1);
-}
-
-struct context
-{
-    int reference;
-    lua_State *state;
-};
-
-void callback(const CassLogMessage *log, void *data)
-{
-    lua_pushvalue(log_context, 1);
-    lua_pushstring(log_context, log->message);
-    lua_pushinteger(log_context, log->severity);
-    lua_call(log_context, 2, 0);
-}
-
-int log_callback(lua_State *L)
-{
-    luaL_checktype(L, 1, LUA_TFUNCTION);
-    log_context = lua_newthread(L);
-    luaL_ref(L, LUA_REGISTRYINDEX);
-    lua_xmove(L, log_context, 1);
-    cass_log_set_callback(callback, NULL);
-    cass_log_set_level(CASS_LOG_DEBUG);
-    return 0;
 }
 
 int luaopen_lucas(lua_State *L)

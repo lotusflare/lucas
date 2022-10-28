@@ -3,7 +3,7 @@ CREATE KEYSPACE IF NOT EXISTS testing WITH replication = {
     'replication_factor': 1
 };
 
-CREATE TABLE testing.data(
+CREATE TABLE IF NOT EXISTS testing.data(
     operator_name text,
     id text,
     id_type int,
