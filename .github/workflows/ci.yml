@@ -4,7 +4,6 @@ on: [push]
 
 jobs:
   test:
-    name: test
     runs-on: ubuntu-22.04
     env:
       DOCKER_BUILDKIT: "1"
@@ -14,13 +13,11 @@ jobs:
           submodules: true
 
       - name: Bring up environment
-        working-directory: integration
         run: |
           docker compose build
           docker compose up cassandra --wait
-          cat init.cql | docker compose exec -T cassandra cqlsh
+          cat integration/init.cql | docker compose exec -T cassandra cqlsh
 
       - name: Integration tests
-        working-directory: integration
         run: |
           docker compose run driver busted --output=TAP .
