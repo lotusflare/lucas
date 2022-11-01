@@ -1,8 +1,7 @@
 #include "cassandra.h"
 #include "luajit-2.1/lauxlib.h"
 #include "luajit-2.1/lua.h"
-
-static lua_State *log_context = NULL;
+#include "state.c"
 
 void callback(const CassLogMessage *log, void *data)
 {
@@ -21,4 +20,98 @@ int logger(lua_State *L)
     cass_log_set_callback(callback, NULL);
     cass_log_set_level(CASS_LOG_DEBUG);
     return 0;
+}
+
+int metrics(lua_State *L)
+{
+    CassMetrics metrics;
+    cass_session_get_metrics(session, &metrics);
+    lua_newtable(L);
+    int main_table = lua_gettop(L);
+
+    // stats subtable
+    lua_pushstring(L, "stats");
+    lua_newtable(L);
+    int stats_table = lua_gettop(L);
+    lua_pushstring(L, "total_connections");
+    lua_pushnumber(L, metrics.stats.total_connections);
+    lua_settable(L, stats_table);
+    lua_pushstring(L, "available_connections");
+    lua_pushnumber(L, metrics.stats.available_connections);
+    lua_settable(L, stats_table);
+    lua_pushstring(L, "exceeded_pending_requests_water_mark");
+    lua_pushnumber(L, metrics.stats.exceeded_pending_requests_water_mark);
+    lua_settable(L, stats_table);
+    lua_pushstring(L, "exceeded_write_bytes_water_mark");
+    lua_pushnumber(L, metrics.stats.exceeded_write_bytes_water_mark);
+    lua_settable(L, stats_table);
+    lua_settable(L, main_table);
+
+    // requests subtable
+    lua_pushstring(L, "requests");
+    lua_newtable(L);
+    int requests_table = lua_gettop(L);
+    lua_pushstring(L, "stddev");
+    lua_pushnumber(L, metrics.requests.stddev);
+    lua_settable(L, requests_table);
+    lua_pushstring(L, "fifteen_minute_rate");
+    lua_pushnumber(L, metrics.requests.fifteen_minute_rate);
+    lua_settable(L, requests_table);
+    lua_pushstring(L, "five_minute_rate");
+    lua_pushnumber(L, metrics.requests.five_minute_rate);
+    lua_settable(L, requests_table);
+    lua_pushstring(L, "one_minute_rate");
+    lua_pushnumber(L, metrics.requests.one_minute_rate);
+    lua_settable(L, requests_table);
+    lua_pushstring(L, "mean_rate");
+    lua_pushnumber(L, metrics.requests.mean_rate);
+    lua_settable(L, requests_table);
+    lua_pushstring(L, "max");
+    lua_pushnumber(L, metrics.requests.max);
+    lua_settable(L, requests_table);
+    lua_pushstring(L, "mean");
+    lua_pushnumber(L, metrics.requests.mean);
+    lua_settable(L, requests_table);
+    lua_pushstring(L, "mean_rate");
+    lua_pushnumber(L, metrics.requests.mean_rate);
+    lua_settable(L, requests_table);
+    lua_pushstring(L, "min");
+    lua_pushnumber(L, metrics.requests.min);
+    lua_settable(L, requests_table);
+    lua_pushstring(L, "median");
+    lua_pushnumber(L, metrics.requests.median);
+    lua_settable(L, requests_table);
+    lua_pushstring(L, "percentile_75th");
+    lua_pushnumber(L, metrics.requests.percentile_75th);
+    lua_settable(L, requests_table);
+    lua_pushstring(L, "percentile_95th");
+    lua_pushnumber(L, metrics.requests.percentile_95th);
+    lua_settable(L, requests_table);
+    lua_pushstring(L, "percentile_98th");
+    lua_pushnumber(L, metrics.requests.percentile_98th);
+    lua_settable(L, requests_table);
+    lua_pushstring(L, "percentile_999th");
+    lua_pushnumber(L, metrics.requests.percentile_999th);
+    lua_settable(L, requests_table);
+    lua_pushstring(L, "percentile_99th");
+    lua_pushnumber(L, metrics.requests.percentile_99th);
+    lua_settable(L, requests_table);
+    lua_settable(L, main_table);
+
+    // errors subtable
+    lua_pushstring(L, "errors");
+    lua_newtable(L);
+    int errors_table = lua_gettop(L);
+    lua_pushstring(L, "connection_timeouts");
+    lua_pushnumber(L, metrics.errors.connection_timeouts);
+    lua_settable(L, errors_table);
+    lua_pushstring(L, "pending_request_timeouts");
+    lua_pushnumber(L, metrics.errors.pending_request_timeouts);
+    lua_settable(L, errors_table);
+    lua_pushstring(L, "request_timeouts");
+    lua_pushnumber(L, metrics.errors.request_timeouts);
+    lua_settable(L, errors_table);
+    lua_settable(L, main_table);
+
+    return 1;
 }
