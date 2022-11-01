@@ -12,12 +12,5 @@ jobs:
         with:
           submodules: true
 
-      - name: Bring up environment
-        run: |
-          docker compose build
-          docker compose up cassandra --wait
-          cat integration/init.cql | docker compose exec -T cassandra cqlsh
-
       - name: Integration tests
-        run: |
-          docker compose run driver busted
+        run: ./test-all.sh
