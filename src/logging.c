@@ -22,6 +22,50 @@ int logger(lua_State *L)
     return 0;
 }
 
+int speculative_execution_metrics(lua_State *L)
+{
+    CassSpeculativeExecutionMetrics metrics;
+    cass_session_get_speculative_execution_metrics(session, &metrics);
+    lua_newtable(L);
+    int table = lua_gettop(L);
+
+    lua_pushstring(L, "count");
+    lua_pushnumber(L, metrics.count);
+    lua_settable(L, table);
+    lua_pushstring(L, "max");
+    lua_pushnumber(L, metrics.max);
+    lua_settable(L, table);
+    lua_pushstring(L, "mean");
+    lua_pushnumber(L, metrics.mean);
+    lua_settable(L, table);
+    lua_pushstring(L, "median");
+    lua_pushnumber(L, metrics.median);
+    lua_settable(L, table);
+    lua_pushstring(L, "min");
+    lua_pushnumber(L, metrics.min);
+    lua_settable(L, table);
+    lua_pushstring(L, "percentage");
+    lua_pushnumber(L, metrics.percentage);
+    lua_settable(L, table);
+    lua_pushstring(L, "percentile_75th");
+    lua_pushnumber(L, metrics.percentile_75th);
+    lua_settable(L, table);
+    lua_pushstring(L, "percentile_95th");
+    lua_pushnumber(L, metrics.percentile_95th);
+    lua_settable(L, table);
+    lua_pushstring(L, "percentile_98th");
+    lua_pushnumber(L, metrics.percentile_98th);
+    lua_settable(L, table);
+    lua_pushstring(L, "percentile_99th");
+    lua_pushnumber(L, metrics.percentile_99th);
+    lua_settable(L, table);
+    lua_pushstring(L, "percentile_999th");
+    lua_pushnumber(L, metrics.percentile_999th);
+    lua_settable(L, table);
+
+    return 1;
+}
+
 int metrics(lua_State *L)
 {
     CassMetrics metrics;

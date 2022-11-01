@@ -28,7 +28,7 @@ describe("logging", function()
 end)
 
 describe("metrics", function()
-    it("collects stats", function ()
+    it("collects stats", function()
         lucas.connect(os.getenv("CASSANDRA_HOST"))
         local metrics = lucas.metrics()
     end)

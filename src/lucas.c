@@ -45,6 +45,7 @@ int luaopen_lucas(lua_State *L)
         {"batch", batch},
         {"logger", logger},
         {"metrics", metrics},
+        {"speculative_execution_metrics", speculative_execution_metrics},
 
         {"ascii", type_ascii},
         {"bigint", type_bigint},

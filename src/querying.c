@@ -3,6 +3,7 @@
 #include "state.c"
 #include <luajit-2.1/lauxlib.h>
 #include <luajit-2.1/lua.h>
+#include <string.h>
 
 const int QUERY_POSITION = 1;
 const int PARAMETERS_POSITION = 2;
