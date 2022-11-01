@@ -1,0 +1,7 @@
+return {
+  default = {
+    ROOT = { "integration/tests" },
+    output = "TAP",
+     coverage = false
+  }
+}

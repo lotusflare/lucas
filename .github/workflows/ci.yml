@@ -20,4 +20,4 @@ jobs:
 
       - name: Integration tests
         run: |
-          docker compose run driver busted --output=TAP .
+          docker compose run driver busted

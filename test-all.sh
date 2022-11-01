@@ -3,11 +3,6 @@
 clean=false
 
 clean() {
-    remove_containers
-    # popd > /dev/null
-}
-
-remove_containers() {
     if $clean; then
         docker compose rm -fs
     fi
@@ -23,14 +18,13 @@ parse_flags() {
 }
 
 run() {
-    remove_containers
+    clean
     docker compose build
     docker compose up cassandra --wait
-    cat integration/init.cql | docker compose exec -T cassandra cqlsh
-    docker compose run driver busted --output=TAP .
+    find integration -name *.cql | xargs cat | docker compose exec -T cassandra cqlsh
+    docker compose run driver busted
 }
 
-trap clean EXIT
-# pushd integration > /dev/null
 parse_flags "$@"
+
 run
