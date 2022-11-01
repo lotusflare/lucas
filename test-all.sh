@@ -21,7 +21,7 @@ run() {
     clean
     docker compose build
     docker compose up cassandra --wait
-    find integration -name *.cql | xargs cat | docker compose exec -T cassandra cqlsh
+    find integration -name '*.cql' | xargs cat | docker compose exec -T cassandra cqlsh
     docker compose run driver busted
 }
 

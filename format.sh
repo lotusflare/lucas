@@ -12,13 +12,13 @@ parse_flags() {
 }
 
 fix() {
-    find src include -iname *.h -o -iname *.c | xargs clang-format --verbose -i
-    find integration -iname *.lua | xargs prettier -w
+    find src include -name '*.h' -o -name '*.c' | xargs clang-format --verbose -i
+    find integration -name '*.lua' | xargs prettier -w
 }
 
 check() {
-    find src include -iname *.h -o -iname *.c | xargs clang-format --verbose -n
-    find integration -iname *.lua | xargs prettier -c
+    find src include -name '*.h' -o -name '*.c' | xargs clang-format --verbose -n
+    find integration -name '*.lua' | xargs prettier -c
 }
 
 parse_flags "$@"
