@@ -9,7 +9,7 @@ typedef struct Metric
     lua_Number value;
 } Metric;
 
-void push_metrics(lua_State *L, int index, Metric items[], int length)
+void push_metrics(lua_State *L, int index, Metric items[], unsigned long length)
 {
     for (int i = 0; i < length; i++)
     {
@@ -25,8 +25,8 @@ int speculative_execution_metrics(lua_State *L)
     cass_session_get_speculative_execution_metrics(session, &metrics);
 
     lua_newtable(L);
-    int table = lua_gettop(L);
-    Metric items[] = {
+    int spec_table = lua_gettop(L);
+    Metric spec_metrics[] = {
         {"count", metrics.count},
         {"max", metrics.max},
         {"mean", metrics.mean},
@@ -39,7 +39,7 @@ int speculative_execution_metrics(lua_State *L)
         {"percentile_99th", metrics.percentile_99th},
         {"percentile_999th", metrics.percentile_999th},
     };
-    push_metrics(L, table, items, sizeof(items) / sizeof(Metric));
+    push_metrics(L, spec_table, spec_metrics, sizeof(spec_metrics) / sizeof(Metric));
 
     return 1;
 }
@@ -55,20 +55,20 @@ int metrics(lua_State *L)
     lua_pushstring(L, "stats");
     lua_newtable(L);
     int stats_table = lua_gettop(L);
-    Metric stats_items[] = {
+    Metric stats_metrics[] = {
         {"total_connections", metrics.stats.total_connections},
         {"available_connections", metrics.stats.available_connections},
         {"exceeded_pending_requests_water_mark", metrics.stats.exceeded_pending_requests_water_mark},
         {"exceeded_write_bytes_water_mark", metrics.stats.exceeded_write_bytes_water_mark},
     };
-    push_metrics(L, stats_table, stats_items, sizeof(stats_items) / sizeof(Metric));
+    push_metrics(L, stats_table, stats_metrics, sizeof(stats_metrics) / sizeof(Metric));
     lua_settable(L, main_table);
 
     // requests subtable
     lua_pushstring(L, "requests");
     lua_newtable(L);
     int requests_table = lua_gettop(L);
-    Metric requests_items[] = {
+    Metric requests_metrics[] = {
         {"stddev", metrics.requests.stddev},
         {"fifteen_minute_rate", metrics.requests.fifteen_minute_rate},
         {"five_minute_rate", metrics.requests.five_minute_rate},
@@ -85,19 +85,19 @@ int metrics(lua_State *L)
         {"percentile_999th", metrics.requests.percentile_999th},
         {"percentile_99th", metrics.requests.percentile_99th},
     };
-    push_metrics(L, requests_table, requests_items, sizeof(requests_items) / sizeof(Metric));
+    push_metrics(L, requests_table, requests_metrics, sizeof(requests_metrics) / sizeof(Metric));
     lua_settable(L, main_table);
 
     // errors subtable
     lua_pushstring(L, "errors");
     lua_newtable(L);
     int errors_table = lua_gettop(L);
-    Metric errors_items[] = {
+    Metric errors_metrics[] = {
         {"connection_timeouts", metrics.errors.connection_timeouts},
         {"pending_request_timeouts", metrics.errors.pending_request_timeouts},
         {"request_timeouts", metrics.errors.request_timeouts},
     };
-    push_metrics(L, errors_table, errors_items, sizeof(errors_items) / sizeof(Metric));
+    push_metrics(L, errors_table, errors_metrics, sizeof(errors_metrics) / sizeof(Metric));
     lua_settable(L, main_table);
 
     return 1;
