@@ -11,16 +11,17 @@ parse_flags() {
     done
 }
 
-fix() {
-    find src include -iname *.h -o -iname *.c | xargs clang-format --verbose -i
-    find integration -iname *.lua | xargs prettier -w
-}
-
-check() {
-    find src include -iname *.h -o -iname *.c | xargs clang-format --verbose -n
-    find integration -iname *.lua | xargs prettier -c
+format() {
+    if $fix; then
+        prettier_args='-w'
+        clang_args='-i'
+    else
+        prettier_args='-c'
+        clang_args='-n'
+    fi
+    find src include -name '*.h' -o -name '*.c' | xargs clang-format --verbose "$clang_args"
+    find integration -name '*.lua' | xargs prettier "$prettier_args"
 }
 
 parse_flags "$@"
-
-$fix && fix || check
+format
