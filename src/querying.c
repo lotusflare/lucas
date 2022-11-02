@@ -189,7 +189,7 @@ void iterate_result(lua_State *L, CassFuture *future)
                 char value_as_string[CASS_UUID_STRING_LENGTH];
                 cass_value_get_uuid(cass_value, &value);
                 cass_uuid_string(value, value_as_string);
-                lua_pushlstring(L, value_as_string, CASS_UUID_STRING_LENGTH);
+                lua_pushstring(L, value_as_string);
             }
             else if (vt == CASS_VALUE_TYPE_INT)
             {
