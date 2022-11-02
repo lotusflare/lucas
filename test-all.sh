@@ -26,5 +26,4 @@ run() {
 }
 
 parse_flags "$@"
-
 run
