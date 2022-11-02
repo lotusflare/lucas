@@ -20,7 +20,7 @@ parse_flags() {
 run() {
     clean
     docker compose build
-    docker compose up cassandra --wait
+    docker compose up cassandra --wait --quiet-pull
     find integration -name '*.cql' | sort | xargs cat | docker compose exec -T cassandra cqlsh
     docker compose run driver busted
 }
