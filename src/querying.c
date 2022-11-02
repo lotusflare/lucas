@@ -127,7 +127,6 @@ void create_statement(lua_State *L, int index, CassStatement *statement)
         const int type_index = lua_gettop(L) - 1;
         const int value_index = lua_gettop(L);
         const CassValueType type = lua_tointeger(L, type_index);
-        const char *value = lua_tostring(L, value_index);
 
         if (table_key_type == LUA_TSTRING)
         {
@@ -182,15 +181,15 @@ void iterate_result(lua_State *L, CassFuture *future)
                 const char *value;
                 size_t length;
                 cass_value_get_string(cass_value, &value, &length);
-                lua_pushstring(L, value);
+                lua_pushlstring(L, value, length);
             }
             else if (vt == CASS_VALUE_TYPE_UUID || vt == CASS_VALUE_TYPE_TIMEUUID)
             {
-                CassUuid uuid_val;
-                char uuid_str_val[CASS_UUID_STRING_LENGTH];
-                cass_value_get_uuid(cass_value, &uuid_val);
-                cass_uuid_string(uuid_val, uuid_str_val);
-                lua_pushstring(L, uuid_str_val);
+                CassUuid value;
+                char value_as_string[CASS_UUID_STRING_LENGTH];
+                cass_value_get_uuid(cass_value, &value);
+                cass_uuid_string(value, value_as_string);
+                lua_pushlstring(L, value_as_string, CASS_UUID_STRING_LENGTH);
             }
             else if (vt == CASS_VALUE_TYPE_INT)
             {

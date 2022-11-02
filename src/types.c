@@ -69,6 +69,22 @@ static int type_boolean(lua_State *L)
     return 1;
 }
 
+static int type_null(lua_State *L)
+{
+    lua_newtable(L);
+    int table = lua_gettop(L);
+
+    lua_pushinteger(L, 1);
+    lua_pushinteger(L, CASS_VALUE_TYPE_UNKNOWN);
+    lua_settable(L, table);
+
+    lua_pushinteger(L, 2);
+    lua_pushnil(L);
+    lua_settable(L, table);
+
+    return 1;
+}
+
 static int type_ascii(lua_State *L)
 {
     return string_helper(L, CASS_VALUE_TYPE_ASCII);

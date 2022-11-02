@@ -1,4 +1,3 @@
-#include "lucas.h"
 #include "cassandra.h"
 #include "errors.c"
 #include "logging.c"
@@ -73,6 +72,7 @@ int luaopen_lucas(lua_State *L)
         {"set", type_set},
         {"udt", type_udt},
         {"tuple", type_tuple},
+        {"null", type_null},
 
         {NULL, NULL},
     };
