@@ -1,6 +1,7 @@
 #include "cassandra.h"
 #include "errors.c"
 #include "state.c"
+#include "types.c"
 #include <luajit-2.1/lauxlib.h>
 #include <luajit-2.1/lua.h>
 #include <string.h>
@@ -51,6 +52,14 @@ void bind_positional_parameter(lua_State *L, int i, CassStatement *statement, Ca
     {
         err = cass_statement_bind_string(statement, i, lua_tostring(L, index));
     }
+    else if (type == CASS_VALUE_TYPE_NULL)
+    {
+        err = cass_statement_bind_null(statement, i);
+    }
+    else if (type == CASS_VALUE_TYPE_UNSET)
+    {
+        return;
+    }
     else
     {
         errorf_to_lua(L, "invalid type %d for parameter %d", type, i);
@@ -99,6 +108,14 @@ void bind_named_parameter(lua_State *L, const char *name, CassStatement *stateme
     else if (type == CASS_VALUE_TYPE_ASCII || type == CASS_VALUE_TYPE_TEXT || type == CASS_VALUE_TYPE_VARCHAR)
     {
         err = cass_statement_bind_string_by_name(statement, name, lua_tostring(L, index));
+    }
+    else if (type == CASS_VALUE_TYPE_NULL)
+    {
+        err = cass_statement_bind_null_by_name(statement, name);
+    }
+    else if (type == CASS_VALUE_TYPE_UNSET)
+    {
+        return;
     }
     else
     {
@@ -174,7 +191,11 @@ void iterate_result(lua_State *L, CassFuture *future)
             const CassDataType *dt = cass_result_column_data_type(result, c);
             const CassValueType vt = cass_data_type_type(dt);
 
-            if (vt == CASS_VALUE_TYPE_ASCII || vt == CASS_VALUE_TYPE_TEXT || vt == CASS_VALUE_TYPE_VARCHAR)
+            if (vt == CASS_VALUE_TYPE_NULL || vt == CASS_VALUE_TYPE_UNSET)
+            {
+                lua_pushnil(L);
+            }
+            else if (vt == CASS_VALUE_TYPE_ASCII || vt == CASS_VALUE_TYPE_TEXT || vt == CASS_VALUE_TYPE_VARCHAR)
             {
                 const char *value;
                 size_t length;
@@ -189,10 +210,28 @@ void iterate_result(lua_State *L, CassFuture *future)
                 cass_uuid_string(value, value_as_string);
                 lua_pushstring(L, value_as_string);
             }
+            else if (vt == CASS_VALUE_TYPE_TINY_INT)
+            {
+                cass_int8_t value;
+                cass_value_get_int8(cass_value, &value);
+                lua_pushinteger(L, value);
+            }
+            else if (vt == CASS_VALUE_TYPE_SMALL_INT)
+            {
+                cass_int16_t value;
+                cass_value_get_int16(cass_value, &value);
+                lua_pushinteger(L, value);
+            }
             else if (vt == CASS_VALUE_TYPE_INT)
             {
                 cass_int32_t value;
                 cass_value_get_int32(cass_value, &value);
+                lua_pushinteger(L, value);
+            }
+            else if (vt == CASS_VALUE_TYPE_BIGINT)
+            {
+                cass_int64_t value;
+                cass_value_get_int64(cass_value, &value);
                 lua_pushinteger(L, value);
             }
             else if (vt == CASS_VALUE_TYPE_BOOLEAN)
