@@ -36,7 +36,7 @@ void bind_positional_parameter(lua_State *L, int i, CassStatement *statement, Ca
     {
         err = cass_statement_bind_int32(statement, i, lua_tointeger(L, index));
     }
-    else if (type == CASS_VALUE_TYPE_BIGINT)
+    else if (type == CASS_VALUE_TYPE_BIGINT || type == CASS_VALUE_TYPE_TIMESTAMP)
     {
         err = cass_statement_bind_int64(statement, i, lua_tointeger(L, index));
     }
@@ -93,7 +93,7 @@ void bind_named_parameter(lua_State *L, const char *name, CassStatement *stateme
     {
         err = cass_statement_bind_int32_by_name(statement, name, lua_tointeger(L, index));
     }
-    else if (type == CASS_VALUE_TYPE_BIGINT)
+    else if (type == CASS_VALUE_TYPE_BIGINT || type == CASS_VALUE_TYPE_TIMESTAMP)
     {
         err = cass_statement_bind_int64_by_name(statement, name, lua_tointeger(L, index));
     }
