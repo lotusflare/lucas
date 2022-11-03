@@ -15,6 +15,7 @@ static int connect(lua_State *L)
     CassError err;
     session = cass_session_new();
     cluster = cass_cluster_new();
+    // cass_cluster_set_port(cluster, 9043);
     err = cass_cluster_set_contact_points(cluster, contact_points);
     if (err != CASS_OK)
     {

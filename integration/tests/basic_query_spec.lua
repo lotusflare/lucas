@@ -58,4 +58,38 @@ describe("query", function()
             results
         )
     end)
+
+    it("select map", function()
+    lucas.connect(os.getenv("CASSANDRA_HOST"))
+        local results =
+            lucas.query(
+                "SELECT misc FROM testing.data WHERE asset_type = :asset_id ALLOW FILTERING",
+                { asset_id = lucas.int(1) }
+            )
+        assert.are.same(
+            { {
+                misc = {
+                    car = 'Honda',
+                    fruit = 'apple'
+                }
+            } },
+            results
+        )
+    end)
+
+    it("select list", function()
+        local results =
+            lucas.query(
+                "SELECT list FROM testing.data WHERE asset_type = :asset_id ALLOW FILTERING",
+                { asset_id = lucas.int(1) }
+            )
+        assert.are.same(
+            { {
+                list = {
+                    1,2,3
+                }
+            } },
+            results
+        )
+    end)
 end)

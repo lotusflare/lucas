@@ -168,9 +168,7 @@ void iterate_result(lua_State *L, CassFuture *future)
             const char *col_name;
             size_t col_name_len;
             cass_result_column_name(result, c, &col_name, &col_name_len);
-            char terminated[col_name_len + 1];
-            strncpy(terminated, col_name, col_name_len + 1);
-            lua_pushstring(L, terminated);
+            lua_pushlstring(L, col_name, col_name_len);
 
             const CassValue *cass_value = cass_row_get_column(row, c);
             const CassDataType *dt = cass_result_column_data_type(result, c);
@@ -214,6 +212,55 @@ void iterate_result(lua_State *L, CassFuture *future)
                 cass_double_t value;
                 cass_value_get_double(cass_value, &value);
                 lua_pushnumber(L, value);
+            }
+            else if (vt == CASS_VALUE_TYPE_MAP)
+            {
+                CassIterator *map_iterator = cass_iterator_from_map(cass_value);
+                if (map_iterator != NULL)
+                {
+                    lua_newtable(L);
+                    int map_table = lua_gettop(L);
+                    while (cass_iterator_next(map_iterator))
+                    {
+                        const char *key;
+                        size_t key_length;
+                        cass_value_get_string(cass_iterator_get_map_key(map_iterator), &key, &key_length);
+                        const char *value;
+                        size_t value_length;
+                        cass_value_get_string(cass_iterator_get_map_value(map_iterator), &value, &value_length);
+                        lua_pushlstring(L, key, key_length);
+                        lua_pushlstring(L, value, value_length);
+                        lua_settable(L, map_table);
+                    }
+                }
+                else
+                {
+                    lua_pushnil(L);
+                }
+                cass_iterator_free(map_iterator);
+            }
+            else if (vt == CASS_VALUE_TYPE_LIST || vt == CASS_VALUE_TYPE_SET)
+            {
+                CassIterator *list_iterator = cass_iterator_from_collection(cass_value);
+                printf("about to iterate list\n");
+                if (list_iterator != NULL)
+                {
+                    lua_newtable(L);
+                    int list_table = lua_gettop(L);
+                    for (int i = 1; cass_iterator_next(list_iterator); i++)
+                    {
+                        printf("iterating list\n");
+                        int value;
+                        cass_value_get_int32(cass_iterator_get_value(list_iterator), &value);
+                        lua_pushnumber(L, value);
+                        lua_rawseti(L, list_table, i);
+                    }
+                    cass_iterator_free(list_iterator);
+                }
+                else
+                {
+                    lua_pushnil(L);
+                }
             }
             else
             {
