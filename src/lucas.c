@@ -74,6 +74,7 @@ int luaopen_lucas(lua_State *L)
         {"udt", type_udt},
         {"tuple", type_tuple},
         {"null", type_null},
+        {"unset", type_unset},
 
         {NULL, NULL},
     };

@@ -24,6 +24,10 @@ void bind_positional_parameter(lua_State *L, int i, CassStatement *statement, Ca
         err = cass_uuid_from_string(lua_tostring(L, index), &uuid);
         cass_statement_bind_uuid(statement, i, uuid);
     }
+    else if (type == CASS_VALUE_TYPE_BOOLEAN)
+    {
+        cass_statement_bind_bool(statement, i, lua_toboolean(L, index));
+    }
     else if (type == CASS_VALUE_TYPE_TINY_INT)
     {
         err = cass_statement_bind_int8(statement, i, lua_tointeger(L, index));
@@ -80,6 +84,10 @@ void bind_named_parameter(lua_State *L, const char *name, CassStatement *stateme
         CassUuid uuid;
         err = cass_uuid_from_string(lua_tostring(L, index), &uuid);
         cass_statement_bind_uuid_by_name(statement, name, uuid);
+    }
+    else if (type == CASS_VALUE_TYPE_BOOLEAN)
+    {
+        cass_statement_bind_bool_by_name(statement, name, lua_toboolean(L, index));
     }
     else if (type == CASS_VALUE_TYPE_TINY_INT)
     {
