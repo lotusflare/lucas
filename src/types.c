@@ -1,6 +1,11 @@
+#pragma once
+
 #include "errors.c"
 #include "luajit-2.1/lua.h"
 #include <cassandra.h>
+
+const int CASS_VALUE_TYPE_NULL = -1;
+const int CASS_VALUE_TYPE_UNSET = -2;
 
 int string_helper(lua_State *L, CassValueType cass_type)
 {
@@ -8,13 +13,11 @@ int string_helper(lua_State *L, CassValueType cass_type)
     lua_newtable(L);
     int table = lua_gettop(L);
 
-    lua_pushinteger(L, 1);
     lua_pushinteger(L, cass_type);
-    lua_settable(L, table);
+    lua_rawseti(L, table, 1);
 
-    lua_pushinteger(L, 2);
     lua_pushstring(L, value);
-    lua_settable(L, table);
+    lua_rawseti(L, table, 2);
 
     return 1;
 }
@@ -25,13 +28,11 @@ int integer_helper(lua_State *L, CassValueType cass_type)
     lua_newtable(L);
     int table = lua_gettop(L);
 
-    lua_pushinteger(L, 1);
     lua_pushinteger(L, cass_type);
-    lua_settable(L, table);
+    lua_rawseti(L, table, 1);
 
-    lua_pushinteger(L, 2);
     lua_pushinteger(L, value);
-    lua_settable(L, table);
+    lua_rawseti(L, table, 2);
 
     return 1;
 }
@@ -42,13 +43,11 @@ int number_helper(lua_State *L, CassValueType cass_type)
     lua_newtable(L);
     int table = lua_gettop(L);
 
-    lua_pushinteger(L, 1);
     lua_pushinteger(L, cass_type);
-    lua_settable(L, table);
+    lua_rawseti(L, table, 1);
 
-    lua_pushinteger(L, 2);
     lua_pushnumber(L, value);
-    lua_settable(L, table);
+    lua_rawseti(L, table, 2);
 
     return 1;
 }
@@ -58,13 +57,11 @@ static int type_boolean(lua_State *L)
     lua_newtable(L);
     int table = lua_gettop(L);
 
-    lua_pushinteger(L, 1);
     lua_pushinteger(L, CASS_VALUE_TYPE_BOOLEAN);
-    lua_settable(L, table);
+    lua_rawseti(L, table, 1);
 
-    lua_pushinteger(L, 2);
     lua_pushboolean(L, lua_toboolean(L, 1));
-    lua_settable(L, table);
+    lua_rawseti(L, table, 2);
 
     return 1;
 }
@@ -74,13 +71,19 @@ static int type_null(lua_State *L)
     lua_newtable(L);
     int table = lua_gettop(L);
 
-    lua_pushinteger(L, 1);
-    lua_pushinteger(L, CASS_VALUE_TYPE_UNKNOWN);
-    lua_settable(L, table);
+    lua_pushinteger(L, CASS_VALUE_TYPE_NULL);
+    lua_rawseti(L, table, 1);
 
-    lua_pushinteger(L, 2);
-    lua_pushnil(L);
-    lua_settable(L, table);
+    return 1;
+}
+
+static int type_unset(lua_State *L)
+{
+    lua_newtable(L);
+    int table = lua_gettop(L);
+
+    lua_pushinteger(L, CASS_VALUE_TYPE_UNSET);
+    lua_rawseti(L, table, 1);
 
     return 1;
 }

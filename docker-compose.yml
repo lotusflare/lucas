@@ -5,8 +5,8 @@ services:
     image: cassandra:4.0
     environment:
       CASSANDRA_LISTEN_ADDRESS: cassandra
-    # ports:
-    #   - "9042:9042"
+    ports:
+      - "9042:9042"
     healthcheck:
       test: ["CMD", "nodetool", "status"]
       timeout: 2m
