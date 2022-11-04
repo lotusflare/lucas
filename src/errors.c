@@ -29,6 +29,7 @@ void errorf_cass_to_lua(lua_State *L, CassError err, const char *fmt, ...)
 
     char append[snprintf(NULL, 0, fmt, args1)];
     vsprintf(append, fmt, args2);
+
     const char *desc = cass_error_desc(err);
     errorf_to_lua(L, "%s: %s", append, desc);
 
@@ -48,7 +49,6 @@ void errorf_cass_future_to_lua(lua_State *L, CassFuture *future, const char *fmt
     size_t length;
     const char *desc;
     cass_future_error_message(future, &desc, &length);
-
     errorf_to_lua(L, "%s: %s", append, desc);
 
     va_end(args1);
