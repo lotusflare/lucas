@@ -26,12 +26,11 @@ test() {
 }
 
 cassandra() {
-    tty=$(tty)
-
     print_box "Waiting for Cassandra"
     docker compose up cassandra --wait --quiet-pull
 
     print_box "Seeding Cassandra"
+    tty=$(tty)
     find integration -name '*.cql' | sort | tee $tty | xargs cat | docker compose exec -T cassandra cqlsh
 }
 
