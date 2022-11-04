@@ -13,4 +13,4 @@ jobs:
           submodules: true
 
       - name: Integration tests
-        run: ./run.sh -t
+        run: ./run.sh -bt
