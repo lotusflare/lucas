@@ -14,4 +14,3 @@ WORKDIR /app
 RUN ./format.sh \
     && cmake -S . -B build \
     && cmake --build build
-
