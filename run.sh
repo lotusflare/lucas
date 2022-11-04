@@ -11,6 +11,13 @@ clean() {
     fi
 }
 
+build() {
+    if $build; then
+        print_box "Building containers"
+        docker compose build --progress=tty
+    fi
+}
+
 test() {
     if $test; then
         print_box "Running tests"
@@ -18,11 +25,14 @@ test() {
     fi
 }
 
-build() {
-    if $build; then
-        print_box "Building containers"
-        docker compose build --progress=tty
-    fi
+cassandra() {
+    tty=$(tty)
+
+    print_box "Waiting for Cassandra"
+    docker compose up cassandra --wait --quiet-pull
+
+    print_box "Seeding Cassandra"
+    find integration -name '*.cql' | sort | tee $tty | xargs cat | docker compose exec -T cassandra cqlsh
 }
 
 run_flags() {
@@ -39,10 +49,7 @@ run_flags() {
 run() {
     clean
     build
-    print_box "Waiting for Cassandra"
-    docker compose up cassandra --wait --quiet-pull
-    print_box "Seeding Cassandra"
-    find integration -name '*.cql' | sort | tee /dev/tty | xargs cat | docker compose exec -T cassandra cqlsh
+    cassandra
     test
 }
 
