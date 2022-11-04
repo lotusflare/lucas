@@ -8,10 +8,10 @@ See `integration/tests` for examples.
 
 ## Scripts
 
-`format.sh` will check the code has been formatted.
+`format.sh` checks the code has been formatted.
 - `-f` auto fixes formatting errors.
 
-`run.sh` will build and test the code.
+`run.sh` brings up the test environment.
 
 - `-c` removes existing containers first (clears database).
 - `-b` force rebuild of the containers.
