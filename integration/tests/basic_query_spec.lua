@@ -4,7 +4,7 @@ local lucas = require("lucas")
 
 describe("query", function()
     it("basic select", function()
-        lucas.connect("cassandra")
+        lucas.connect(os.getenv("CASSANDRA_HOST"))
         local results = lucas.query("SELECT * FROM testing.data", {})
         assert.array.has(
             { {
@@ -34,6 +34,11 @@ describe("query", function()
                 id = "9380816255dc45dfa1a57541db81df1d",
                 id_type = 1,
                 operator_name = "avantel",
+                list = { 1, 2, 3 },
+                misc = {
+                    car = "Honda",
+                    fruit = "apple",
+                },
             } },
             results
         )
@@ -54,40 +59,11 @@ describe("query", function()
                 id = "9380816255dc45dfa1a57541db81df1d",
                 id_type = 1,
                 operator_name = "avantel",
-            } },
-            results
-        )
-    end)
-
-    it("select map", function()
-    lucas.connect(os.getenv("CASSANDRA_HOST"))
-        local results =
-            lucas.query(
-                "SELECT misc FROM testing.data WHERE asset_type = :asset_id ALLOW FILTERING",
-                { asset_id = lucas.int(1) }
-            )
-        assert.are.same(
-            { {
+                list = { 1, 2, 3 },
                 misc = {
-                    car = 'Honda',
-                    fruit = 'apple'
-                }
-            } },
-            results
-        )
-    end)
-
-    it("select list", function()
-        local results =
-            lucas.query(
-                "SELECT list FROM testing.data WHERE asset_type = :asset_id ALLOW FILTERING",
-                { asset_id = lucas.int(1) }
-            )
-        assert.are.same(
-            { {
-                list = {
-                    1,2,3
-                }
+                    car = "Honda",
+                    fruit = "apple",
+                },
             } },
             results
         )

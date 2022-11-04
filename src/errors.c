@@ -5,45 +5,52 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-const int MAX_LENGTH = 4096;
-
-void error_to_lua(lua_State *L, const char *msg)
-{
-    lua_pushfstring(L, "error: %s\n", msg);
-    lua_error(L);
-}
-
 void errorf_to_lua(lua_State *L, const char *fmt, ...)
 {
-    char msg[MAX_LENGTH];
-    va_list args;
-    va_start(args, fmt);
-    vsprintf(msg, fmt, args);
-    va_end(args);
-    error_to_lua(L, msg);
+    va_list args1, args2;
+    va_start(args1, fmt);
+    va_copy(args2, args1);
+
+    char append[vsnprintf(NULL, 0, fmt, args1)];
+    vsprintf(append, fmt, args2);
+
+    lua_pushfstring(L, "error: %s", append);
+    lua_error(L);
+
+    va_end(args1);
+    va_end(args2);
 }
 
 void errorf_cass_to_lua(lua_State *L, CassError err, const char *fmt, ...)
 {
-    char append[MAX_LENGTH];
-    va_list args;
-    va_start(args, fmt);
-    vsprintf(append, fmt, args);
-    va_end(args);
+    va_list args1, args2;
+    va_start(args1, fmt);
+    va_copy(args2, args1);
+
+    char append[snprintf(NULL, 0, fmt, args1)];
+    vsprintf(append, fmt, args2);
     const char *desc = cass_error_desc(err);
     errorf_to_lua(L, "%s: %s", append, desc);
+
+    va_end(args1);
+    va_end(args2);
 }
 
 void errorf_cass_future_to_lua(lua_State *L, CassFuture *future, const char *fmt, ...)
 {
+    va_list args1, args2;
+    va_start(args1, fmt);
+    va_copy(args2, args1);
+
+    char append[snprintf(NULL, 0, fmt, args1)];
+    vsprintf(append, fmt, args2);
+
     size_t length;
     const char *desc;
-    char append[MAX_LENGTH];
     cass_future_error_message(future, &desc, &length);
-    sprintf(append, "%s: %s", desc, fmt);
-    append[length] = 0; // cass_future_error_message may not return null terminated string
-    va_list args;
-    va_start(args, fmt);
-    errorf_to_lua(L, append, args);
-    va_end(args);
+
+    errorf_to_lua(L, "%s: %s", append, desc);
+
+    va_end(args1);
+    va_end(args2);
 }

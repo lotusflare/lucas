@@ -6,14 +6,6 @@
 #include <luajit-2.1/lua.h>
 #include <string.h>
 
-const int QUERY_POSITION = 1;
-const int PARAMETERS_POSITION = 2;
-
-const int TYPE_POSITION = 1;
-const int TYPE_OFFSET = -2;
-const int VALUE_POSITION = 2;
-const int VALUE_OFFSET = -1;
-
 void bind_positional_parameter(lua_State *L, int i, CassStatement *statement, CassValueType type, int index)
 {
     CassError err;
@@ -139,7 +131,8 @@ void bind_named_parameter(lua_State *L, const char *name, CassStatement *stateme
 void create_statement(lua_State *L, int index, CassStatement *statement)
 {
     lua_pushnil(L);
-    for (int previous_top = lua_gettop(L); lua_next(L, index) != 0; lua_pop(L, lua_gettop(L) - previous_top))
+
+    for (int last_top = lua_gettop(L); lua_next(L, index) != 0; lua_pop(L, lua_gettop(L) - last_top))
     {
         const int table_key_index = lua_gettop(L) - 1;
         const int table_value_index = lua_gettop(L);
@@ -147,8 +140,8 @@ void create_statement(lua_State *L, int index, CassStatement *statement)
         lua_pushvalue(L, table_key_index); // copy the key
         const int table_key_copy_index = lua_gettop(L);
 
-        lua_rawgeti(L, table_value_index, TYPE_POSITION);
-        lua_rawgeti(L, table_value_index, VALUE_POSITION);
+        lua_rawgeti(L, table_value_index, 1);
+        lua_rawgeti(L, table_value_index, 2);
         const int type_index = lua_gettop(L) - 1;
         const int value_index = lua_gettop(L);
         const CassValueType type = lua_tointeger(L, type_index);
@@ -289,14 +282,12 @@ void iterate_result(lua_State *L, CassFuture *future)
             else if (vt == CASS_VALUE_TYPE_LIST || vt == CASS_VALUE_TYPE_SET)
             {
                 CassIterator *list_iterator = cass_iterator_from_collection(cass_value);
-                printf("about to iterate list\n");
                 if (list_iterator != NULL)
                 {
                     lua_newtable(L);
                     int list_table = lua_gettop(L);
                     for (int i = 1; cass_iterator_next(list_iterator); i++)
                     {
-                        printf("iterating list\n");
                         int value;
                         cass_value_get_int32(cass_iterator_get_value(list_iterator), &value);
                         lua_pushnumber(L, value);
@@ -337,10 +328,17 @@ CassStatement *create_prepared_statement(lua_State *L, const char *query, int pa
 
 static int query(lua_State *L)
 {
-    luaL_checktype(L, QUERY_POSITION, LUA_TSTRING);
-    luaL_checktype(L, PARAMETERS_POSITION, LUA_TTABLE);
-    const size_t parameter_count = lua_objlen(L, PARAMETERS_POSITION);
-    const char *query = lua_tostring(L, QUERY_POSITION);
+    const int ARG_QUERY = 1;
+    const int ARG_QUERY_PARAMS = 2;
+    luaL_checktype(L, ARG_QUERY, LUA_TSTRING);
+    luaL_checktype(L, ARG_QUERY_PARAMS, LUA_TTABLE);
+    const size_t parameter_count = lua_objlen(L, ARG_QUERY_PARAMS);
+    const char *query = lua_tostring(L, ARG_QUERY);
+
+    if (session == NULL)
+    {
+        errorf_to_lua(L, "not connected");
+    }
 
     CassStatement *statement = create_prepared_statement(L, query, parameter_count);
     create_statement(L, lua_gettop(L), statement);
@@ -377,7 +375,7 @@ int batch(lua_State *L)
     prepare_insert_into_batch(L, session, query, &prepared);
 
     lua_pushnil(L);
-    for (int previous_top = lua_gettop(L); lua_next(L, ARG_BATCHES) != 0; lua_pop(L, lua_gettop(L) - previous_top))
+    for (int last_top = lua_gettop(L); lua_next(L, ARG_BATCHES) != 0; lua_pop(L, lua_gettop(L) - last_top))
     {
         CassStatement *statement = cass_prepared_bind(prepared);
         create_statement(L, lua_gettop(L), statement);
