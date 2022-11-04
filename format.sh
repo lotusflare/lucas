@@ -13,14 +13,14 @@ parse_flags() {
 
 format() {
     if $fix; then
-        prettier_args='-w'
-        clang_args='-i'
+        pargs='-w'
+        cargs='-i'
     else
-        prettier_args='-c'
-        clang_args='-n'
+        pargs='-c'
+        cargs='-n'
     fi
-    find src include -name '*.h' -o -name '*.c' | xargs clang-format --verbose "$clang_args"
-    find integration -name '*.lua' | xargs prettier "$prettier_args"
+    find src include -name '*.h' -o -name '*.c' | xargs clang-format --verbose $cargs
+    find integration -name '*.lua' | xargs prettier $pargs
 }
 
 parse_flags "$@"
