@@ -30,7 +30,7 @@ cassandra() {
     docker compose up cassandra --wait --quiet-pull
 
     print_box "Seeding Cassandra"
-    find integration -name '*.cql' | sort | tee >(xargs cat | docker compose exec -T cassandra cqlsh)
+    find integration -name '*.cql' | sort | tee /dev/stderr | xargs cat | docker compose exec -T cassandra cqlsh
 }
 
 run_flags() {
