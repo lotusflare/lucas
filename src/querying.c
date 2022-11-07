@@ -1,7 +1,7 @@
+#include "cassandra.h"
 #include "errors.c"
 #include "state.c"
 #include "types.c"
-#include <cassandra.h>
 #include <luajit-2.1/lauxlib.h>
 #include <luajit-2.1/lua.h>
 #include <string.h>
@@ -296,8 +296,9 @@ void cass_value_to_lua(lua_State *L, const CassValue *cass_value)
             for (int i = 1; cass_iterator_next(list_iterator); i++)
             {
                 const CassValue *list_value = cass_iterator_get_value(list_iterator);
+                lua_pushinteger(L, i);
                 cass_value_to_lua(L, list_value);
-                lua_rawseti(L, list_table, i);
+                lua_settable(L, list_table);
             }
             cass_iterator_free(list_iterator);
         }

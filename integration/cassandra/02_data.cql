@@ -6,8 +6,8 @@ INSERT INTO testing.data (
     asset_type,
     approval_status,
     list,
-    misc)
-VALUES (
+    misc
+) VALUES (
     'avantel',
     '9380816255dc45dfa1a57541db81df1d',
     1,
@@ -16,4 +16,14 @@ VALUES (
     2,
     [1, 2, 3],
     {'car': 'Honda', 'fruit': 'apple'}
+);
+
+INSERT INTO testing.collections (
+    id,
+    tinyint_list,
+    uuid_to_text_map
+) VALUES (
+    2,
+    [99, 102],
+    {0f854625-9bfd-4407-8c28-c4cdb67106f8: 'foo'}
 );
