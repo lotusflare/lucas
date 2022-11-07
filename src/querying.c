@@ -166,6 +166,128 @@ void create_statement(lua_State *L, int index, CassStatement *statement)
             const int index = lua_tointeger(L, table_key_copy_index) - 1; // lua base 1 indexing
             bind_positional_parameter(L, index, statement, type, value_index);
         }
+        else
+        {
+            errorf_to_lua(L, "invalid key type");
+        }
+    }
+}
+
+void cass_value_to_lua(lua_State *L, const CassValue *cass_value)
+{
+    CassValueType vt = cass_value_type(cass_value);
+
+    if (vt == CASS_VALUE_TYPE_NULL || vt == CASS_VALUE_TYPE_UNSET)
+    {
+        lua_pushnil(L);
+    }
+    else if (vt == CASS_VALUE_TYPE_ASCII || vt == CASS_VALUE_TYPE_TEXT || vt == CASS_VALUE_TYPE_VARCHAR)
+    {
+        const char *value;
+        size_t length;
+        cass_value_get_string(cass_value, &value, &length);
+        lua_pushlstring(L, value, length);
+    }
+    else if (vt == CASS_VALUE_TYPE_UUID || vt == CASS_VALUE_TYPE_TIMEUUID)
+    {
+        CassUuid value;
+        char value_as_string[CASS_UUID_STRING_LENGTH];
+        cass_value_get_uuid(cass_value, &value);
+        cass_uuid_string(value, value_as_string);
+        lua_pushstring(L, value_as_string);
+    }
+    else if (vt == CASS_VALUE_TYPE_TINY_INT)
+    {
+        cass_int8_t value;
+        cass_value_get_int8(cass_value, &value);
+        lua_pushinteger(L, value);
+    }
+    else if (vt == CASS_VALUE_TYPE_SMALL_INT)
+    {
+        cass_int16_t value;
+        cass_value_get_int16(cass_value, &value);
+        lua_pushinteger(L, value);
+    }
+    else if (vt == CASS_VALUE_TYPE_INT)
+    {
+        cass_int32_t value;
+        cass_value_get_int32(cass_value, &value);
+        lua_pushinteger(L, value);
+    }
+    else if (vt == CASS_VALUE_TYPE_BIGINT || vt == CASS_VALUE_TYPE_TIMESTAMP)
+    {
+        cass_int64_t value;
+        cass_value_get_int64(cass_value, &value);
+        lua_pushinteger(L, value);
+    }
+    else if (vt == CASS_VALUE_TYPE_BOOLEAN)
+    {
+        cass_bool_t value;
+        cass_value_get_bool(cass_value, &value);
+        lua_pushboolean(L, value);
+    }
+    else if (vt == CASS_VALUE_TYPE_FLOAT)
+    {
+        cass_float_t value;
+        cass_value_get_float(cass_value, &value);
+        lua_pushnumber(L, value);
+    }
+    else if (vt == CASS_VALUE_TYPE_DOUBLE)
+    {
+        cass_double_t value;
+        cass_value_get_double(cass_value, &value);
+        lua_pushnumber(L, value);
+    }
+    else if (vt == CASS_VALUE_TYPE_MAP)
+    {
+        CassIterator *map_iterator = cass_iterator_from_map(cass_value);
+        if (map_iterator != NULL)
+        {
+            lua_newtable(L);
+            int map_table = lua_gettop(L);
+
+            while (cass_iterator_next(map_iterator))
+            {
+                const CassValue *map_key_value = cass_iterator_get_map_key(map_iterator);
+                cass_value_to_lua(L, map_key_value);
+
+                const CassValue *map_value_value = cass_iterator_get_map_value(map_iterator);
+                cass_value_to_lua(L, map_value_value);
+
+                lua_settable(L, map_table);
+            }
+            cass_iterator_free(map_iterator);
+        }
+        else
+        {
+            lua_pushnil(L);
+        }
+    }
+    else if (vt == CASS_VALUE_TYPE_LIST || vt == CASS_VALUE_TYPE_SET)
+    {
+        CassIterator *list_iterator = cass_iterator_from_collection(cass_value);
+        if (list_iterator != NULL)
+        {
+            lua_newtable(L);
+            int list_table = lua_gettop(L);
+
+            for (int i = 1; cass_iterator_next(list_iterator); i++)
+            {
+                lua_pushinteger(L, i);
+                const CassValue *list_value = cass_iterator_get_value(list_iterator);
+                cass_value_to_lua(L, list_value);
+                lua_settable(L, list_table);
+            }
+            cass_iterator_free(list_iterator);
+        }
+        else
+        {
+            lua_pushnil(L);
+        }
+    }
+    else
+    {
+        lua_pushnil(L);
     }
 }
 
@@ -176,8 +298,8 @@ void iterate_result(lua_State *L, CassFuture *future)
     {
         errorf_cass_future_to_lua(L, future, "execution error");
     }
-    const CassResult *result = cass_future_get_result(future);
 
+    const CassResult *result = cass_future_get_result(future);
     CassIterator *iterator = cass_iterator_from_result(result);
     size_t col_count = cass_result_column_count(result);
 
@@ -199,121 +321,7 @@ void iterate_result(lua_State *L, CassFuture *future)
             lua_pushlstring(L, col_name, col_name_len);
 
             const CassValue *cass_value = cass_row_get_column(row, c);
-            const CassDataType *dt = cass_result_column_data_type(result, c);
-            const CassValueType vt = cass_data_type_type(dt);
-
-            if (vt == CASS_VALUE_TYPE_NULL || vt == CASS_VALUE_TYPE_UNSET)
-            {
-                lua_pushnil(L);
-            }
-            else if (vt == CASS_VALUE_TYPE_ASCII || vt == CASS_VALUE_TYPE_TEXT || vt == CASS_VALUE_TYPE_VARCHAR)
-            {
-                const char *value;
-                size_t length;
-                cass_value_get_string(cass_value, &value, &length);
-                lua_pushlstring(L, value, length);
-            }
-            else if (vt == CASS_VALUE_TYPE_UUID || vt == CASS_VALUE_TYPE_TIMEUUID)
-            {
-                CassUuid value;
-                char value_as_string[CASS_UUID_STRING_LENGTH];
-                cass_value_get_uuid(cass_value, &value);
-                cass_uuid_string(value, value_as_string);
-                lua_pushstring(L, value_as_string);
-            }
-            else if (vt == CASS_VALUE_TYPE_TINY_INT)
-            {
-                cass_int8_t value;
-                cass_value_get_int8(cass_value, &value);
-                lua_pushinteger(L, value);
-            }
-            else if (vt == CASS_VALUE_TYPE_SMALL_INT)
-            {
-                cass_int16_t value;
-                cass_value_get_int16(cass_value, &value);
-                lua_pushinteger(L, value);
-            }
-            else if (vt == CASS_VALUE_TYPE_INT)
-            {
-                cass_int32_t value;
-                cass_value_get_int32(cass_value, &value);
-                lua_pushinteger(L, value);
-            }
-            else if (vt == CASS_VALUE_TYPE_BIGINT || vt == CASS_VALUE_TYPE_TIMESTAMP)
-            {
-                cass_int64_t value;
-                cass_value_get_int64(cass_value, &value);
-                lua_pushinteger(L, value);
-            }
-            else if (vt == CASS_VALUE_TYPE_BOOLEAN)
-            {
-                cass_bool_t value;
-                cass_value_get_bool(cass_value, &value);
-                lua_pushboolean(L, value);
-            }
-            else if (vt == CASS_VALUE_TYPE_FLOAT)
-            {
-                cass_float_t value;
-                cass_value_get_float(cass_value, &value);
-                lua_pushnumber(L, value);
-            }
-            else if (vt == CASS_VALUE_TYPE_DOUBLE)
-            {
-                cass_double_t value;
-                cass_value_get_double(cass_value, &value);
-                lua_pushnumber(L, value);
-            }
-            else if (vt == CASS_VALUE_TYPE_MAP)
-            {
-                CassIterator *map_iterator = cass_iterator_from_map(cass_value);
-                if (map_iterator != NULL)
-                {
-                    lua_newtable(L);
-                    int map_table = lua_gettop(L);
-                    while (cass_iterator_next(map_iterator))
-                    {
-                        const char *key;
-                        size_t key_length;
-                        cass_value_get_string(cass_iterator_get_map_key(map_iterator), &key, &key_length);
-                        const char *value;
-                        size_t value_length;
-                        cass_value_get_string(cass_iterator_get_map_value(map_iterator), &value, &value_length);
-                        lua_pushlstring(L, key, key_length);
-                        lua_pushlstring(L, value, value_length);
-                        lua_settable(L, map_table);
-                    }
-                }
-                else
-                {
-                    lua_pushnil(L);
-                }
-                cass_iterator_free(map_iterator);
-            }
-            else if (vt == CASS_VALUE_TYPE_LIST || vt == CASS_VALUE_TYPE_SET)
-            {
-                CassIterator *list_iterator = cass_iterator_from_collection(cass_value);
-                if (list_iterator != NULL)
-                {
-                    lua_newtable(L);
-                    int list_table = lua_gettop(L);
-                    for (int i = 1; cass_iterator_next(list_iterator); i++)
-                    {
-                        int value;
-                        cass_value_get_int32(cass_iterator_get_value(list_iterator), &value);
-                        lua_pushnumber(L, value);
-                        lua_rawseti(L, list_table, i);
-                    }
-                    cass_iterator_free(list_iterator);
-                }
-                else
-                {
-                    lua_pushnil(L);
-                }
-            }
-            else
-            {
-                lua_pushnil(L);
-            }
+            cass_value_to_lua(L, cass_value);
             lua_settable(L, sub_table);
         }
         lua_settable(L, main_table);

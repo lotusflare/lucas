@@ -12,15 +12,15 @@ static int connect(lua_State *L)
     const int CONTACT_POINTS_POSITION = 1;
     luaL_checkstring(L, CONTACT_POINTS_POSITION);
     const char *contact_points = lua_tostring(L, CONTACT_POINTS_POSITION);
-    CassError err;
     session = cass_session_new();
     cluster = cass_cluster_new();
-    err = cass_cluster_set_contact_points(cluster, contact_points);
+    CassError err = cass_cluster_set_contact_points(cluster, contact_points);
     if (err != CASS_OK)
     {
         errorf_cass_to_lua(L, err, "could not set contact points");
     }
     err = cass_cluster_set_protocol_version(cluster, CASS_PROTOCOL_VERSION_V4);
+    // cass_cluster_set_port(cluster, 9043);
     if (err != CASS_OK)
     {
         errorf_cass_to_lua(L, err, "could not set protocol version");

@@ -12,7 +12,7 @@ RUN apt-get update -y \
 
 COPY . /app
 WORKDIR /app
-RUN if [ ${SKIP_BUILD} = true ]; then \
+RUN if [ ${SKIP_BUILD} = false ]; then \
         ./format.sh \
         && cmake -S . -B build \
         && cmake --build build; \
