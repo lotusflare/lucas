@@ -20,7 +20,7 @@ static int connect(lua_State *L)
         errorf_cass_to_lua(L, err, "could not set contact points");
     }
     err = cass_cluster_set_protocol_version(cluster, CASS_PROTOCOL_VERSION_V4);
-    // cass_cluster_set_port(cluster, 9043);
+    cass_cluster_set_port(cluster, 9043);
     if (err != CASS_OK)
     {
         errorf_cass_to_lua(L, err, "could not set protocol version");

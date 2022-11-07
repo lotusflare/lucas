@@ -38,7 +38,7 @@ describe("batch", function()
                 approval_status = 1,
                 asset_id = "015e3714-a98b-11ec-9f51-0242ac150008",
                 asset_type = 2,
-                created_at = 94186083255376,
+                created_at = 35184372088832,
                 id = "9380816255dc45dfa1a57541db81df1d",
                 id_type = 1,
                 operator_name = "tmo",
