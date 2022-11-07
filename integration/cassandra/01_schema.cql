@@ -22,4 +22,4 @@ CREATE TABLE IF NOT EXISTS testing.collections(
     int_set set<int>,
     tinyint_list list<tinyint>,
     PRIMARY KEY (id)
-)
+);
