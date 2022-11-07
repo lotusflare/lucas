@@ -1,7 +1,7 @@
-#include "cassandra.h"
 #include "errors.c"
 #include "state.c"
 #include "types.c"
+#include <cassandra.h>
 #include <luajit-2.1/lauxlib.h>
 #include <luajit-2.1/lua.h>
 #include <string.h>
@@ -47,6 +47,11 @@ void bind_positional_parameter(lua_State *L, int i, CassStatement *statement, Ca
     else if (type == CASS_VALUE_TYPE_ASCII || type == CASS_VALUE_TYPE_TEXT || type == CASS_VALUE_TYPE_VARCHAR)
     {
         err = cass_statement_bind_string(statement, i, lua_tostring(L, index));
+    }
+    else if (type == CASS_VALUE_TYPE_LIST)
+    {
+        CassCollection *list = cass_collection_new(CASS_COLLECTION_TYPE_LIST, 0);
+        cass_statement_bind_collection(statement, i, list);
     }
     else if (type == CASS_VALUE_TYPE_NULL)
     {
@@ -108,6 +113,11 @@ void bind_named_parameter(lua_State *L, const char *name, CassStatement *stateme
     else if (type == CASS_VALUE_TYPE_ASCII || type == CASS_VALUE_TYPE_TEXT || type == CASS_VALUE_TYPE_VARCHAR)
     {
         err = cass_statement_bind_string_by_name(statement, name, lua_tostring(L, index));
+    }
+    else if (type == CASS_VALUE_TYPE_LIST)
+    {
+        CassCollection *list = cass_collection_new(CASS_COLLECTION_TYPE_LIST, 0);
+        cass_statement_bind_collection_by_name(statement, name, list);
     }
     else if (type == CASS_VALUE_TYPE_NULL)
     {
@@ -229,7 +239,7 @@ void iterate_result(lua_State *L, CassFuture *future)
                 cass_value_get_int32(cass_value, &value);
                 lua_pushinteger(L, value);
             }
-            else if (vt == CASS_VALUE_TYPE_BIGINT)
+            else if (vt == CASS_VALUE_TYPE_BIGINT || vt == CASS_VALUE_TYPE_TIMESTAMP)
             {
                 cass_int64_t value;
                 cass_value_get_int64(cass_value, &value);
