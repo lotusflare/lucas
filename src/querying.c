@@ -14,7 +14,10 @@ void bind_positional_parameter(lua_State *L, int i, CassStatement *statement, Ca
     {
         CassUuid uuid;
         err = cass_uuid_from_string(lua_tostring(L, index), &uuid);
-        cass_statement_bind_uuid(statement, i, uuid);
+        if (err == CASS_OK)
+        {
+            cass_statement_bind_uuid(statement, i, uuid);
+        }
     }
     else if (type == CASS_VALUE_TYPE_BOOLEAN)
     {
@@ -48,9 +51,19 @@ void bind_positional_parameter(lua_State *L, int i, CassStatement *statement, Ca
     {
         err = cass_statement_bind_string(statement, i, lua_tostring(L, index));
     }
+    else if (type == CASS_VALUE_TYPE_MAP)
+    {
+        CassCollection *map = cass_collection_new(CASS_COLLECTION_TYPE_MAP, 0);
+        cass_statement_bind_collection(statement, i, map);
+    }
     else if (type == CASS_VALUE_TYPE_LIST)
     {
         CassCollection *list = cass_collection_new(CASS_COLLECTION_TYPE_LIST, 0);
+        cass_statement_bind_collection(statement, i, list);
+    }
+    else if (type == CASS_VALUE_TYPE_SET)
+    {
+        CassCollection *list = cass_collection_new(CASS_COLLECTION_TYPE_SET, 0);
         cass_statement_bind_collection(statement, i, list);
     }
     else if (type == CASS_VALUE_TYPE_NULL)
@@ -65,7 +78,6 @@ void bind_positional_parameter(lua_State *L, int i, CassStatement *statement, Ca
     {
         errorf_to_lua(L, "invalid type %d for parameter %d", type, i);
     }
-
     if (err != CASS_OK)
     {
         errorf_cass_to_lua(L, err, "could not bind positional parameter at index %d", i);
@@ -80,7 +92,10 @@ void bind_named_parameter(lua_State *L, const char *name, CassStatement *stateme
     {
         CassUuid uuid;
         err = cass_uuid_from_string(lua_tostring(L, index), &uuid);
-        cass_statement_bind_uuid_by_name(statement, name, uuid);
+        if (err == CASS_OK)
+        {
+            cass_statement_bind_uuid_by_name(statement, name, uuid);
+        }
     }
     else if (type == CASS_VALUE_TYPE_BOOLEAN)
     {
@@ -114,10 +129,20 @@ void bind_named_parameter(lua_State *L, const char *name, CassStatement *stateme
     {
         err = cass_statement_bind_string_by_name(statement, name, lua_tostring(L, index));
     }
+    else if (type == CASS_VALUE_TYPE_MAP)
+    {
+        CassCollection *map = cass_collection_new(CASS_COLLECTION_TYPE_MAP, 0);
+        cass_statement_bind_collection_by_name(statement, name, map);
+    }
     else if (type == CASS_VALUE_TYPE_LIST)
     {
         CassCollection *list = cass_collection_new(CASS_COLLECTION_TYPE_LIST, 0);
         cass_statement_bind_collection_by_name(statement, name, list);
+    }
+    else if (type == CASS_VALUE_TYPE_SET)
+    {
+        CassCollection *set = cass_collection_new(CASS_COLLECTION_TYPE_SET, 0);
+        cass_statement_bind_collection_by_name(statement, name, set);
     }
     else if (type == CASS_VALUE_TYPE_NULL)
     {
@@ -131,7 +156,6 @@ void bind_named_parameter(lua_State *L, const char *name, CassStatement *stateme
     {
         errorf_to_lua(L, "invalid type %d for parameter %s", type, name);
     }
-
     if (err != CASS_OK)
     {
         errorf_cass_to_lua(L, err, "could not bind named parameter %s", name);
@@ -250,10 +274,8 @@ void cass_value_to_lua(lua_State *L, const CassValue *cass_value)
             {
                 const CassValue *map_key_value = cass_iterator_get_map_key(map_iterator);
                 cass_value_to_lua(L, map_key_value);
-
                 const CassValue *map_value_value = cass_iterator_get_map_value(map_iterator);
                 cass_value_to_lua(L, map_value_value);
-
                 lua_settable(L, map_table);
             }
             cass_iterator_free(map_iterator);
@@ -273,10 +295,9 @@ void cass_value_to_lua(lua_State *L, const CassValue *cass_value)
 
             for (int i = 1; cass_iterator_next(list_iterator); i++)
             {
-                lua_pushinteger(L, i);
                 const CassValue *list_value = cass_iterator_get_value(list_iterator);
                 cass_value_to_lua(L, list_value);
-                lua_settable(L, list_table);
+                lua_rawseti(L, list_table, i);
             }
             cass_iterator_free(list_iterator);
         }
