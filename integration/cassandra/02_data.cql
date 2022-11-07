@@ -20,10 +20,12 @@ INSERT INTO testing.data (
 
 INSERT INTO testing.collections (
     id,
+    int_set,
     tinyint_list,
     uuid_to_text_map
 ) VALUES (
     2,
-    [99, 102],
+    {50},
+    [10, 20],
     {0f854625-9bfd-4407-8c28-c4cdb67106f8: 'foo'}
 );
