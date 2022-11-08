@@ -129,6 +129,11 @@ int logger(lua_State *L)
 
 void lucas_log(CassLogLevel level, const char *fmt, ...)
 {
+    if (log_context == NULL)
+    {
+        return;
+    }
+
     va_list args1, args2;
     va_start(args1, fmt);
     va_copy(args2, args1);
