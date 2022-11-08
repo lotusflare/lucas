@@ -201,7 +201,7 @@ void cass_value_to_lua(lua_State *L, const CassValue *cass_value)
 {
     CassValueType vt = cass_value_type(cass_value);
 
-    if (vt == CASS_VALUE_TYPE_NULL || vt == CASS_VALUE_TYPE_UNSET)
+    if (cass_value_is_null(cass_value) || vt == CASS_VALUE_TYPE_NULL || vt == CASS_VALUE_TYPE_UNSET)
     {
         lua_pushnil(L);
     }
@@ -315,6 +315,7 @@ void cass_value_to_lua(lua_State *L, const CassValue *cass_value)
 
 void iterate_result(lua_State *L, CassFuture *future)
 {
+    printf("iterate_result\n");
     cass_future_wait(future);
     if (cass_future_error_code(future) != CASS_OK)
     {
@@ -341,7 +342,6 @@ void iterate_result(lua_State *L, CassFuture *future)
             size_t col_name_len;
             cass_result_column_name(result, c, &col_name, &col_name_len);
             lua_pushlstring(L, col_name, col_name_len);
-
             const CassValue *cass_value = cass_row_get_column(row, c);
             cass_value_to_lua(L, cass_value);
             lua_settable(L, sub_table);
