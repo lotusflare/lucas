@@ -37,7 +37,7 @@ describe("batch", function()
                 {}
             )
 
-        assert.are.same(
+        assert.array.has(
             { {
                 approval_status = 1,
                 asset_id = "015e3714-a98b-11ec-9f51-0242ac150008",
