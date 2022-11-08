@@ -1,5 +1,6 @@
 #include "cassandra.h"
 #include "errors.c"
+#include "logging.c"
 #include "state.c"
 #include "types.c"
 #include <luajit-2.1/lauxlib.h>
@@ -347,6 +348,7 @@ CassStatement *create_prepared_statement(lua_State *L, const char *query)
 
 static int query(lua_State *L)
 {
+    lucas_log(CASS_LOG_INFO, "Attempting to query");
     const int ARG_QUERY = 1;
     const int ARG_QUERY_PARAMS = 2;
     luaL_checktype(L, ARG_QUERY, LUA_TSTRING);

@@ -9,6 +9,7 @@
 
 static int connect(lua_State *L)
 {
+    lucas_log(CASS_LOG_INFO, "Attempting to connect");
     const int ARG_CONTACT_POINTS = 1;
     const int ARG_PORT = 2;
     luaL_checkstring(L, ARG_CONTACT_POINTS);
