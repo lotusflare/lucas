@@ -9,21 +9,31 @@
 
 static int connect(lua_State *L)
 {
-    const int CONTACT_POINTS_POSITION = 1;
-    luaL_checkstring(L, CONTACT_POINTS_POSITION);
-    const char *contact_points = lua_tostring(L, CONTACT_POINTS_POSITION);
-    CassError err;
+    const int ARG_CONTACT_POINTS = 1;
+    const int ARG_PORT = 2;
+    luaL_checkstring(L, ARG_CONTACT_POINTS);
+    const char *contact_points = lua_tostring(L, ARG_CONTACT_POINTS);
+    int port = lua_tointeger(L, ARG_PORT);
+    if (port == 0)
+    {
+        port = 9042;
+    }
     session = cass_session_new();
     cluster = cass_cluster_new();
-    err = cass_cluster_set_contact_points(cluster, contact_points);
+    CassError err = cass_cluster_set_contact_points(cluster, contact_points);
     if (err != CASS_OK)
     {
-        errorf_cass_to_lua(L, err, "could not set contact points");
+        errorf_cass_to_lua(L, err, "could not set contact points %s", contact_points);
     }
     err = cass_cluster_set_protocol_version(cluster, CASS_PROTOCOL_VERSION_V4);
     if (err != CASS_OK)
     {
         errorf_cass_to_lua(L, err, "could not set protocol version");
+    }
+    err = cass_cluster_set_port(cluster, port);
+    if (err != CASS_OK)
+    {
+        errorf_cass_to_lua(L, err, "could not set port %d", port);
     }
     CassFuture *future = cass_session_connect(session, cluster);
     cass_future_wait(future);

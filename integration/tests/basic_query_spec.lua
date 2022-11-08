@@ -4,7 +4,7 @@ local lucas = require("lucas")
 
 describe("query", function()
     it("basic select", function()
-        lucas.connect(os.getenv("CASSANDRA_HOST"))
+        lucas.connect(os.getenv("CASSANDRA_HOST"), os.getenv("CASSANDRA_PORT"))
         local results = lucas.query("SELECT * FROM testing.data", {})
         assert.array.has(
             { {
@@ -20,13 +20,13 @@ describe("query", function()
     end)
 
     it("select with positional parameters", function()
-        lucas.connect(os.getenv("CASSANDRA_HOST"))
+        lucas.connect(os.getenv("CASSANDRA_HOST"), os.getenv("CASSANDRA_PORT"))
         local results =
             lucas.query(
                 "SELECT * FROM testing.data WHERE asset_type = ? ALLOW FILTERING",
                 { lucas.int(1) }
             )
-        assert.are.same(
+        assert.array.has(
             { {
                 approval_status = 2,
                 asset_id = "015e3714-a98b-11ec-9f51-0242ac150008",
@@ -45,13 +45,13 @@ describe("query", function()
     end)
 
     it("select with named parameters", function()
-        lucas.connect(os.getenv("CASSANDRA_HOST"))
+        lucas.connect(os.getenv("CASSANDRA_HOST"), os.getenv("CASSANDRA_PORT"))
         local results =
             lucas.query(
                 "SELECT * FROM testing.data WHERE asset_type = :asset_id ALLOW FILTERING",
                 { asset_id = lucas.int(1) }
             )
-        assert.are.same(
+        assert.array.has(
             { {
                 approval_status = 2,
                 asset_id = "015e3714-a98b-11ec-9f51-0242ac150008",
