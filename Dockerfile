@@ -4,8 +4,8 @@ ENV LUA_CPATH="/app/build/?.so;/usr/local/lib/lua/5.1/?.so"
 ARG DEBIAN_FRONTEND="noninteractive"
 ARG SKIP_BUILD="false"
 
-RUN apt-get update -y \
-    && apt-get install -y git clang-12 clangd-12 clang-format-12 make cmake libssl-dev libuv1-dev zlib1g-dev libluajit-5.1-dev luajit luarocks pkg-config nodejs npm \
+RUN apt-get update -yq \
+    && apt-get install -yq git clang-12 clangd-12 clang-format-12 make cmake libssl-dev libuv1-dev zlib1g-dev libluajit-5.1-dev luajit luarocks pkg-config nodejs npm \
     && apt-get clean \
     && luarocks install busted \
     && npm install --global prettier https://github.com/prettier/plugin-lua.git

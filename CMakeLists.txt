@@ -6,6 +6,8 @@ set(CMAKE_C_STANDARD 11)
 set(CC clang)
 set(CXX clang++)
 
+set_property(GLOBAL PROPERTY RULE_MESSAGES OFF)
+
 add_subdirectory(vendor/cpp-driver)
 include_directories(vendor/cpp-driver/include)
 include_directories(include)

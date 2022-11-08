@@ -1,7 +1,11 @@
+#pragma once
+
 #include "cassandra.h"
 #include "luajit-2.1/lauxlib.h"
 #include "luajit-2.1/lua.h"
 #include "state.c"
+#include <stdarg.h>
+#include <time.h>
 
 typedef struct Metric
 {
@@ -108,7 +112,8 @@ void callback(const CassLogMessage *log, void *data)
     lua_pushvalue(log_context, 1);
     lua_pushstring(log_context, log->message);
     lua_pushinteger(log_context, log->severity);
-    lua_call(log_context, 2, 0);
+    lua_pushinteger(log_context, log->time_ms / 1000);
+    lua_call(log_context, 3, 0);
 }
 
 int logger(lua_State *L)
@@ -120,4 +125,28 @@ int logger(lua_State *L)
     cass_log_set_callback(callback, NULL);
     cass_log_set_level(CASS_LOG_DEBUG);
     return 0;
+}
+
+void lucas_log(CassLogLevel level, const char *fmt, ...)
+{
+    if (log_context == NULL)
+    {
+        return;
+    }
+
+    va_list args1, args2;
+    va_start(args1, fmt);
+    va_copy(args2, args1);
+
+    char append[vsnprintf(NULL, 0, fmt, args1)];
+    vsprintf(append, fmt, args2);
+
+    lua_pushvalue(log_context, 1);
+    lua_pushfstring(log_context, "lucas: %s", append);
+    lua_pushinteger(log_context, level);
+    lua_pushinteger(log_context, (int)time(NULL));
+    lua_call(log_context, 3, 0);
+
+    va_end(args1);
+    va_end(args2);
 }
