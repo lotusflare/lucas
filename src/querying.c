@@ -356,8 +356,7 @@ CassStatement *create_prepared_statement(lua_State *L, const char *query, int pa
 {
     CassFuture *future = cass_session_prepare(session, query);
     cass_future_wait(future);
-    CassError err = cass_future_error_code(future);
-    if (err != CASS_OK)
+    if (cass_future_error_code(future) != CASS_OK)
     {
         errorf_cass_future_to_lua(L, future, "failed to create prepared statement");
     }

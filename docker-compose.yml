@@ -15,4 +15,5 @@ services:
     build:
       context: .
     environment:
-      CASSANDRA_HOST: cassandra
+      CASSANDRA_HOST: 127.0.0.1
+      CASSANDRA_PORT: 9043
