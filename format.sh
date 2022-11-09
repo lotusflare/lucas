@@ -3,7 +3,7 @@
 fix=false
 
 print() {
-    echo $1 | boxes -d stone
+    echo $1 | (command -v boxes > /dev/null && boxes -d stone || cat)
 }
 
 format_flags() {
