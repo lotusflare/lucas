@@ -14,8 +14,8 @@ jobs:
 
       - name: apt install
         run: |
-          apt-get update -yq
-          apt-get install -yq boxes
+          sudo apt-get update -yq
+          sudo apt-get install -yq boxes
 
       - name: Integration tests
         run: ./run.sh -bt
