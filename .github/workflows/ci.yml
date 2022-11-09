@@ -12,5 +12,10 @@ jobs:
         with:
           submodules: true
 
+      - name: apt install
+        run: |
+          apt-get update -yq
+          apt-get install -yq boxes
+
       - name: Integration tests
         run: ./run.sh -bt
