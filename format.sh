@@ -2,6 +2,10 @@
 
 fix=false
 
+print() {
+    echo $1 | (command -v boxes > /dev/null && boxes -d stone || cat)
+}
+
 format_flags() {
     while getopts 'f' option; do
         case $option in
@@ -9,19 +13,6 @@ format_flags() {
         ?) exit 1 ;;
         esac
     done
-}
-
-print_box() {
-    length=$((${#1} + 1))
-    printf "┏"
-    for i in $(seq 0 $length); do
-        printf "━"
-    done
-    printf "┓\n┃ %s ┃\n┗" "$1"
-    for i in $(seq 0 $length); do
-        printf "━"
-    done
-    echo "┛"
 }
 
 format() {
@@ -32,13 +23,11 @@ format() {
         pargs='-c'
         cargs='-n'
     fi
-    print_box "Running clang-format"
+    print "Running clang-format"
     find src include -name '*.h' -o -name '*.c' | xargs clang-format --verbose $cargs
-    print_box "Running prettier"
+    print "Running prettier"
     find integration -name '*.lua' | xargs prettier $pargs
 }
 
-if [ "$0" = "$BASH_SOURCE" ]; then
-    format_flags "$@"
-    format
-fi
+format_flags "$@"
+format

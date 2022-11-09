@@ -4,32 +4,36 @@ clean=false
 build=false
 test=false
 
+print() {
+    echo $1 | (command -v boxes > /dev/null && boxes -d stone || cat)
+}
+
 clean() {
     if $clean; then
-        print_box "Removing containers"
+        print "Removing containers"
         docker compose rm -fs
     fi
 }
 
 build() {
     if $build; then
-        print_box "Building containers"
+        print "Building containers"
         docker compose build --progress=tty
     fi
 }
 
 test() {
     if $test; then
-        print_box "Running tests"
+        print "Running tests"
         docker compose run driver busted
     fi
 }
 
 cassandra() {
-    print_box "Waiting for Cassandra"
+    print "Waiting for Cassandra"
     docker compose up cassandra --wait --quiet-pull
 
-    print_box "Seeding Cassandra"
+    print "Seeding Cassandra"
     find integration -name '*.cql' | sort | tee /dev/stderr | xargs cat | docker compose exec -T cassandra cqlsh
 }
 
@@ -51,6 +55,5 @@ run() {
     test
 }
 
-source format.sh
 run_flags "$@"
 run
