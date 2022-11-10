@@ -1,17 +1,21 @@
 {
-    "build": {
-        "dockerfile": "${localWorkspaceFolder}/Dockerfile",
-        "args": {
-            "SKIP_BUIlD": "true"
-        }
-    },
-    "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
+    // "build": {
+    //     "dockerfile": "${localWorkspaceFolder}/Dockerfile",
+    //     "args": {
+    //         "SKIP_BUIlD": "true"
+    //     }
+    // },
+    // "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
     "workspaceFolder": "/app",
-    "runArgs": [
-        "--network=host",
-        "--env=CASSANDRA_HOST=127.0.0.1",
-        "--env=CASSANDRA_PORT=9043"
+    "dockerComposeFile": [
+        "../docker-compose.yml",
+        "../docker-compose.devcontainer.yml"
     ],
+    // "runArgs": [
+    //     "--network=host",
+    //     "--env=CASSANDRA_HOST=127.0.0.1",
+    //     "--env=CASSANDRA_PORT=9043"
+    // ],
     "containerEnv": {
         "CASSANDRA_HOST": "cassandra"
     },
@@ -25,8 +29,10 @@
                 "llvm-vs-code-extensions.vscode-clangd",
                 "twxs.cmake"
             ]
-        }
+        },
+        "codespaces": {}
     },
+    "postCreateCommand": "git submodule update --init",
     "features": {
         "ghcr.io/devcontainers/features/git:1": {
             "version": "latest"

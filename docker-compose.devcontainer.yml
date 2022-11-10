@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/docker/compose/master/compose/config/compose_spec.json
+
+services:
+  driver:
+    build:
+      args:
+        SKIP_BUILD: "true"
+    environment:
+      CASSANDRA_HOST: cassandra
+      CASSANDRA_PORT: 9042
+    volumes:
+      - "./:/app:rw"
