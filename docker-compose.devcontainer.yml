@@ -9,4 +9,6 @@ services:
       CASSANDRA_HOST: cassandra
       CASSANDRA_PORT: 9042
     volumes:
-      - "./:/app:rw"
+      - "./:/app"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    # command: /bin/sh -c "while sleep 1000; do :; done"

@@ -1,44 +1,32 @@
 {
-    // "build": {
-    //     "dockerfile": "${localWorkspaceFolder}/Dockerfile",
-    //     "args": {
-    //         "SKIP_BUIlD": "true"
-    //     }
-    // },
-    // "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
     "workspaceFolder": "/app",
     "dockerComposeFile": [
         "../docker-compose.yml",
         "../docker-compose.devcontainer.yml"
     ],
-    // "runArgs": [
-    //     "--network=host",
-    //     "--env=CASSANDRA_HOST=127.0.0.1",
-    //     "--env=CASSANDRA_PORT=9043"
-    // ],
-    "containerEnv": {
-        "CASSANDRA_HOST": "cassandra"
-    },
+    "service": "driver",
     "customizations": {
         "vscode": {
             "extensions": [
                 "EditorConfig.EditorConfig",
                 "ms-vscode.cmake-tools",
-                "ms-azuretools.vscode-docker",
                 "redhat.vscode-yaml",
                 "llvm-vs-code-extensions.vscode-clangd",
                 "twxs.cmake"
             ]
-        },
-        "codespaces": {}
+        }
     },
-    "postCreateCommand": "git submodule update --init",
+    // "postCreateCommand": "git submodule update --init",
     "features": {
         "ghcr.io/devcontainers/features/git:1": {
             "version": "latest"
         },
         "ghcr.io/devcontainers/features/common-utils:1": {
             "version": "latest"
+        },
+        "ghcr.io/devcontainers/features/docker-from-docker:1": {
+            "version": "latest",
+            "dockerDashComposeVersion": "v2"
         }
     }
 }
