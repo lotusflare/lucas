@@ -72,15 +72,15 @@ CassCollection *create_collection(lua_State *L, int index, CassStatement *statem
 
         if (value_type == LUA_TSTRING)
         {
-            cass_collection_append_string(collection, lua_tostring(L, value_index));
+            err = cass_collection_append_string(collection, lua_tostring(L, value_index));
         }
         else if (value_type == LUA_TNUMBER)
         {
-            cass_collection_append_int32(collection, lua_tointeger(L, value_index));
+            err = cass_collection_append_int32(collection, lua_tointeger(L, value_index));
         }
         else if (value_type == LUA_TBOOLEAN)
         {
-            cass_collection_append_bool(collection, lua_toboolean(L, value_index));
+            err = cass_collection_append_bool(collection, lua_toboolean(L, value_index));
         }
 
         if (err != CASS_OK)
