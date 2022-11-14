@@ -3,6 +3,7 @@
 #include "logging.c"
 #include "state.c"
 #include "types.c"
+#include <b64/cdecode.h>
 #include <b64/cencode.h>
 #include <luajit-2.1/lauxlib.h>
 #include <luajit-2.1/lua.h>
@@ -385,10 +386,10 @@ void cass_value_to_lua(lua_State *L, const CassValue *cass_value)
     }
 }
 
-void encode(const char *input)
+char *encode(const char *input, size_t size)
 {
     /* set up a destination buffer large enough to hold the encoded data */
-    char *output = (char *)malloc(100);
+    char *output = (char *)malloc(1000);
     /* keep track of our encoded position */
     char *c = output;
     /* store the number of bytes encoded by a single call */
@@ -400,7 +401,7 @@ void encode(const char *input)
     /* initialise the encoder state */
     base64_init_encodestate(&s);
     /* gather data from the input and send it to the output */
-    cnt = base64_encode_block(input, strlen(input), c, &s);
+    cnt = base64_encode_block(input, size, c, &s);
     c += cnt;
     /* since we have encoded the entire input string, we know that
        there is no more input data; finalise the encoding */
@@ -411,16 +412,40 @@ void encode(const char *input)
     /* we want to print the encoded data, so null-terminate it: */
     *c = 0;
 
-    printf("%s\n", output);
+    return output;
 }
 
-void iterate_result(lua_State *L, CassStatement *statement)
+void decode(const char *input, size_t input_size, char *output, size_t *output_size)
+{
+    /* set up a destination buffer large enough to hold the encoded data */
+    output = (char *)malloc(1000);
+    /* keep track of our decoded position */
+    char *c = output;
+    /* we need a decoder state */
+    base64_decodestate s;
+
+    /*---------- START DECODING ----------*/
+    /* initialise the decoder state */
+    base64_init_decodestate(&s);
+    /* decode the input data */
+    *output_size = base64_decode_block(input, input_size, c, &s);
+    c += *output_size;
+    /* note: there is no base64_decode_blockend! */
+    /*---------- STOP DECODING  ----------*/
+
+    /* we want to print the decoded data, so null-terminate it: */
+    *c = 0;
+}
+
+void iterate_result(lua_State *L, CassStatement *statement, const char *paging_state, size_t paging_state_size)
 {
     cass_statement_set_paging_size(statement, 1);
-    // cass_statement_set_paging_state_token(statement, const char *paging_state, size_t paging_state_size);
+    printf("yolo\n");
 
-    // cass_statement_set_paging_state_token(CassStatement *statement, const char *paging_state, size_t
-    // paging_state_size)
+    if (paging_state != NULL && paging_state[0] != '\0')
+    {
+        cass_statement_set_paging_state_token(statement, paging_state, paging_state_size);
+    }
 
     CassFuture *future = cass_session_execute(session, statement);
     cass_future_wait(future);
@@ -460,19 +485,31 @@ void iterate_result(lua_State *L, CassStatement *statement)
 
     if (has_more_pages)
     {
-        cass_statement_set_paging_state(statement, result);
-
         const char *paging_state;
         size_t paging_state_size;
-        cass_result_paging_state_token(result, &paging_state, &paging_state_size);
-        printf("size=%d\n", (int)paging_state_size);
-        printf("paging_state_token=(%.*s)\n", (int)paging_state_size, paging_state);
+        CassError err = cass_result_paging_state_token(result, &paging_state, &paging_state_size);
+        if (err != CASS_OK)
+        {
+            errorf_cass_to_lua(L, err, "could not get paging state token");
+        }
+        err = cass_statement_set_paging_state_token(statement, paging_state, paging_state_size);
+        if (err != CASS_OK)
+        {
+            errorf_cass_to_lua(L, err, "could not set paging state token");
+        }
 
-        // for (int i = 0; i < paging_state_size; i++)
-        // {
-        //     printf("%c", paging_state[i]);
-        // }
-        encode(paging_state);
+        printf("paging state = \"");
+        for (int i = 0; i < paging_state_size; i++)
+        {
+            printf("%c", paging_state[i]);
+        }
+        printf("\"\n");
+
+        lua_newtable(L);
+        const int meta_table = lua_gettop(L);
+        lua_pushstring(L, "paging_token");
+        lua_pushlstring(L, paging_state, paging_state_size);
+        lua_settable(L, meta_table);
     }
 
     // cass_result_free(result);
@@ -488,7 +525,9 @@ CassStatement *create_prepared_statement(lua_State *L, const char *query)
     {
         errorf_cass_future_to_lua(L, future, "failed to create prepared statement");
     }
-    return cass_prepared_bind(cass_future_get_prepared(future));
+    CassStatement *statement = cass_prepared_bind(cass_future_get_prepared(future));
+    cass_future_free(future);
+    return statement;
 }
 
 static int query(lua_State *L)
@@ -496,10 +535,21 @@ static int query(lua_State *L)
     lucas_log(CASS_LOG_INFO, "Attempting to query");
     const int ARG_QUERY = 1;
     const int ARG_QUERY_PARAMS = 2;
+    const int ARG_OPTIONS = 3;
     luaL_checktype(L, ARG_QUERY, LUA_TSTRING);
     luaL_checktype(L, ARG_QUERY_PARAMS, LUA_TTABLE);
     const size_t parameter_count = lua_objlen(L, ARG_QUERY_PARAMS);
     const char *query = lua_tostring(L, ARG_QUERY);
+
+    size_t paging_token_size;
+    const char *paging_token = lua_tolstring(L, ARG_OPTIONS, &paging_token_size);
+
+    // size_t paging_token_size = 0;
+    if (paging_token != NULL)
+    {
+        printf("%s\n", paging_token);
+        printf("len=%lu\n", paging_token_size);
+    }
 
     if (session == NULL)
     {
@@ -507,11 +557,14 @@ static int query(lua_State *L)
     }
 
     CassStatement *statement = create_prepared_statement(L, query);
-    bind_parameters(L, lua_gettop(L), statement);
-    iterate_result(L, statement);
+    printf("1) statement prepared\n");
+    bind_parameters(L, ARG_QUERY_PARAMS, statement);
+    printf("2) parameters bound\n");
+    iterate_result(L, statement, paging_token, paging_token_size);
+    printf("3) results iterated\n");
     cass_statement_free(statement);
 
-    return 1;
+    return 2;
 }
 
 void prepare_insert_into_batch(lua_State *L, CassSession *session, const char *query, const CassPrepared **prepared)
