@@ -482,7 +482,6 @@ static int query(lua_State *L)
 
     if (lua_type(L, ARG_OPTIONS) == LUA_TTABLE)
     {
-        printf("ARG_OPTIONS is table\n");
         lua_getfield(L, ARG_OPTIONS, "paging_state");
         paging_state = lua_tolstring(L, lua_gettop(L), &paging_state_size);
         lua_getfield(L, ARG_OPTIONS, "page_size");
