@@ -442,7 +442,7 @@ void iterate_result(lua_State *L, CassStatement *statement, const char *paging_s
         }
         lua_newtable(L);
         const int meta_table = lua_gettop(L);
-        lua_pushstring(L, "paging_token");
+        lua_pushstring(L, "paging_state");
         lua_pushlstring(L, paging_state, paging_state_size);
         lua_settable(L, meta_table);
     }
@@ -479,13 +479,13 @@ static int query(lua_State *L)
     luaL_checktype(L, ARG_QUERY_PARAMS, LUA_TTABLE);
     const size_t parameter_count = lua_objlen(L, ARG_QUERY_PARAMS);
     const char *query = lua_tostring(L, ARG_QUERY);
-    size_t paging_token_size = 0;
-    const char *paging_token = NULL;
+    size_t paging_state_size = 0;
+    const char *paging_state = NULL;
 
     if (lua_type(L, ARG_OPTIONS) == LUA_TTABLE)
     {
-        lua_getfield(L, ARG_OPTIONS, "paging_token");
-        paging_token = lua_tolstring(L, lua_gettop(L), &paging_token_size);
+        lua_getfield(L, ARG_OPTIONS, "paging_state");
+        paging_state = lua_tolstring(L, lua_gettop(L), &paging_state_size);
     }
 
     if (session == NULL)
@@ -495,7 +495,7 @@ static int query(lua_State *L)
 
     CassStatement *statement = create_prepared_statement(L, query);
     bind_parameters(L, ARG_QUERY_PARAMS, statement);
-    iterate_result(L, statement, paging_token, paging_token_size);
+    iterate_result(L, statement, paging_state, paging_state_size);
     cass_statement_free(statement);
 
     return 2;
