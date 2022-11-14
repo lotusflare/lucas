@@ -3,8 +3,6 @@
 #include "logging.c"
 #include "state.c"
 #include "types.c"
-#include <b64/cdecode.h>
-#include <b64/cencode.h>
 #include <luajit-2.1/lauxlib.h>
 #include <luajit-2.1/lua.h>
 #include <stdio.h>
@@ -386,63 +384,11 @@ void cass_value_to_lua(lua_State *L, const CassValue *cass_value)
     }
 }
 
-char *encode(const char *input, size_t size)
-{
-    /* set up a destination buffer large enough to hold the encoded data */
-    char *output = (char *)malloc(1000);
-    /* keep track of our encoded position */
-    char *c = output;
-    /* store the number of bytes encoded by a single call */
-    int cnt = 0;
-    /* we need an encoder state */
-    base64_encodestate s;
-
-    /*---------- START ENCODING ----------*/
-    /* initialise the encoder state */
-    base64_init_encodestate(&s);
-    /* gather data from the input and send it to the output */
-    cnt = base64_encode_block(input, size, c, &s);
-    c += cnt;
-    /* since we have encoded the entire input string, we know that
-       there is no more input data; finalise the encoding */
-    cnt = base64_encode_blockend(c, &s);
-    c += cnt;
-    /*---------- STOP ENCODING  ----------*/
-
-    /* we want to print the encoded data, so null-terminate it: */
-    *c = 0;
-
-    return output;
-}
-
-void decode(const char *input, size_t input_size, char *output, size_t *output_size)
-{
-    /* set up a destination buffer large enough to hold the encoded data */
-    output = (char *)malloc(1000);
-    /* keep track of our decoded position */
-    char *c = output;
-    /* we need a decoder state */
-    base64_decodestate s;
-
-    /*---------- START DECODING ----------*/
-    /* initialise the decoder state */
-    base64_init_decodestate(&s);
-    /* decode the input data */
-    *output_size = base64_decode_block(input, input_size, c, &s);
-    c += *output_size;
-    /* note: there is no base64_decode_blockend! */
-    /*---------- STOP DECODING  ----------*/
-
-    /* we want to print the decoded data, so null-terminate it: */
-    *c = 0;
-}
-
 void iterate_result(lua_State *L, CassStatement *statement, const char *paging_state, size_t paging_state_size)
 {
-    cass_statement_set_paging_size(statement, 1);
-    printf("yolo\n");
+    cass_statement_set_paging_size(statement, 100);
 
-    if (paging_state != NULL && paging_state[0] != '\0')
+    if (paging_state != NULL)
     {
         cass_statement_set_paging_state_token(statement, paging_state, paging_state_size);
     }
@@ -480,10 +426,7 @@ void iterate_result(lua_State *L, CassStatement *statement, const char *paging_s
         lua_settable(L, root_table);
     }
 
-    cass_bool_t has_more_pages = cass_result_has_more_pages(result);
-    printf("has_more_pages=%d\n", (int)has_more_pages);
-
-    if (has_more_pages)
+    if (cass_result_has_more_pages(result))
     {
         const char *paging_state;
         size_t paging_state_size;
@@ -497,22 +440,18 @@ void iterate_result(lua_State *L, CassStatement *statement, const char *paging_s
         {
             errorf_cass_to_lua(L, err, "could not set paging state token");
         }
-
-        printf("paging state = \"");
-        for (int i = 0; i < paging_state_size; i++)
-        {
-            printf("%c", paging_state[i]);
-        }
-        printf("\"\n");
-
         lua_newtable(L);
         const int meta_table = lua_gettop(L);
         lua_pushstring(L, "paging_token");
         lua_pushlstring(L, paging_state, paging_state_size);
         lua_settable(L, meta_table);
     }
+    else
+    {
+        lua_pushnil(L);
+    }
 
-    // cass_result_free(result);
+    cass_result_free(result);
     cass_iterator_free(iterator);
     cass_future_free(future);
 }
@@ -540,15 +479,13 @@ static int query(lua_State *L)
     luaL_checktype(L, ARG_QUERY_PARAMS, LUA_TTABLE);
     const size_t parameter_count = lua_objlen(L, ARG_QUERY_PARAMS);
     const char *query = lua_tostring(L, ARG_QUERY);
+    size_t paging_token_size = 0;
+    const char *paging_token = NULL;
 
-    size_t paging_token_size;
-    const char *paging_token = lua_tolstring(L, ARG_OPTIONS, &paging_token_size);
-
-    // size_t paging_token_size = 0;
-    if (paging_token != NULL)
+    if (lua_type(L, ARG_OPTIONS) == LUA_TTABLE)
     {
-        printf("%s\n", paging_token);
-        printf("len=%lu\n", paging_token_size);
+        lua_getfield(L, ARG_OPTIONS, "paging_token");
+        paging_token = lua_tolstring(L, lua_gettop(L), &paging_token_size);
     }
 
     if (session == NULL)
@@ -557,11 +494,8 @@ static int query(lua_State *L)
     }
 
     CassStatement *statement = create_prepared_statement(L, query);
-    printf("1) statement prepared\n");
     bind_parameters(L, ARG_QUERY_PARAMS, statement);
-    printf("2) parameters bound\n");
     iterate_result(L, statement, paging_token, paging_token_size);
-    printf("3) results iterated\n");
     cass_statement_free(statement);
 
     return 2;
