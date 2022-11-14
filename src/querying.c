@@ -386,8 +386,6 @@ void cass_value_to_lua(lua_State *L, const CassValue *cass_value)
 
 void iterate_result(lua_State *L, CassStatement *statement, const char *paging_state, size_t paging_state_size)
 {
-    cass_statement_set_paging_size(statement, 100);
-
     if (paging_state != NULL)
     {
         cass_statement_set_paging_state_token(statement, paging_state, paging_state_size);
@@ -481,11 +479,19 @@ static int query(lua_State *L)
     const char *query = lua_tostring(L, ARG_QUERY);
     size_t paging_state_size = 0;
     const char *paging_state = NULL;
+    int page_size = 0;
 
     if (lua_type(L, ARG_OPTIONS) == LUA_TTABLE)
     {
         lua_getfield(L, ARG_OPTIONS, "paging_state");
         paging_state = lua_tolstring(L, lua_gettop(L), &paging_state_size);
+        lua_getfield(L, ARG_OPTIONS, "page_size");
+        int page_size = lua_tointeger(L, lua_gettop(L));
+    }
+
+    if (page_size == 0)
+    {
+        page_size = 500;
     }
 
     if (session == NULL)
@@ -494,6 +500,7 @@ static int query(lua_State *L)
     }
 
     CassStatement *statement = create_prepared_statement(L, query);
+    cass_statement_set_paging_size(statement, page_size);
     bind_parameters(L, ARG_QUERY_PARAMS, statement);
     iterate_result(L, statement, paging_state, paging_state_size);
     cass_statement_free(statement);
