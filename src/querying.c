@@ -424,6 +424,8 @@ void iterate_result(lua_State *L, CassStatement *statement, const char *paging_s
         lua_settable(L, root_table);
     }
 
+    lua_newtable(L);
+    const int meta_table = lua_gettop(L);
     if (cass_result_has_more_pages(result))
     {
         const char *paging_state;
@@ -438,21 +440,12 @@ void iterate_result(lua_State *L, CassStatement *statement, const char *paging_s
         {
             errorf_cass_to_lua(L, err, "could not set paging state token");
         }
-
-        lua_newtable(L);
-
-        const int meta_table = lua_gettop(L);
-        lua_pushstring(L, "paging_state");
-        lua_pushlstring(L, paging_state, paging_state_size);
-        lua_settable(L, meta_table);
-
         lua_pushstring(L, "has_more_pages");
         lua_pushboolean(L, 1);
         lua_settable(L, meta_table);
-    }
-    else
-    {
-        lua_pushnil(L);
+        lua_pushstring(L, "paging_state");
+        lua_pushlstring(L, paging_state, paging_state_size);
+        lua_settable(L, meta_table);
     }
 
     cass_result_free(result);
@@ -489,10 +482,11 @@ static int query(lua_State *L)
 
     if (lua_type(L, ARG_OPTIONS) == LUA_TTABLE)
     {
+        printf("ARG_OPTIONS is table\n");
         lua_getfield(L, ARG_OPTIONS, "paging_state");
         paging_state = lua_tolstring(L, lua_gettop(L), &paging_state_size);
         lua_getfield(L, ARG_OPTIONS, "page_size");
-        int page_size = lua_tointeger(L, lua_gettop(L));
+        page_size = lua_tointeger(L, lua_gettop(L));
     }
 
     if (page_size == 0)
