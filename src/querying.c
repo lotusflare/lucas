@@ -438,10 +438,16 @@ void iterate_result(lua_State *L, CassStatement *statement, const char *paging_s
         {
             errorf_cass_to_lua(L, err, "could not set paging state token");
         }
+
         lua_newtable(L);
+
         const int meta_table = lua_gettop(L);
         lua_pushstring(L, "paging_state");
         lua_pushlstring(L, paging_state, paging_state_size);
+        lua_settable(L, meta_table);
+
+        lua_pushstring(L, "has_more_pages");
+        lua_pushboolean(L, 1);
         lua_settable(L, meta_table);
     }
     else
