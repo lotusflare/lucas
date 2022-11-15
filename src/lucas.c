@@ -19,8 +19,12 @@ static int connect(lua_State *L)
     {
         port = 9042;
     }
+    if (session)
+    {
+        cass_session_free(session);
+    }
     session = cass_session_new();
-    cluster = cass_cluster_new();
+    CassCluster *cluster = cass_cluster_new();
     CassError err = cass_cluster_set_contact_points(cluster, contact_points);
     if (err != CASS_OK)
     {
@@ -36,8 +40,14 @@ static int connect(lua_State *L)
     {
         errorf_cass_to_lua(L, err, "could not set port %d", port);
     }
+    err = cass_cluster_set_num_threads_io(cluster, 4);
+    if (err != CASS_OK)
+    {
+        errorf_cass_to_lua(L, err, "could not IO thread count");
+    }
     CassFuture *future = cass_session_connect(session, cluster);
     cass_future_wait(future);
+    cass_cluster_free(cluster);
     err = cass_future_error_code(future);
     cass_future_free(future);
     if (err != CASS_OK)
