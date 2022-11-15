@@ -148,11 +148,13 @@ void lucas_log(CassLogLevel level, const char *fmt, ...)
     char append[vsnprintf(NULL, 0, fmt, args1)];
     vsprintf(append, fmt, args2);
 
+    pthread_mutex_lock(&lock);
     lua_pushvalue(log_context, 1);
     lua_pushfstring(log_context, "lucas: %s", append);
     lua_pushinteger(log_context, level);
     lua_pushinteger(log_context, (int)time(NULL));
     lua_call(log_context, 3, 0);
+    pthread_mutex_unlock(&lock);
 
     va_end(args1);
     va_end(args2);
