@@ -4,6 +4,7 @@
 #include "luajit-2.1/lauxlib.h"
 #include "luajit-2.1/lua.h"
 #include "state.c"
+#include <pthread.h>
 #include <stdarg.h>
 #include <time.h>
 
@@ -109,11 +110,13 @@ int metrics(lua_State *L)
 
 void callback(const CassLogMessage *log, void *data)
 {
+    pthread_mutex_lock(&lock);
     lua_pushvalue(log_context, 1);
     lua_pushstring(log_context, log->message);
     lua_pushinteger(log_context, log->severity);
     lua_pushinteger(log_context, log->time_ms / 1000);
     lua_call(log_context, 3, 0);
+    pthread_mutex_unlock(&lock);
 }
 
 int logger(lua_State *L)
