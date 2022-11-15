@@ -474,12 +474,12 @@ CassStatement *create_prepared_statement(lua_State *L, const char *query)
 {
     CassFuture *future = cass_session_prepare(session, query);
     cass_future_wait(future);
-    if (cass_future_error_code(future) != CASS_OK)
+    CassError err = cass_future_error_code(future);
+    if (err != CASS_OK)
     {
         errorf_cass_future_to_lua(L, future, "failed to create prepared statement");
     }
     CassStatement *statement = cass_prepared_bind(cass_future_get_prepared(future));
-cleanup:
     cass_future_free(future);
     return statement;
 }
@@ -517,7 +517,11 @@ static int query(lua_State *L)
     }
 
     CassStatement *statement = create_prepared_statement(L, query);
-    cass_statement_set_paging_size(statement, page_size);
+    CassError err = cass_statement_set_paging_size(statement, page_size);
+    if (err != CASS_OK)
+    {
+        errorf_cass_to_lua(L, err, "could not set paging size to %d", page_size);
+    }
     bind_parameters(L, ARG_QUERY_PARAMS, statement);
     iterate_result(L, statement, paging_state, paging_state_size);
     cass_statement_free(statement);
