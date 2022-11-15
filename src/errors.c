@@ -14,7 +14,7 @@ void errorf_to_lua(lua_State *L, const char *fmt, ...)
     char append[vsnprintf(NULL, 0, fmt, args1)];
     vsprintf(append, fmt, args2);
 
-    lua_pushfstring(L, "lucas: %s", append);
+    lua_pushfstring(L, "lucas error: %s", append);
     lua_error(L);
 
     va_end(args1);
