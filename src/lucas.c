@@ -7,6 +7,28 @@
 #include "state.c"
 #include "types.c"
 
+int get_port(lua_State *L, int i)
+{
+    lua_getfield(L, i, "port");
+    int n = lua_tointeger(L, lua_gettop(L));
+    if (n == 0)
+    {
+        return 9042;
+    }
+    return n;
+}
+
+int get_num_io_threads(lua_State *L, int i)
+{
+    lua_getfield(L, i, "num_io_threads");
+    int n = lua_tointeger(L, lua_gettop(L));
+    if (n == 0)
+    {
+        return 1;
+    }
+    return n;
+}
+
 static int connect(lua_State *L)
 {
     lucas_log(CASS_LOG_INFO, "Attempting to connect");
@@ -14,11 +36,8 @@ static int connect(lua_State *L)
     const int ARG_PORT = 2;
     luaL_checkstring(L, ARG_CONTACT_POINTS);
     const char *contact_points = lua_tostring(L, ARG_CONTACT_POINTS);
-    int port = lua_tointeger(L, ARG_PORT);
-    if (port == 0)
-    {
-        port = 9042;
-    }
+    int port = get_port(L, ARG_PORT);
+    int num_threads = get_num_io_threads(L, ARG_PORT);
     if (session != NULL)
     {
         cass_session_free(session);
@@ -40,11 +59,11 @@ static int connect(lua_State *L)
     {
         errorf_cass_to_lua(L, err, "could not set port %d", port);
     }
-    // err = cass_cluster_set_num_threads_io(cluster, 4);
-    // if (err != CASS_OK)
-    // {
-    //     errorf_cass_to_lua(L, err, "could not num IO threads");
-    // }
+    err = cass_cluster_set_num_threads_io(cluster, num_threads);
+    if (err != CASS_OK)
+    {
+        errorf_cass_to_lua(L, err, "could not num IO threads");
+    }
     CassFuture *future = cass_session_connect(session, cluster);
     cass_future_wait(future);
     cass_cluster_free(cluster);
