@@ -115,7 +115,7 @@ void callback(const CassLogMessage *log, void *data)
     lua_pushstring(log_context, log->message);
     lua_pushinteger(log_context, log->severity);
     lua_pushinteger(log_context, log->time_ms / 1000);
-    lua_call(log_context, 3, 0);
+    lua_pcall(log_context, 3, 0, 0);
     pthread_mutex_unlock(&lock);
 }
 
@@ -153,7 +153,7 @@ void lucas_log(CassLogLevel level, const char *fmt, ...)
     lua_pushfstring(log_context, "lucas: %s", append);
     lua_pushinteger(log_context, level);
     lua_pushinteger(log_context, (int)time(NULL));
-    lua_call(log_context, 3, 0);
+    lua_pcall(log_context, 3, 0, 0);
     pthread_mutex_unlock(&lock);
 
     va_end(args1);
