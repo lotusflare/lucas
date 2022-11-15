@@ -121,6 +121,10 @@ void callback(const CassLogMessage *log, void *data)
 
 int logger(lua_State *L)
 {
+    if (log_context != NULL)
+    {
+        lua_close(log_context);
+    }
     luaL_checktype(L, 1, LUA_TFUNCTION);
     log_context = lua_newthread(L); // thread safety
     luaL_ref(L, LUA_REGISTRYINDEX);
