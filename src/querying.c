@@ -412,6 +412,7 @@ bool iterate_result(lua_State *L, CassStatement *statement, const char *paging_s
     }
 
     const CassResult *result = cass_future_get_result(future);
+    cass_future_free(future);
     CassIterator *iterator = cass_iterator_from_result(result);
     size_t col_count = cass_result_column_count(result);
 
@@ -439,6 +440,7 @@ bool iterate_result(lua_State *L, CassStatement *statement, const char *paging_s
         }
         lua_settable(L, root_table);
     }
+    cass_iterator_free(iterator);
 
     lua_newtable(L);
     const int meta_table = lua_gettop(L);
@@ -465,8 +467,6 @@ bool iterate_result(lua_State *L, CassStatement *statement, const char *paging_s
     }
 
     cass_result_free(result);
-    cass_iterator_free(iterator);
-    cass_future_free(future);
     return true;
 }
 
