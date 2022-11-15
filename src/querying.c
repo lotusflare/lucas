@@ -5,6 +5,7 @@
 #include "types.c"
 #include <luajit-2.1/lauxlib.h>
 #include <luajit-2.1/lua.h>
+#include <luajit-2.1/lualib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -102,12 +103,12 @@ void bind_positional_parameter(lua_State *L, int i, CassStatement *statement, Ca
         err = cass_uuid_from_string(lua_tostring(L, index), &uuid);
         if (err == CASS_OK)
         {
-            cass_statement_bind_uuid(statement, i, uuid);
+            err = cass_statement_bind_uuid(statement, i, uuid);
         }
     }
     else if (type == CASS_VALUE_TYPE_BOOLEAN)
     {
-        cass_statement_bind_bool(statement, i, lua_toboolean(L, index));
+        err = cass_statement_bind_bool(statement, i, lua_toboolean(L, index));
     }
     else if (type == CASS_VALUE_TYPE_TINY_INT)
     {
@@ -140,17 +141,20 @@ void bind_positional_parameter(lua_State *L, int i, CassStatement *statement, Ca
     else if (type == CASS_VALUE_TYPE_MAP)
     {
         CassCollection *map = create_map(L, index, statement);
-        cass_statement_bind_collection(statement, i, map);
+        err = cass_statement_bind_collection(statement, i, map);
+        cass_collection_free(map);
     }
     else if (type == CASS_VALUE_TYPE_LIST)
     {
         CassCollection *collection = create_collection(L, index, statement, CASS_COLLECTION_TYPE_LIST);
-        cass_statement_bind_collection(statement, i, collection);
+        err = cass_statement_bind_collection(statement, i, collection);
+        cass_collection_free(collection);
     }
     else if (type == CASS_VALUE_TYPE_SET)
     {
         CassCollection *collection = create_collection(L, index, statement, CASS_COLLECTION_TYPE_SET);
-        cass_statement_bind_collection(statement, i, collection);
+        err = cass_statement_bind_collection(statement, i, collection);
+        cass_collection_free(collection);
     }
     else if (type == CASS_VALUE_TYPE_NULL)
     {
@@ -181,12 +185,12 @@ void bind_named_parameter(lua_State *L, const char *name, CassStatement *stateme
         err = cass_uuid_from_string(lua_tostring(L, index), &uuid);
         if (err == CASS_OK)
         {
-            cass_statement_bind_uuid_by_name(statement, name, uuid);
+            err = cass_statement_bind_uuid_by_name(statement, name, uuid);
         }
     }
     else if (type == CASS_VALUE_TYPE_BOOLEAN)
     {
-        cass_statement_bind_bool_by_name(statement, name, lua_toboolean(L, index));
+        err = cass_statement_bind_bool_by_name(statement, name, lua_toboolean(L, index));
     }
     else if (type == CASS_VALUE_TYPE_TINY_INT)
     {
@@ -220,16 +224,19 @@ void bind_named_parameter(lua_State *L, const char *name, CassStatement *stateme
     {
         CassCollection *map = create_map(L, index, statement);
         err = cass_statement_bind_collection_by_name(statement, name, map);
+        cass_collection_free(map);
     }
     else if (type == CASS_VALUE_TYPE_LIST)
     {
         CassCollection *collection = create_collection(L, index, statement, CASS_COLLECTION_TYPE_LIST);
         err = cass_statement_bind_collection_by_name(statement, name, collection);
+        cass_collection_free(collection);
     }
     else if (type == CASS_VALUE_TYPE_SET)
     {
         CassCollection *collection = create_collection(L, index, statement, CASS_COLLECTION_TYPE_SET);
         err = cass_statement_bind_collection_by_name(statement, name, collection);
+        cass_collection_free(collection);
     }
     else if (type == CASS_VALUE_TYPE_NULL)
     {
@@ -393,7 +400,9 @@ void iterate_result(lua_State *L, CassStatement *statement, const char *paging_s
 
     CassFuture *future = cass_session_execute(session, statement);
     cass_future_wait(future);
-    if (cass_future_error_code(future) != CASS_OK)
+    CassError err = cass_future_error_code(future);
+    cass_future_free(future);
+    if (err != CASS_OK)
     {
         errorf_cass_future_to_lua(L, future, "execution of query failed");
     }
@@ -512,12 +521,12 @@ void prepare_insert_into_batch(lua_State *L, CassSession *session, const char *q
     CassFuture *future = cass_session_prepare(session, query);
     cass_future_wait(future);
     CassError err = cass_future_error_code(future);
+    *prepared = cass_future_get_prepared(future);
+    cass_future_free(future);
     if (err != CASS_OK)
     {
         errorf_cass_future_to_lua(L, future, "could not create prepared statement");
     }
-    *prepared = cass_future_get_prepared(future);
-    cass_future_free(future);
 }
 
 int batch(lua_State *L)
@@ -544,8 +553,9 @@ int batch(lua_State *L)
     }
 
     CassFuture *future = cass_session_execute_batch(session, batch);
-    cass_future_wait(future);
+    cass_batch_free(batch);
     cass_prepared_free(prepared);
+    cass_future_wait(future);
     CassError err = cass_future_error_code(future);
     cass_future_free(future);
     if (err != CASS_OK)
