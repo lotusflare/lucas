@@ -6,4 +6,4 @@
 
 CassSession *session = NULL;
 lua_State *log_context = NULL;
-pthread_mutex_t lock;
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;

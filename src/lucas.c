@@ -18,9 +18,9 @@ int get_port(lua_State *L, int i)
     return port;
 }
 
-int get_num_io_threads(lua_State *L, int i)
+int get_num_threads_io(lua_State *L, int i)
 {
-    lua_getfield(L, i, "num_io_threads");
+    lua_getfield(L, i, "num_threads_io");
     int num = lua_tointeger(L, lua_gettop(L));
     if (num == 0)
     {
@@ -49,7 +49,8 @@ static int connect(lua_State *L)
     luaL_checkstring(L, ARG_CONTACT_POINTS);
     const char *contact_points = lua_tostring(L, ARG_CONTACT_POINTS);
     const int port = get_port(L, ARG_OPTIONS);
-    const int num_threads = get_num_io_threads(L, ARG_OPTIONS);
+
+    const int num_threads_io = get_num_threads_io(L, ARG_OPTIONS);
     const char *application_name = get_application_name(L, ARG_OPTIONS);
     cass_bool_t use_latency_aware_routing = get_use_latency_aware_routing(L, ARG_OPTIONS);
 
@@ -74,11 +75,12 @@ static int connect(lua_State *L)
     {
         errorf_cass_to_lua(L, err, "could not set port %d", port);
     }
-    err = cass_cluster_set_num_threads_io(cluster, num_threads);
+    err = cass_cluster_set_num_threads_io(cluster, num_threads_io);
     if (err != CASS_OK)
     {
-        errorf_cass_to_lua(L, err, "could not num IO threads");
+        errorf_cass_to_lua(L, err, "could not set IO thread count");
     }
+    cass_cluster_set_connect_timeout(cluster, 5000);
     cass_cluster_set_application_name(cluster, application_name);
     cass_cluster_set_latency_aware_routing(cluster, use_latency_aware_routing);
     CassFuture *future = cass_session_connect(session, cluster);

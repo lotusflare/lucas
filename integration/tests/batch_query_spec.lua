@@ -4,10 +4,9 @@ local lucas = require("lucas")
 describe("batch", function()
     it("insert", function()
         local err =
-            lucas.connect(
-                os.getenv("CASSANDRA_HOST"),
-                os.getenv("CASSANDRA_PORT")
-            )
+            lucas.connect(os.getenv("CASSANDRA_HOST"), {
+                port = os.getenv("CASSANDRA_PORT"),
+            })
 
         lucas.batch(
             "INSERT INTO testing.data (operator_name, id, id_type, asset_id, asset_type, approval_status) VALUES (?, ?, ?, ?, ?, ?)",
