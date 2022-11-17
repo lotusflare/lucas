@@ -20,7 +20,7 @@ void lucas_error_free(LucasError *err)
 
 void lucas_error_to_lua(lua_State *L, LucasError *err)
 {
-    lua_pushfstring(L, "lucas error");
+    lua_pushfstring(L, "lucas: %s", err->message);
     lua_error(L);
 }
 

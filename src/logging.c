@@ -150,7 +150,7 @@ void lucas_log(CassLogLevel level, const char *fmt, ...)
 
     pthread_mutex_lock(&lock);
     lua_pushvalue(log_context, 1);
-    lua_pushfstring(log_context, "lucas: %s", append);
+    lua_pushfstring(log_context, "%s", append);
     lua_pushinteger(log_context, level);
     lua_pushinteger(log_context, (int)time(NULL));
     lua_pcall(log_context, 3, 0, 0);
