@@ -164,13 +164,13 @@ int luaopen_lucas(lua_State *L)
 
         {NULL, NULL},
     };
-    // luaL_Reg reg_compat[] = {
-    //     {"convert", convert},
+    luaL_Reg reg_compat[] = {
+        {"convert", convert},
 
-    //     {NULL, NULL},
-    // };
+        {NULL, NULL},
+    };
     luaL_openlib(L, "lucas", reg, 0);
-    // luaL_openlib(L, "lucas.compat", reg_compat, 0);
+    luaL_openlib(L, "lucas.compatibility", reg_compat, 0);
     cass_log_set_level(CASS_LOG_DISABLED);
-    return 1;
+    return 2;
 }
