@@ -126,7 +126,7 @@ int logger(lua_State *L)
         lua_close(log_context);
     }
     luaL_checktype(L, 1, LUA_TFUNCTION);
-    log_context = lua_newthread(L); // thread safety
+    log_context = lua_newthread(L);
     luaL_ref(L, LUA_REGISTRYINDEX);
     lua_xmove(L, log_context, 1);
     cass_log_set_callback(callback, NULL);

@@ -1,4 +1,5 @@
 #include "cassandra.h"
+#include "compat.c"
 #include "errors.c"
 #include "logging.c"
 #include "luajit-2.1/lauxlib.h"
@@ -41,6 +42,12 @@ bool get_use_latency_aware_routing(lua_State *L, int i)
     return lua_toboolean(L, lua_gettop(L));
 }
 
+bool get_reconnect(lua_State *L, int i)
+{
+    lua_getfield(L, i, "reconnect");
+    return lua_toboolean(L, lua_gettop(L));
+}
+
 static int connect(lua_State *L)
 {
     lucas_log(CASS_LOG_INFO, "Attempting to connect");
@@ -49,11 +56,16 @@ static int connect(lua_State *L)
     luaL_checkstring(L, ARG_CONTACT_POINTS);
     const char *contact_points = lua_tostring(L, ARG_CONTACT_POINTS);
     const int port = get_port(L, ARG_OPTIONS);
-
     const int num_threads_io = get_num_threads_io(L, ARG_OPTIONS);
     const char *application_name = get_application_name(L, ARG_OPTIONS);
     cass_bool_t use_latency_aware_routing = get_use_latency_aware_routing(L, ARG_OPTIONS);
+    const bool reconnect = get_reconnect(L, ARG_OPTIONS);
+    LucasError *rc = NULL;
 
+    if (!reconnect && session != NULL)
+    {
+        return 0;
+    }
     if (session != NULL)
     {
         cass_session_free(session);
@@ -63,34 +75,50 @@ static int connect(lua_State *L)
     CassError err = cass_cluster_set_contact_points(cluster, contact_points);
     if (err != CASS_OK)
     {
-        errorf_cass_to_lua(L, err, "could not set contact points %s", contact_points);
+        rc = lucas_new_errorf_from_cass_error(err, "could not set contact points %s", contact_points);
+        goto cleanup;
     }
     err = cass_cluster_set_protocol_version(cluster, CASS_PROTOCOL_VERSION_V4);
     if (err != CASS_OK)
     {
-        errorf_cass_to_lua(L, err, "could not set protocol version");
+        rc = lucas_new_errorf_from_cass_error(err, "could not set protocol version");
+        goto cleanup;
     }
     err = cass_cluster_set_port(cluster, port);
     if (err != CASS_OK)
     {
-        errorf_cass_to_lua(L, err, "could not set port %d", port);
+        rc = lucas_new_errorf_from_cass_error(err, "could not set port %d", port);
+        goto cleanup;
     }
     err = cass_cluster_set_num_threads_io(cluster, num_threads_io);
     if (err != CASS_OK)
     {
-        errorf_cass_to_lua(L, err, "could not set IO thread count");
+        rc = lucas_new_errorf_from_cass_error(err, "could not set IO thread count");
+        goto cleanup;
     }
     cass_cluster_set_connect_timeout(cluster, 5000);
     cass_cluster_set_application_name(cluster, application_name);
     cass_cluster_set_latency_aware_routing(cluster, use_latency_aware_routing);
     CassFuture *future = cass_session_connect(session, cluster);
     cass_future_wait(future);
-    cass_cluster_free(cluster);
     err = cass_future_error_code(future);
-    cass_future_free(future);
     if (err != CASS_OK)
     {
-        errorf_cass_to_lua(L, err, "could not connect");
+        rc = lucas_new_errorf_from_cass_error(err, "could not connect");
+        goto cleanup;
+    }
+cleanup:
+    if (future)
+    {
+        cass_future_free(future);
+    }
+    if (cluster)
+    {
+        cass_cluster_free(cluster);
+    }
+    if (rc != NULL)
+    {
+        lucas_error_to_lua(L, rc);
     }
     return 0;
 }
@@ -136,7 +164,13 @@ int luaopen_lucas(lua_State *L)
 
         {NULL, NULL},
     };
+    // luaL_Reg reg_compat[] = {
+    //     {"convert", convert},
+
+    //     {NULL, NULL},
+    // };
     luaL_openlib(L, "lucas", reg, 0);
+    // luaL_openlib(L, "lucas.compat", reg_compat, 0);
     cass_log_set_level(CASS_LOG_DISABLED);
     return 1;
 }

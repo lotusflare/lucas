@@ -190,30 +190,30 @@ static int type_duration(lua_State *L)
 
 static int type_list(lua_State *L)
 {
-    errorf_to_lua(L, "list type not supported");
+    lucas_error_to_lua(L, lucas_new_errorf("list type not supported"));
     return 0;
 }
 
 static int type_map(lua_State *L)
 {
-    errorf_to_lua(L, "map type not supported");
+    lucas_error_to_lua(L, lucas_new_errorf("map type not supported"));
     return 0;
 }
 
 static int type_set(lua_State *L)
 {
-    errorf_to_lua(L, "set type not supported");
+    lucas_error_to_lua(L, lucas_new_errorf("set type not supported"));
     return 0;
 }
 
 static int type_udt(lua_State *L)
 {
-    errorf_to_lua(L, "udt type not supported");
+    lucas_error_to_lua(L, lucas_new_errorf("udt type not supported"));
     return 0;
 }
 
 static int type_tuple(lua_State *L)
 {
-    errorf_to_lua(L, "tuple type not supported");
+    lucas_error_to_lua(L, lucas_new_errorf("tuple type not supported"));
     return 0;
 }
