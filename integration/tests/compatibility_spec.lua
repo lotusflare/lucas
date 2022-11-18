@@ -26,5 +26,4 @@ describe("compatibility", function()
         local result = compat.convert({})
         assert.are.same(lucas.null(), result)
     end)
-
 end)

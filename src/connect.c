@@ -28,6 +28,16 @@ int get_num_threads_io(lua_State *L, int i)
     return num;
 }
 
+bool get_use_latency_aware_routing(lua_State *L, int i)
+{
+    lua_getfield(L, i, "use_latency_aware_routing");
+    if (lua_type(L, i) == LUA_TNIL)
+    {
+        return false;
+    }
+    return lua_toboolean(L, lua_gettop(L));
+}
+
 const char *get_contact_points(lua_State *L, int i)
 {
     lua_getfield(L, i, "contact_points");
@@ -40,12 +50,6 @@ const char *get_application_name(lua_State *L, int i)
     return lua_tostring(L, lua_gettop(L));
 }
 
-bool get_use_latency_aware_routing(lua_State *L, int i)
-{
-    lua_getfield(L, i, "use_latency_aware_routing");
-    return lua_toboolean(L, lua_gettop(L));
-}
-
 bool get_reconnect(lua_State *L, int i)
 {
     lua_getfield(L, i, "reconnect");
@@ -55,10 +59,8 @@ bool get_reconnect(lua_State *L, int i)
 static int connect(lua_State *L)
 {
     lucas_log(CASS_LOG_INFO, "Attempting to connect");
-    const int ARG_CONTACT_POINTS = 1;
-    const int ARG_OPTIONS = 2;
-    luaL_checkstring(L, ARG_CONTACT_POINTS);
-    const char *contact_points = lua_tostring(L, ARG_CONTACT_POINTS);
+    const int ARG_OPTIONS = 1;
+    const char *contact_points = get_contact_points(L, ARG_OPTIONS);
     const int port = get_port(L, ARG_OPTIONS);
     const int num_threads_io = get_num_threads_io(L, ARG_OPTIONS);
     const char *application_name = get_application_name(L, ARG_OPTIONS);
