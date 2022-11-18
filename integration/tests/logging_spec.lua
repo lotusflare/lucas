@@ -17,14 +17,19 @@ end)
 describe("logging", function()
     it("callback hook works", function()
         local s = spy.new(function() end)
-        lucas.logger(function(message, level)
-            s(message, level)
+        lucas.logger(function(message, severity, timestamp)
+        -- print(message)
+            s(message, severity, timestamp)
         end)
         lucas.connect(os.getenv("CASSANDRA_HOST"), {
             port = os.getenv("CASSANDRA_PORT"),
         })
+        lucas.connect(os.getenv("CASSANDRA_HOST"), {
+            port = os.getenv("CASSANDRA_PORT"),
+        })
         assert.spy(s).was.called_with(
-            match.contains("Connected to host"),
+            match.contains("already connected"),
+            match.is_number(),
             match.is_number()
         )
     end)

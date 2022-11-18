@@ -108,33 +108,25 @@ int metrics(lua_State *L)
     return 1;
 }
 
-void callback(const CassLogMessage *log, void *data)
+typedef CassLogLevel LucasLogLevel;
+
+void log_lua(const char *message, LucasLogLevel severity, int timestamp)
 {
     pthread_mutex_lock(&lock);
     lua_pushvalue(log_context, 1);
-    lua_pushstring(log_context, log->message);
-    lua_pushinteger(log_context, log->severity);
-    lua_pushinteger(log_context, log->time_ms / 1000);
+    lua_pushstring(log_context, message);
+    lua_pushinteger(log_context, severity);
+    lua_pushinteger(log_context, timestamp);
     lua_pcall(log_context, 3, 0, 0);
     pthread_mutex_unlock(&lock);
 }
 
-int logger(lua_State *L)
+void cassandra_callback(const CassLogMessage *log, void *data)
 {
-    if (log_context != NULL)
-    {
-        lua_close(log_context);
-    }
-    luaL_checktype(L, 1, LUA_TFUNCTION);
-    log_context = lua_newthread(L); // thread safety
-    luaL_ref(L, LUA_REGISTRYINDEX);
-    lua_xmove(L, log_context, 1);
-    cass_log_set_callback(callback, NULL);
-    cass_log_set_level(CASS_LOG_DEBUG);
-    return 0;
+    log_lua(log->message, log->severity, log->time_ms / 1000);
 }
 
-void lucas_log(CassLogLevel level, const char *fmt, ...)
+void lucas_log(LucasLogLevel level, const char *fmt, ...)
 {
     if (log_context == NULL)
     {
@@ -147,15 +139,23 @@ void lucas_log(CassLogLevel level, const char *fmt, ...)
 
     char append[vsnprintf(NULL, 0, fmt, args1)];
     vsprintf(append, fmt, args2);
-
-    pthread_mutex_lock(&lock);
-    lua_pushvalue(log_context, 1);
-    lua_pushfstring(log_context, "lucas: %s", append);
-    lua_pushinteger(log_context, level);
-    lua_pushinteger(log_context, (int)time(NULL));
-    lua_pcall(log_context, 3, 0, 0);
-    pthread_mutex_unlock(&lock);
+    log_lua(append, level, (int)time(NULL));
 
     va_end(args1);
     va_end(args2);
+}
+
+int logger(lua_State *L)
+{
+    if (log_context != NULL)
+    {
+        lua_close(log_context);
+    }
+    luaL_checktype(L, 1, LUA_TFUNCTION);
+    log_context = lua_newthread(L);
+    luaL_ref(L, LUA_REGISTRYINDEX);
+    lua_xmove(L, log_context, 1);
+    cass_log_set_callback(cassandra_callback, NULL);
+    cass_log_set_level(CASS_LOG_DEBUG);
+    return 0;
 }
