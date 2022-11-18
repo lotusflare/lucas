@@ -9,6 +9,11 @@ describe("compatibility", function()
         assert.are.same(lucas.varchar("hello"), result)
     end)
 
+    it("convert int", function()
+        local result = compat.convert(32)
+        assert.are.same(lucas.int(32), result)
+    end)
+
     it("convert table", function()
         local result = compat.convert({
             __cql_type = 13,
@@ -21,4 +26,5 @@ describe("compatibility", function()
         local result = compat.convert({})
         assert.are.same(lucas.null(), result)
     end)
+
 end)

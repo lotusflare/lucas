@@ -10,9 +10,23 @@ static int convert(lua_State *L)
     lua_newtable(L);
     int table = lua_gettop(L);
 
-    if (lt == LUA_TSTRING || lt == LUA_TBOOLEAN || lt == LUA_TNUMBER)
+    if (lt == LUA_TSTRING)
     {
         lua_pushinteger(L, CASS_VALUE_TYPE_VARCHAR);
+        lua_rawseti(L, table, 1);
+        lua_pushvalue(L, ARG_PARAM);
+        lua_rawseti(L, table, 2);
+    }
+    if (lt == LUA_TBOOLEAN || lt == LUA_TNUMBER)
+    {
+        lua_pushinteger(L, CASS_VALUE_TYPE_BOOLEAN);
+        lua_rawseti(L, table, 1);
+        lua_pushvalue(L, ARG_PARAM);
+        lua_rawseti(L, table, 2);
+    }
+    if (lt == LUA_TNUMBER)
+    {
+        lua_pushinteger(L, CASS_VALUE_TYPE_INT);
         lua_rawseti(L, table, 1);
         lua_pushvalue(L, ARG_PARAM);
         lua_rawseti(L, table, 2);
