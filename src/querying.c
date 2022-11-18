@@ -598,7 +598,6 @@ cleanup:
 
 static int query(lua_State *L)
 {
-    lucas_log(CASS_LOG_INFO, "Attempting to query");
     const int ARG_QUERY = 1;
     const int ARG_QUERY_PARAMS = 2;
     const int ARG_OPTIONS = 3;

@@ -62,6 +62,7 @@ static int connect(lua_State *L)
 
     if (!reconnect && session != NULL)
     {
+        lucas_log(CASS_LOG_INFO, "already connected");
         return 0;
     }
     if (session != NULL)
