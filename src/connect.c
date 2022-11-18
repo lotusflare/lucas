@@ -28,16 +28,26 @@ int get_num_threads_io(lua_State *L, int i)
     return num;
 }
 
+bool get_use_latency_aware_routing(lua_State *L, int i)
+{
+    lua_getfield(L, i, "use_latency_aware_routing");
+    if (lua_type(L, i) == LUA_TNIL)
+    {
+        return false;
+    }
+    return lua_toboolean(L, lua_gettop(L));
+}
+
+const char *get_contact_points(lua_State *L, int i)
+{
+    lua_getfield(L, i, "contact_points");
+    return lua_tostring(L, lua_gettop(L));
+}
+
 const char *get_application_name(lua_State *L, int i)
 {
     lua_getfield(L, i, "application_name");
     return lua_tostring(L, lua_gettop(L));
-}
-
-bool get_use_latency_aware_routing(lua_State *L, int i)
-{
-    lua_getfield(L, i, "use_latency_aware_routing");
-    return lua_toboolean(L, lua_gettop(L));
 }
 
 bool get_reconnect(lua_State *L, int i)
@@ -49,15 +59,14 @@ bool get_reconnect(lua_State *L, int i)
 static int connect(lua_State *L)
 {
     lucas_log(CASS_LOG_INFO, "Attempting to connect");
-    const int ARG_CONTACT_POINTS = 1;
-    const int ARG_OPTIONS = 2;
-    luaL_checkstring(L, ARG_CONTACT_POINTS);
-    const char *contact_points = lua_tostring(L, ARG_CONTACT_POINTS);
+    const int ARG_OPTIONS = 1;
+    const char *contact_points = get_contact_points(L, ARG_OPTIONS);
     const int port = get_port(L, ARG_OPTIONS);
     const int num_threads_io = get_num_threads_io(L, ARG_OPTIONS);
     const char *application_name = get_application_name(L, ARG_OPTIONS);
     cass_bool_t use_latency_aware_routing = get_use_latency_aware_routing(L, ARG_OPTIONS);
     const bool reconnect = get_reconnect(L, ARG_OPTIONS);
+    CassFuture *future = NULL;
     LucasError *rc = NULL;
 
     if (!reconnect && session != NULL)
@@ -98,7 +107,7 @@ static int connect(lua_State *L)
     cass_cluster_set_connect_timeout(cluster, 5000);
     cass_cluster_set_application_name(cluster, application_name);
     cass_cluster_set_latency_aware_routing(cluster, use_latency_aware_routing);
-    CassFuture *future = cass_session_connect(session, cluster);
+    future = cass_session_connect(session, cluster);
     cass_future_wait(future);
     err = cass_future_error_code(future);
     if (err != CASS_OK)

@@ -18,13 +18,14 @@ describe("logging", function()
     it("callback hook works", function()
         local s = spy.new(function() end)
         lucas.logger(function(message, severity, timestamp)
-        -- print(message)
             s(message, severity, timestamp)
         end)
-        lucas.connect(os.getenv("CASSANDRA_HOST"), {
+        lucas.connect({
+            contact_points = os.getenv("CASSANDRA_HOST"),
             port = os.getenv("CASSANDRA_PORT"),
         })
-        lucas.connect(os.getenv("CASSANDRA_HOST"), {
+        lucas.connect({
+            contact_points = os.getenv("CASSANDRA_HOST"),
             port = os.getenv("CASSANDRA_PORT"),
         })
         assert.spy(s).was.called_with(
@@ -37,7 +38,8 @@ end)
 
 describe("metrics", function()
     it("collects general metrics", function()
-        lucas.connect(os.getenv("CASSANDRA_HOST"), {
+        lucas.connect({
+            contact_points = os.getenv("CASSANDRA_HOST"),
             port = os.getenv("CASSANDRA_PORT"),
         })
         local metrics = lucas.metrics()
@@ -45,7 +47,8 @@ describe("metrics", function()
     end)
 
     it("collects speculative execution metrics", function()
-        lucas.connect(os.getenv("CASSANDRA_HOST"), {
+        lucas.connect({
+            contact_points = os.getenv("CASSANDRA_HOST"),
             port = os.getenv("CASSANDRA_PORT"),
         })
         local metrics = lucas.speculative_execution_metrics()
