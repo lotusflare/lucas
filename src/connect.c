@@ -28,6 +28,12 @@ int get_num_threads_io(lua_State *L, int i)
     return num;
 }
 
+const char *get_contact_points(lua_State *L, int i)
+{
+    lua_getfield(L, i, "contact_points");
+    return lua_tostring(L, lua_gettop(L));
+}
+
 const char *get_application_name(lua_State *L, int i)
 {
     lua_getfield(L, i, "application_name");
@@ -58,6 +64,7 @@ static int connect(lua_State *L)
     const char *application_name = get_application_name(L, ARG_OPTIONS);
     cass_bool_t use_latency_aware_routing = get_use_latency_aware_routing(L, ARG_OPTIONS);
     const bool reconnect = get_reconnect(L, ARG_OPTIONS);
+    CassFuture *future = NULL;
     LucasError *rc = NULL;
 
     if (!reconnect && session != NULL)
@@ -98,7 +105,7 @@ static int connect(lua_State *L)
     cass_cluster_set_connect_timeout(cluster, 5000);
     cass_cluster_set_application_name(cluster, application_name);
     cass_cluster_set_latency_aware_routing(cluster, use_latency_aware_routing);
-    CassFuture *future = cass_session_connect(session, cluster);
+    future = cass_session_connect(session, cluster);
     cass_future_wait(future);
     err = cass_future_error_code(future);
     if (err != CASS_OK)

@@ -1,5 +1,6 @@
 #include "cassandra.h"
 #include "types.c"
+#include <luajit-2.1/lauxlib.h>
 #include <luajit-2.1/lua.h>
 
 static int convert(lua_State *L)
@@ -19,10 +20,19 @@ static int convert(lua_State *L)
     else if (lt == LUA_TTABLE)
     {
         lua_getfield(L, ARG_PARAM, "__cql_type");
-        lua_rawseti(L, table, 1);
-        lua_getfield(L, ARG_PARAM, "val");
-        lua_rawseti(L, table, 2);
+        if (lua_type(L, lua_gettop(L)) == LUA_TNIL)
+        {
+            lua_pushinteger(L, CASS_VALUE_TYPE_NULL);
+            lua_rawseti(L, table, 1);
+        }
+        else
+        {
+            lua_getfield(L, ARG_PARAM, "__cql_type");
+            lua_rawseti(L, table, 1);
+            lua_getfield(L, ARG_PARAM, "val");
+            lua_rawseti(L, table, 2);
+        }
+        lua_pop(L, 1);
     }
-
     return 1;
 }
