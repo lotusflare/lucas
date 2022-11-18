@@ -1,4 +1,5 @@
 #include "cassandra.h"
+#include "errors.c"
 #include "types.c"
 #include <luajit-2.1/lauxlib.h>
 #include <luajit-2.1/lua.h>
@@ -17,14 +18,14 @@ static int convert(lua_State *L)
         lua_pushvalue(L, ARG_PARAM);
         lua_rawseti(L, table, 2);
     }
-    if (lt == LUA_TBOOLEAN)
+    else if (lt == LUA_TBOOLEAN)
     {
         lua_pushinteger(L, CASS_VALUE_TYPE_BOOLEAN);
         lua_rawseti(L, table, 1);
         lua_pushvalue(L, ARG_PARAM);
         lua_rawseti(L, table, 2);
     }
-    if (lt == LUA_TNUMBER)
+    else if (lt == LUA_TNUMBER)
     {
         lua_pushinteger(L, CASS_VALUE_TYPE_INT);
         lua_rawseti(L, table, 1);
@@ -47,6 +48,10 @@ static int convert(lua_State *L)
             lua_rawseti(L, table, 2);
         }
         lua_pop(L, 1);
+    }
+    else
+    {
+        lucas_error_to_lua(L, lucas_new_errorf("could not convert type %d", lt));
     }
     return 1;
 }
