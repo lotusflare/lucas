@@ -17,7 +17,7 @@ static int convert(lua_State *L)
         lua_pushvalue(L, ARG_PARAM);
         lua_rawseti(L, table, 2);
     }
-    if (lt == LUA_TBOOLEAN || lt == LUA_TNUMBER)
+    if (lt == LUA_TBOOLEAN)
     {
         lua_pushinteger(L, CASS_VALUE_TYPE_BOOLEAN);
         lua_rawseti(L, table, 1);
