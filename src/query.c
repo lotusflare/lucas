@@ -14,9 +14,9 @@
 
 LucasError *create_map(lua_State *L, int index, CassStatement *statement, CassCollection **collection)
 {
-    LucasError *rc;
-    size_t map_size = lua_objlen(L, lua_gettop(L));
-    *collection = cass_collection_new(CASS_COLLECTION_TYPE_MAP, map_size);
+    CassError err = CASS_OK;
+    LucasError *rc = NULL;
+    *collection = cass_collection_new(CASS_COLLECTION_TYPE_MAP, 0);
     lua_pushnil(L);
 
     for (int last_top = lua_gettop(L); lua_next(L, index) != 0; lua_pop(L, lua_gettop(L) - last_top))
@@ -25,7 +25,6 @@ LucasError *create_map(lua_State *L, int index, CassStatement *statement, CassCo
         const int key_type = lua_type(L, key_index);
         const int value_index = lua_gettop(L);
         const int value_type = lua_type(L, value_index);
-        CassError err = CASS_OK;
 
         if (key_type == LUA_TSTRING)
         {
@@ -38,6 +37,11 @@ LucasError *create_map(lua_State *L, int index, CassStatement *statement, CassCo
         else if (key_type == LUA_TBOOLEAN)
         {
             err = cass_collection_append_bool(*collection, lua_toboolean(L, key_index));
+        }
+        else
+        {
+            rc = lucas_new_errorf("invalid key type for collection");
+            goto cleanup;
         }
 
         if (value_type == LUA_TSTRING)
@@ -52,6 +56,11 @@ LucasError *create_map(lua_State *L, int index, CassStatement *statement, CassCo
         {
             err = cass_collection_append_bool(*collection, lua_toboolean(L, value_index));
         }
+        else
+        {
+            rc = lucas_new_errorf("invalid value type for collection");
+            goto cleanup;
+        }
 
         if (err != CASS_OK)
         {
@@ -61,10 +70,6 @@ LucasError *create_map(lua_State *L, int index, CassStatement *statement, CassCo
     }
 
 cleanup:
-    if (*collection)
-    {
-        cass_collection_free(*collection);
-    }
     return rc;
 }
 
@@ -94,18 +99,20 @@ LucasError *create_collection(lua_State *L, int index, CassStatement *statement,
         {
             err = cass_collection_append_bool(*collection, lua_toboolean(L, value_index));
         }
+        else
+        {
+            rc = lucas_new_errorf("invalid value type for list");
+            goto cleanup;
+        }
 
         if (err != CASS_OK)
         {
             rc = lucas_new_errorf_from_cass_error(err, "could not append to collection");
+            goto cleanup;
         }
     }
 
 cleanup:
-    if (*collection)
-    {
-        cass_collection_free(*collection);
-    }
     return rc;
 }
 
@@ -113,7 +120,7 @@ LucasError *bind_positional_parameter(lua_State *L, int i, CassStatement *statem
 {
     LucasError *rc = NULL;
     CassError err = CASS_OK;
-    CassCollection *collection;
+    CassCollection *collection = NULL;
 
     if (type == CASS_VALUE_TYPE_UUID || type == CASS_VALUE_TYPE_TIMEUUID)
     {
@@ -204,6 +211,10 @@ LucasError *bind_positional_parameter(lua_State *L, int i, CassStatement *statem
     }
 
 cleanup:
+    if (collection)
+    {
+        cass_collection_free(collection);
+    }
     return rc;
 }
 
@@ -212,7 +223,7 @@ LucasError *bind_named_parameter(lua_State *L, const char *name, CassStatement *
 {
     LucasError *rc = NULL;
     CassError err = CASS_OK;
-    CassCollection *collection;
+    CassCollection *collection = NULL;
 
     if (type == CASS_VALUE_TYPE_UUID || type == CASS_VALUE_TYPE_TIMEUUID)
     {
@@ -293,11 +304,13 @@ LucasError *bind_named_parameter(lua_State *L, const char *name, CassStatement *
     else
     {
         rc = lucas_new_errorf("invalid type %d for parameter %s", type, name);
+        goto cleanup;
     }
 
     if (err != CASS_OK)
     {
         rc = lucas_new_errorf_from_cass_error(err, "could not bind named parameter %s", name);
+        goto cleanup;
     }
 
 cleanup:
@@ -586,6 +599,7 @@ LucasError *create_prepared_statement(lua_State *L, const char *query, CassState
     }
     prepared = cass_future_get_prepared(future);
     *statement = cass_prepared_bind(prepared);
+
 cleanup:
     if (future)
     {

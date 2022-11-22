@@ -68,7 +68,6 @@ static int connect(lua_State *L)
     const bool reconnect = get_reconnect(L, ARG_OPTIONS);
     CassFuture *future = NULL;
     LucasError *rc = NULL;
-
     if (!reconnect && session != NULL)
     {
         lucas_log(CASS_LOG_INFO, "already connected");
@@ -104,6 +103,7 @@ static int connect(lua_State *L)
         rc = lucas_new_errorf_from_cass_error(err, "could not set IO thread count");
         goto cleanup;
     }
+    cass_cluster_set_constant_reconnect(cluster, 1000);
     cass_cluster_set_connect_timeout(cluster, 5000);
     cass_cluster_set_application_name(cluster, application_name);
     cass_cluster_set_latency_aware_routing(cluster, use_latency_aware_routing);
@@ -112,18 +112,13 @@ static int connect(lua_State *L)
     err = cass_future_error_code(future);
     if (err != CASS_OK)
     {
-        rc = lucas_new_errorf_from_cass_error(err, "could not connect");
+        rc = lucas_new_errorf_from_cass_error(err, "could not connect to %s", contact_points);
         goto cleanup;
     }
+
 cleanup:
-    if (future)
-    {
-        cass_future_free(future);
-    }
-    if (cluster)
-    {
-        cass_cluster_free(cluster);
-    }
+    cass_future_free(future);
+    cass_cluster_free(cluster);
     if (rc != NULL)
     {
         lucas_error_to_lua(L, rc);
