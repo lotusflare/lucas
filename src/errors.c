@@ -25,6 +25,12 @@ void lucas_error_to_lua(lua_State *L, LucasError *err)
     lua_error(L);
 }
 
+LucasError *lucas_wrap_error(LucasError *err, const char *fmt, ...)
+{
+    // TODO: support wrapping errors
+    return err;
+}
+
 LucasError *lucas_new_errorf(const char *fmt, ...)
 {
     va_list args1, args2;

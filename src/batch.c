@@ -26,7 +26,10 @@ LucasError *prepare_insert_into_batch(lua_State *L, CassSession *session, const 
     *prepared = cass_future_get_prepared(future);
 
 cleanup:
-    cass_future_free(future);
+    if (future)
+    {
+        cass_future_free(future);
+    }
     return rc;
 }
 
@@ -73,9 +76,18 @@ int batch(lua_State *L)
     }
 
 cleanup:
-    cass_future_free(future);
-    cass_batch_free(batch);
-    cass_statement_free(statement);
+    if (future)
+    {
+        cass_future_free(future);
+    }
+    if (batch)
+    {
+        cass_batch_free(batch);
+    }
+    if (statement)
+    {
+        cass_statement_free(statement);
+    }
     if (rc)
     {
         lucas_error_to_lua(L, rc);
