@@ -211,10 +211,7 @@ LucasError *bind_positional_parameter(lua_State *L, int i, CassStatement *statem
     }
 
 cleanup:
-    if (collection)
-    {
-        cass_collection_free(collection);
-    }
+    cass_collection_free(collection);
     return rc;
 }
 
@@ -482,10 +479,7 @@ LucasError *cass_value_to_lua(lua_State *L, const CassValue *cass_value)
     }
 
 cleanup:
-    if (iterator)
-    {
-        cass_iterator_free(iterator);
-    }
+    cass_iterator_free(iterator);
     return rc;
 }
 
@@ -549,7 +543,7 @@ LucasError *iterate_result(lua_State *L, CassStatement *statement, const char *p
     {
         const char *paging_state;
         size_t paging_state_size;
-        CassError err = cass_result_paging_state_token(result, &paging_state, &paging_state_size);
+        err = cass_result_paging_state_token(result, &paging_state, &paging_state_size);
         if (err != CASS_OK)
         {
             rc = lucas_new_errorf_from_cass_error(err, "could not get paging state token");
@@ -570,18 +564,9 @@ LucasError *iterate_result(lua_State *L, CassStatement *statement, const char *p
     }
 
 cleanup:
-    if (iterator)
-    {
-        cass_iterator_free(iterator);
-    }
-    if (result)
-    {
-        cass_result_free(result);
-    }
-    if (future)
-    {
-        cass_future_free(future);
-    }
+    cass_iterator_free(iterator);
+    cass_result_free(result);
+    cass_future_free(future);
     return rc;
 }
 
@@ -601,14 +586,8 @@ LucasError *create_prepared_statement(lua_State *L, const char *query, CassState
     *statement = cass_prepared_bind(prepared);
 
 cleanup:
-    if (future)
-    {
-        cass_future_free(future);
-    }
-    if (prepared)
-    {
-        cass_prepared_free(prepared);
-    }
+    cass_future_free(future);
+    cass_prepared_free(prepared);
     return rc;
 }
 
@@ -665,13 +644,7 @@ static int query(lua_State *L)
     }
 
 cleanup:
-    if (statement)
-    {
-        cass_statement_free(statement);
-    }
-    if (rc)
-    {
-        lucas_error_to_lua(L, rc);
-    }
+    cass_statement_free(statement);
+    lucas_error_to_lua(L, rc);
     return 2;
 }

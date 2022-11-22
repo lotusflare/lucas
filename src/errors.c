@@ -9,14 +9,8 @@
 
 typedef struct LucasError
 {
-    bool ok;
     char *message;
 } LucasError;
-
-void lucas_error_free(LucasError *err)
-{
-    free(err);
-}
 
 void lucas_error_to_lua(lua_State *L, LucasError *err)
 {

@@ -119,7 +119,7 @@ static int connect(lua_State *L)
 cleanup:
     cass_future_free(future);
     cass_cluster_free(cluster);
-    if (rc != NULL)
+    if (rc)
     {
         lucas_error_to_lua(L, rc);
     }
