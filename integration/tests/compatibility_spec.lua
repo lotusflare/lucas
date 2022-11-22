@@ -14,6 +14,11 @@ describe("compatibility", function()
         assert.are.same(lucas.int(32), result)
     end)
 
+    it("convert bool", function()
+        local result = compat.convert(true)
+        assert.are.same(lucas.boolean(true), result)
+    end)
+
     it("convert table", function()
         local result = compat.convert({
             __cql_type = 13,
