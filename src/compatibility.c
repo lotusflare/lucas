@@ -37,7 +37,7 @@ static int convert(lua_State *L)
         lua_getfield(L, ARG_PARAM, "__cql_type");
         if (lua_type(L, lua_gettop(L)) == LUA_TNIL)
         {
-            lua_pushinteger(L, CASS_VALUE_TYPE_UNSET);
+            lua_pushinteger(L, CASS_VALUE_TYPE_NULL);
             lua_rawseti(L, table, 1);
         }
         else
