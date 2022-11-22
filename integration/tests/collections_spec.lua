@@ -4,7 +4,10 @@ local lucas = require("lucas")
 
 describe("query", function()
     it("collections select", function()
-        lucas.connect(os.getenv("CASSANDRA_HOST"), os.getenv("CASSANDRA_PORT"))
+        lucas.connect({
+            contact_points = os.getenv("CASSANDRA_HOST"),
+            port = os.getenv("CASSANDRA_PORT"),
+        })
         local results = lucas.query("SELECT * FROM testing.collections", {})
         assert.are.same(
             { {

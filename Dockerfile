@@ -2,7 +2,7 @@ FROM ubuntu:20.04
 
 ENV LUA_CPATH="/app/build/?.so;/usr/local/lib/lua/5.1/?.so"
 ARG DEBIAN_FRONTEND="noninteractive"
-ARG SKIP_BUILD="false"
+ARG SKIP_BUILD=""
 
 RUN apt-get update -yq \
     && apt-get install -yq git boxes clang-12 clangd-12 clang-format-12 make cmake libssl-dev libuv1-dev zlib1g-dev libluajit-5.1-dev luajit luarocks pkg-config nodejs npm \
@@ -13,7 +13,7 @@ RUN apt-get update -yq \
 
 COPY . /app
 WORKDIR /app
-RUN if [ ${SKIP_BUILD} = false ]; then \
+RUN if [ -z "${SKIP_BUILD}" ]; then \
         ./format.sh \
         && cmake -S . -B build \
         && cmake --build build; \
