@@ -211,7 +211,10 @@ LucasError *bind_positional_parameter(lua_State *L, int i, CassStatement *statem
     }
 
 cleanup:
-    cass_collection_free(collection);
+    if (collection)
+    {
+        cass_collection_free(collection);
+    }
     return rc;
 }
 
@@ -375,8 +378,8 @@ LucasError *cass_value_to_lua(lua_State *L, const CassValue *cass_value)
     }
     else if (vt == CASS_VALUE_TYPE_ASCII || vt == CASS_VALUE_TYPE_TEXT || vt == CASS_VALUE_TYPE_VARCHAR)
     {
-        const char *value;
-        size_t length;
+        const char *value = NULL;
+        size_t length = 0;
         err = cass_value_get_string(cass_value, &value, &length);
         lua_pushlstring(L, value, length);
     }
@@ -479,7 +482,10 @@ LucasError *cass_value_to_lua(lua_State *L, const CassValue *cass_value)
     }
 
 cleanup:
-    cass_iterator_free(iterator);
+    if (iterator)
+    {
+        cass_iterator_free(iterator);
+    }
     return rc;
 }
 
@@ -518,8 +524,8 @@ LucasError *iterate_result(lua_State *L, CassStatement *statement, const char *p
         const CassRow *row = cass_iterator_get_row(iterator);
         for (size_t c = 0; c < col_count; c++)
         {
-            const char *name;
-            size_t name_length;
+            const char *name = NULL;
+            size_t name_length = 0;
             err = cass_result_column_name(result, c, &name, &name_length);
             if (err != CASS_OK)
             {
@@ -541,8 +547,8 @@ LucasError *iterate_result(lua_State *L, CassStatement *statement, const char *p
     const int meta_table = lua_gettop(L);
     if (cass_result_has_more_pages(result))
     {
-        const char *paging_state;
-        size_t paging_state_size;
+        const char *paging_state = NULL;
+        size_t paging_state_size = 0;
         err = cass_result_paging_state_token(result, &paging_state, &paging_state_size);
         if (err != CASS_OK)
         {
@@ -564,9 +570,18 @@ LucasError *iterate_result(lua_State *L, CassStatement *statement, const char *p
     }
 
 cleanup:
-    cass_iterator_free(iterator);
-    cass_result_free(result);
-    cass_future_free(future);
+    if (iterator)
+    {
+        cass_iterator_free(iterator);
+    }
+    if (result)
+    {
+        cass_result_free(result);
+    }
+    if (future)
+    {
+        cass_future_free(future);
+    }
     return rc;
 }
 
@@ -586,8 +601,14 @@ LucasError *create_prepared_statement(lua_State *L, const char *query, CassState
     *statement = cass_prepared_bind(prepared);
 
 cleanup:
-    cass_future_free(future);
-    cass_prepared_free(prepared);
+    if (future)
+    {
+        cass_future_free(future);
+    }
+    if (prepared)
+    {
+        cass_prepared_free(prepared);
+    }
     return rc;
 }
 
@@ -598,7 +619,6 @@ static int query(lua_State *L)
     const int ARG_OPTIONS = 3;
     luaL_checktype(L, ARG_QUERY, LUA_TSTRING);
     luaL_checktype(L, ARG_QUERY_PARAMS, LUA_TTABLE);
-    const size_t parameter_count = lua_objlen(L, ARG_QUERY_PARAMS);
     const char *query = lua_tostring(L, ARG_QUERY);
     size_t paging_state_size = 0;
     const char *paging_state = NULL;
@@ -613,18 +633,15 @@ static int query(lua_State *L)
         lua_getfield(L, ARG_OPTIONS, "page_size");
         page_size = lua_tointeger(L, lua_gettop(L));
     }
-
     if (page_size == 0)
     {
         page_size = 500;
     }
-
     if (session == NULL)
     {
         rc = lucas_new_errorf("not connected");
         goto cleanup;
     }
-
     rc = create_prepared_statement(L, query, &statement);
     if (rc)
     {
@@ -644,7 +661,13 @@ static int query(lua_State *L)
     }
 
 cleanup:
-    cass_statement_free(statement);
-    lucas_error_to_lua(L, rc);
+    if (statement)
+    {
+        cass_statement_free(statement);
+    }
+    if (rc)
+    {
+        lucas_error_to_lua(L, rc);
+    }
     return 2;
 }
