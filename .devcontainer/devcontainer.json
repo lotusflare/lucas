@@ -1,8 +1,8 @@
 {
     "workspaceFolder": "/app",
     "dockerComposeFile": [
-        "../docker-compose.yml",
-        "../docker-compose.devcontainer.yml"
+        "${localWorkspaceFolder}/docker-compose.yml",
+        "${localWorkspaceFolder}/docker-compose.devcontainer.yml"
     ],
     "service": "driver",
     "customizations": {
@@ -16,7 +16,6 @@
             ]
         }
     },
-    // "postCreateCommand": "git submodule update --init",
     "features": {
         "ghcr.io/devcontainers/features/git:1": {
             "version": "latest"
