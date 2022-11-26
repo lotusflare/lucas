@@ -443,11 +443,13 @@ LucasError *cass_value_to_lua(lua_State *L, const CassValue *cass_value)
             rc = cass_value_to_lua(L, cass_iterator_get_map_key(iterator));
             if (rc)
             {
+                rc = lucas_wrap_error(rc, "unable to convert cassandra map key to lua type");
                 goto cleanup;
             }
             rc = cass_value_to_lua(L, cass_iterator_get_map_value(iterator));
             if (rc)
             {
+                rc = lucas_wrap_error(rc, "unable to convert cassandra map value to lua type");
                 goto cleanup;
             }
             lua_settable(L, map_table);
@@ -464,6 +466,7 @@ LucasError *cass_value_to_lua(lua_State *L, const CassValue *cass_value)
             rc = cass_value_to_lua(L, cass_iterator_get_value(iterator));
             if (rc)
             {
+                rc = lucas_wrap_error(rc, "unable to convert cassandra list or set item to lua type");
                 goto cleanup;
             }
             lua_settable(L, list_table);
@@ -536,6 +539,7 @@ LucasError *iterate_result(lua_State *L, CassStatement *statement, const char *p
             rc = cass_value_to_lua(L, cass_row_get_column(row, c));
             if (rc)
             {
+                rc = lucas_wrap_error(rc, "unable to convert cassandra value to lua");
                 goto cleanup;
             }
             lua_settable(L, sub_table);
