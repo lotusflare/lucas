@@ -26,6 +26,16 @@ int get_num_threads_io(lua_State *L, int i)
     return lua_tointeger(L, lua_gettop(L));
 }
 
+int get_connect_timeout(lua_State *L, int i)
+{
+    lua_getfield(L, i, "connect_timeout");
+    if (lua_type(L, lua_gettop(L)) == LUA_TNIL)
+    {
+        return 5000;
+    }
+    return lua_tointeger(L, lua_gettop(L));
+}
+
 bool get_use_latency_aware_routing(lua_State *L, int i)
 {
     lua_getfield(L, i, "use_latency_aware_routing");
@@ -81,6 +91,7 @@ static int connect(lua_State *L)
     const char *application_name = get_application_name(L, ARG_OPTIONS);
     const bool use_latency_aware_routing = get_use_latency_aware_routing(L, ARG_OPTIONS);
     const bool reconnect = get_reconnect(L, ARG_OPTIONS);
+    const int connect_timeout = get_connect_timeout(L, ARG_OPTIONS);
 
     if (!reconnect && session != NULL)
     {
@@ -118,7 +129,7 @@ static int connect(lua_State *L)
         goto cleanup;
     }
     cass_cluster_set_constant_reconnect(cluster, 1000);
-    cass_cluster_set_connect_timeout(cluster, 5000);
+    cass_cluster_set_connect_timeout(cluster, connect_timeout);
     cass_cluster_set_application_name(cluster, application_name);
     cass_cluster_set_latency_aware_routing(cluster, use_latency_aware_routing);
     future = cass_session_connect(session, cluster);
