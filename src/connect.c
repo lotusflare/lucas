@@ -114,7 +114,7 @@ static int connect(lua_State *L)
     err = cass_cluster_set_num_threads_io(cluster, num_threads_io);
     if (err != CASS_OK)
     {
-        rc = lucas_new_errorf_from_cass_error(err, "could not set IO thread count");
+        rc = lucas_new_errorf_from_cass_error(err, "could not set IO thread count to %d", num_threads_io);
         goto cleanup;
     }
     cass_cluster_set_constant_reconnect(cluster, 1000);
