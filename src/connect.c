@@ -9,7 +9,7 @@
 int get_port(lua_State *L, int i)
 {
     lua_getfield(L, i, "port");
-    if (lua_type(L, i) == LUA_TNONE)
+    if (lua_type(L, lua_gettop(L)) == LUA_TNIL)
     {
         return 9042;
     }
@@ -19,7 +19,7 @@ int get_port(lua_State *L, int i)
 int get_num_threads_io(lua_State *L, int i)
 {
     lua_getfield(L, i, "num_threads_io");
-    if (lua_type(L, i) == LUA_TNONE)
+    if (lua_type(L, lua_gettop(L)) == LUA_TNIL)
     {
         return 1;
     }
@@ -29,7 +29,7 @@ int get_num_threads_io(lua_State *L, int i)
 bool get_use_latency_aware_routing(lua_State *L, int i)
 {
     lua_getfield(L, i, "use_latency_aware_routing");
-    if (lua_type(L, i) == LUA_TNONE)
+    if (lua_type(L, lua_gettop(L)) == LUA_TNIL)
     {
         return false;
     }
@@ -39,7 +39,7 @@ bool get_use_latency_aware_routing(lua_State *L, int i)
 const char *get_contact_points(lua_State *L, int i)
 {
     lua_getfield(L, i, "contact_points");
-    if (lua_type(L, i) == LUA_TNONE)
+    if (lua_type(L, lua_gettop(L)) == LUA_TNIL)
     {
         return "127.0.0.1";
     }
@@ -49,7 +49,7 @@ const char *get_contact_points(lua_State *L, int i)
 const char *get_application_name(lua_State *L, int i)
 {
     lua_getfield(L, i, "application_name");
-    if (lua_type(L, i) == LUA_TNONE)
+    if (lua_type(L, lua_gettop(L)) == LUA_TNIL)
     {
         return NULL;
     }
@@ -59,7 +59,7 @@ const char *get_application_name(lua_State *L, int i)
 bool get_reconnect(lua_State *L, int i)
 {
     lua_getfield(L, i, "reconnect");
-    if (lua_type(L, i) == LUA_TNONE)
+    if (lua_type(L, lua_gettop(L)) == LUA_TNIL)
     {
         return false;
     }
