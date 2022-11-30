@@ -37,7 +37,7 @@ void lucas_log(LucasLogLevel level, const char *fmt, ...)
     va_start(args1, fmt);
     va_copy(args2, args1);
 
-    char append[vsnprintf(NULL, 0, fmt, args1)];
+    char append[vsnprintf(NULL, 0, fmt, args1) + 1];
     vsprintf(append, fmt, args2);
     log_lua(append, level, (int)time(NULL));
 
