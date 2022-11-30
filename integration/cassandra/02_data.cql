@@ -27,5 +27,5 @@ INSERT INTO testing.collections (
     2,
     {50},
     [10, 20],
-    {0f854625-9bfd-4407-8c28-c4cdb67106f8: 'foo'}
+    {0f854625-9bfd-4407-8c28-c4cdb67106f8: 'foo', e00e3562-9b62-40dc-ac40-0b6834ffc5e5: 'bar'}
 );
