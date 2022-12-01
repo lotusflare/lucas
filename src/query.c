@@ -1,5 +1,6 @@
 #pragma once
 
+#include "query.h"
 #include "cassandra.h"
 #include "errors.c"
 #include "logging.c"
@@ -64,6 +65,22 @@ LucasError *append_collection(lua_State *L, int index, CassCollection *collectio
     {
         err = cass_collection_append_string(collection, lua_tostring(L, value_index));
     }
+    else if (type == CASS_VALUE_TYPE_MAP)
+    {
+        rc = lucas_new_errorf("nested collections not supported");
+        create_map(L, value_index, &collection);
+        goto cleanup;
+    }
+    else if (type == CASS_VALUE_TYPE_LIST)
+    {
+        rc = lucas_new_errorf("nested collections not supported");
+        goto cleanup;
+    }
+    else if (type == CASS_VALUE_TYPE_SET)
+    {
+        rc = lucas_new_errorf("nested collections not supported");
+        goto cleanup;
+    }
     else
     {
         rc = lucas_new_errorf("invalid type to append to collection");
@@ -78,7 +95,7 @@ cleanup:
     return rc;
 }
 
-LucasError *create_map(lua_State *L, int index, CassStatement *statement, CassCollection **collection)
+LucasError *create_map(lua_State *L, int index, CassCollection **collection)
 {
     CassError err = CASS_OK;
     LucasError *rc = NULL;
@@ -105,13 +122,13 @@ cleanup:
     return rc;
 }
 
-LucasError *create_collection(lua_State *L, int index, CassStatement *statement, CassCollectionType collection_type,
+LucasError *create_collection(lua_State *L, int index, CassStatement *statement, CassCollectionType type,
                               CassCollection **collection)
 {
     CassError err = CASS_OK;
     LucasError *rc = NULL;
-    size_t collection_size = lua_objlen(L, lua_gettop(L));
-    *collection = cass_collection_new(collection_type, collection_size);
+    size_t size = lua_objlen(L, lua_gettop(L));
+    *collection = cass_collection_new(type, size);
     lua_pushnil(L);
 
     for (int last_top = lua_gettop(L); lua_next(L, index) != 0; lua_pop(L, lua_gettop(L) - last_top))
@@ -177,7 +194,7 @@ LucasError *bind_positional_parameter(lua_State *L, int i, CassStatement *statem
     }
     else if (type == CASS_VALUE_TYPE_MAP)
     {
-        rc = create_map(L, index, statement, &collection);
+        rc = create_map(L, index, &collection);
         if (rc)
         {
             goto cleanup;
@@ -280,7 +297,7 @@ LucasError *bind_named_parameter(lua_State *L, const char *name, CassStatement *
     }
     else if (type == CASS_VALUE_TYPE_MAP)
     {
-        rc = create_map(L, index, statement, &collection);
+        rc = create_map(L, index, &collection);
         if (rc)
         {
             goto cleanup;
