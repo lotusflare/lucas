@@ -27,18 +27,37 @@ describe("collections", function()
         )
     end)
 
-    it("insert implicitly typed collection", function()
+    it("insert named args typed collection", function()
         lucas.connect({
             contact_points = os.getenv("CASSANDRA_HOST"),
             port = os.getenv("CASSANDRA_PORT"),
         })
         lucas.query(
-            "INSERT INTO testing.collections (id, int_set) VALUES (?, ?)",
-            { lucas.bigint(10), lucas.set({ 1, 2, 3, 4, 5 }) }
+            "INSERT INTO testing.collections (id, int_set) VALUES (:id, :int_set)",
+            {
+                id = lucas.bigint(10),
+                int_set = lucas.set({
+                    lucas.int(1),
+                    lucas.int(3),
+                    lucas.int(5),
+                }),
+            }
+        )
+        local results =
+            lucas.query(
+                "SELECT * FROM testing.collections WHERE id = ? ALLOW FILTERING",
+                { lucas.bigint(10) }
+            )
+        assert.are.same(
+            { {
+                id = 10,
+                int_set = { 1, 3, 5 },
+            } },
+            results
         )
     end)
 
-    it("insert explicitly typed collection", function()
+    it("insert positional args typed collection", function()
         lucas.connect({
             contact_points = os.getenv("CASSANDRA_HOST"),
             port = os.getenv("CASSANDRA_PORT"),
