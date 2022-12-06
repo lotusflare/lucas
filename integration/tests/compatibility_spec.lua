@@ -1,5 +1,6 @@
 require("busted.runner")()
 local pretty = require("pl.pretty")
+local tablex = require("pl.tablex")
 local lucas = require("lucas")
 local compat = require("lucas.compatibility")
 
@@ -37,12 +38,25 @@ local test_cases = { {
     name = "implicit map<text, text>",
     input = { foo = "bar" },
     expected = { 33, { { lucas.text("foo"), lucas.text("bar") } } },
+}, {
+    name = "explicit map<text, boolean>",
+    input = {
+        __cql_type = 32,
+        val = { foo = true },
+    },
+    expected = { 33, { { lucas.text("foo"), lucas.boolean(true) } } },
+}, {
+    name = "implicit map<text, boolean>",
+    input = { foo = true },
+    expected = { 33, { { lucas.text("foo"), lucas.boolean(true) } } },
 } }
 
 describe("compatibility", function()
     for _, tc in ipairs(test_cases) do
         it(string.format("(%s)", tc.name), function()
             local converted = compat.convert(tc.input)
+            -- pretty.dump(converted)
+            -- pretty.dump(tc.expected)
             assert.are.same(tc.expected, converted)
         end)
     end

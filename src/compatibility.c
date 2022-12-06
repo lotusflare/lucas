@@ -39,7 +39,7 @@ LucasError *cast(lua_State *L, int value_index)
     return NULL;
 }
 
-LucasError *iterate_list(lua_State *L, int index, int table)
+LucasError *convert_list(lua_State *L, int index, int table)
 {
     lua_newtable(L);
     const int collection_table = lua_gettop(L);
@@ -55,20 +55,38 @@ LucasError *iterate_list(lua_State *L, int index, int table)
         const int key_type = lua_type(L, key_index);
         const int value_index = lua_gettop(L);
         lua_pushinteger(L, ++item_count);
+
         if (key_type == LUA_TSTRING)
         {
+            is_map = true;
             lua_newtable(L);
             int map_table = lua_gettop(L);
             rc = cast(L, key_index);
+            if (rc)
+            {
+                return rc;
+            }
             lua_rawseti(L, map_table, 1);
             rc = cast(L, value_index);
+            if (rc)
+            {
+                return rc;
+            }
             lua_rawseti(L, map_table, 2);
-            is_map = true;
         }
         else if (key_type == LUA_TNUMBER)
         {
             rc = cast(L, value_index);
+            if (rc)
+            {
+                return rc;
+            }
         }
+        else
+        {
+            return lucas_new_errorf("invalid key type");
+        }
+
         lua_settable(L, collection_table);
     }
 
@@ -94,6 +112,37 @@ LucasError *iterate_list(lua_State *L, int index, int table)
     return NULL;
 }
 
+LucasError *convert_table(lua_State *L, int index)
+{
+    LucasError *rc = NULL;
+    lua_newtable(L);
+    const int return_table = lua_gettop(L);
+    lua_getfield(L, index, "__cql_type");
+    int lt = lua_type(L, lua_gettop(L));
+    CassValueType type = lua_tointeger(L, lua_gettop(L));
+
+    if (lt == LUA_TNIL)
+    {
+        lua_pop(L, 1);
+        rc = convert_list(L, index, return_table);
+    }
+    else if (type == CASS_VALUE_TYPE_LIST || type == CASS_VALUE_TYPE_MAP || type == CASS_VALUE_TYPE_SET)
+    {
+        lua_pop(L, 1);
+        lua_getfield(L, index, "val");
+        rc = convert_list(L, lua_gettop(L), return_table);
+        lua_pop(L, 1);
+    }
+    else
+    {
+        lua_rawseti(L, return_table, 1);
+        lua_getfield(L, index, "val");
+        lua_rawseti(L, return_table, 2);
+    }
+
+    return rc;
+}
+
 static int convert(lua_State *L)
 {
     const int ARG_PARAM = 1;
@@ -103,48 +152,20 @@ static int convert(lua_State *L)
     if (type == LUA_TSTRING || type == LUA_TBOOLEAN || type == LUA_TNUMBER)
     {
         rc = cast(L, ARG_PARAM);
-        return 1;
     }
     else if (type == LUA_TTABLE)
     {
-        lua_newtable(L);
-        const int new_table = lua_gettop(L);
-        lua_getfield(L, ARG_PARAM, "__cql_type");
-
-        if (lua_type(L, lua_gettop(L)) != LUA_TNIL)
-        {
-            CassValueType type = lua_tointeger(L, lua_gettop(L));
-            if (type != CASS_VALUE_TYPE_LIST && type != CASS_VALUE_TYPE_MAP && type != CASS_VALUE_TYPE_SET)
-            {
-                lua_rawseti(L, new_table, 1);
-                lua_getfield(L, ARG_PARAM, "val");
-                lua_rawseti(L, new_table, 2);
-                return 1;
-            }
-            else
-            {
-                lua_pop(L, 1);
-                lua_getfield(L, ARG_PARAM, "val");
-                rc = iterate_list(L, lua_gettop(L), new_table);
-                lua_pop(L, 1);
-                return 1;
-            }
-        }
-        else
-        {
-            lua_pop(L, 1);
-            rc = iterate_list(L, ARG_PARAM, new_table);
-            return 1;
-        }
+        rc = convert_table(L, ARG_PARAM);
     }
     else
     {
-        lucas_error_to_lua(L, lucas_new_errorf("could not convert type %d", type));
+        rc = lucas_new_errorf("could not convert type %d", type);
     }
 
+done:
     if (rc)
     {
         lucas_error_to_lua(L, rc);
     }
-    return 0;
+    return 1;
 }

@@ -67,24 +67,19 @@ LucasError *append_collection(lua_State *L, int index, CassCollection *collectio
     }
     else if (type == CASS_VALUE_TYPE_MAP)
     {
-        rc = lucas_new_errorf("nested collections not supported");
-        create_map(L, value_index, &collection);
-        goto cleanup;
+        rc = create_map(L, value_index, &collection);
     }
     else if (type == CASS_VALUE_TYPE_LIST)
     {
-        rc = lucas_new_errorf("nested collections not supported");
-        goto cleanup;
+        rc = create_collection(L, value_index, CASS_COLLECTION_TYPE_LIST, &collection);
     }
     else if (type == CASS_VALUE_TYPE_SET)
     {
-        rc = lucas_new_errorf("nested collections not supported");
-        goto cleanup;
+        rc = create_collection(L, value_index, CASS_COLLECTION_TYPE_SET, &collection);
     }
     else
     {
         rc = lucas_new_errorf("invalid type to append to collection");
-        goto cleanup;
     }
 
 cleanup:
@@ -104,14 +99,15 @@ LucasError *create_map(lua_State *L, int index, CassCollection **collection)
 
     for (int last_top = lua_gettop(L); lua_next(L, index) != 0; lua_pop(L, lua_gettop(L) - last_top))
     {
-        const int key_index = lua_gettop(L) - 1;
         const int value_index = lua_gettop(L);
+
         lua_rawgeti(L, value_index, 1);
         rc = append_collection(L, lua_gettop(L), *collection);
         if (rc)
         {
             return rc;
         }
+
         lua_rawgeti(L, value_index, 2);
         rc = append_collection(L, lua_gettop(L), *collection);
         if (rc)
@@ -124,8 +120,7 @@ cleanup:
     return rc;
 }
 
-LucasError *create_collection(lua_State *L, int index, CassStatement *statement, CassCollectionType type,
-                              CassCollection **collection)
+LucasError *create_collection(lua_State *L, int index, CassCollectionType type, CassCollection **collection)
 {
     CassError err = CASS_OK;
     LucasError *rc = NULL;
@@ -205,7 +200,7 @@ LucasError *bind_positional_parameter(lua_State *L, int i, CassStatement *statem
     }
     else if (type == CASS_VALUE_TYPE_LIST)
     {
-        rc = create_collection(L, index, statement, CASS_COLLECTION_TYPE_LIST, &collection);
+        rc = create_collection(L, index, CASS_COLLECTION_TYPE_LIST, &collection);
         if (rc)
         {
             goto cleanup;
@@ -214,7 +209,7 @@ LucasError *bind_positional_parameter(lua_State *L, int i, CassStatement *statem
     }
     else if (type == CASS_VALUE_TYPE_SET)
     {
-        rc = create_collection(L, index, statement, CASS_COLLECTION_TYPE_SET, &collection);
+        rc = create_collection(L, index, CASS_COLLECTION_TYPE_SET, &collection);
         if (rc)
         {
             goto cleanup;
@@ -308,7 +303,7 @@ LucasError *bind_named_parameter(lua_State *L, const char *name, CassStatement *
     }
     else if (type == CASS_VALUE_TYPE_LIST)
     {
-        rc = create_collection(L, index, statement, CASS_COLLECTION_TYPE_LIST, &collection);
+        rc = create_collection(L, index, CASS_COLLECTION_TYPE_LIST, &collection);
         if (rc)
         {
             goto cleanup;
@@ -317,7 +312,7 @@ LucasError *bind_named_parameter(lua_State *L, const char *name, CassStatement *
     }
     else if (type == CASS_VALUE_TYPE_SET)
     {
-        rc = create_collection(L, index, statement, CASS_COLLECTION_TYPE_SET, &collection);
+        rc = create_collection(L, index, CASS_COLLECTION_TYPE_SET, &collection);
         if (rc)
         {
             goto cleanup;
