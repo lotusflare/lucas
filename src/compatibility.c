@@ -4,60 +4,72 @@
 #include <luajit-2.1/lauxlib.h>
 #include <luajit-2.1/lua.h>
 
-void cast(lua_State *L, int value_index)
+LucasError *cast(lua_State *L, int value_index)
 {
     lua_newtable(L);
     int table = lua_gettop(L);
-    int lt = lua_type(L, value_index);
+    int type = lua_type(L, value_index);
 
-    if (lt == LUA_TSTRING)
+    if (type == LUA_TSTRING)
     {
         lua_pushinteger(L, CASS_VALUE_TYPE_TEXT);
         lua_rawseti(L, table, 1);
         lua_pushvalue(L, value_index);
         lua_rawseti(L, table, 2);
     }
-    else if (lt == LUA_TBOOLEAN)
+    else if (type == LUA_TBOOLEAN)
     {
         lua_pushinteger(L, CASS_VALUE_TYPE_BOOLEAN);
         lua_rawseti(L, table, 1);
         lua_pushvalue(L, value_index);
         lua_rawseti(L, table, 2);
     }
-    else if (lt == LUA_TNUMBER)
+    else if (type == LUA_TNUMBER)
     {
         lua_pushinteger(L, CASS_VALUE_TYPE_INT);
         lua_rawseti(L, table, 1);
         lua_pushvalue(L, value_index);
         lua_rawseti(L, table, 2);
     }
+    else
+    {
+        return lucas_new_errorf("invalid type");
+    }
+
+    return NULL;
 }
 
 LucasError *iterate_list(lua_State *L, int index, int table)
 {
     lua_newtable(L);
-    const int list_table = lua_gettop(L);
+    const int collection_table = lua_gettop(L);
     lua_pushnil(L);
+
     int item_count = 0;
     bool is_map = false;
+    LucasError *rc = NULL;
 
     for (int last_top = lua_gettop(L); lua_next(L, index) != 0; lua_pop(L, lua_gettop(L) - last_top))
     {
         const int key_index = lua_gettop(L) - 1;
         const int key_type = lua_type(L, key_index);
         const int value_index = lua_gettop(L);
-
+        lua_pushinteger(L, ++item_count);
         if (key_type == LUA_TSTRING)
         {
-            cast(L, key_index);
+            lua_newtable(L);
+            int map_table = lua_gettop(L);
+            rc = cast(L, key_index);
+            lua_rawseti(L, map_table, 1);
+            rc = cast(L, value_index);
+            lua_rawseti(L, map_table, 2);
             is_map = true;
         }
         else if (key_type == LUA_TNUMBER)
         {
-            lua_pushinteger(L, ++item_count);
+            rc = cast(L, value_index);
         }
-        cast(L, value_index);
-        lua_settable(L, list_table);
+        lua_settable(L, collection_table);
     }
 
     if (is_map)
@@ -85,14 +97,15 @@ LucasError *iterate_list(lua_State *L, int index, int table)
 static int convert(lua_State *L)
 {
     const int ARG_PARAM = 1;
-    int lt = lua_type(L, ARG_PARAM);
+    int type = lua_type(L, ARG_PARAM);
+    LucasError *rc = NULL;
 
-    if (lt == LUA_TSTRING || lt == LUA_TBOOLEAN || lt == LUA_TNUMBER)
+    if (type == LUA_TSTRING || type == LUA_TBOOLEAN || type == LUA_TNUMBER)
     {
-        cast(L, ARG_PARAM);
+        rc = cast(L, ARG_PARAM);
         return 1;
     }
-    else if (lt == LUA_TTABLE)
+    else if (type == LUA_TTABLE)
     {
         lua_newtable(L);
         const int new_table = lua_gettop(L);
@@ -112,7 +125,7 @@ static int convert(lua_State *L)
             {
                 lua_pop(L, 1);
                 lua_getfield(L, ARG_PARAM, "val");
-                iterate_list(L, lua_gettop(L), new_table);
+                rc = iterate_list(L, lua_gettop(L), new_table);
                 lua_pop(L, 1);
                 return 1;
             }
@@ -120,13 +133,18 @@ static int convert(lua_State *L)
         else
         {
             lua_pop(L, 1);
-            iterate_list(L, ARG_PARAM, new_table);
+            rc = iterate_list(L, ARG_PARAM, new_table);
             return 1;
         }
     }
     else
     {
-        lucas_error_to_lua(L, lucas_new_errorf("could not convert type %d", lt));
+        lucas_error_to_lua(L, lucas_new_errorf("could not convert type %d", type));
+    }
+
+    if (rc)
+    {
+        lucas_error_to_lua(L, rc);
     }
     return 0;
 }

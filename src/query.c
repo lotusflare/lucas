@@ -106,12 +106,14 @@ LucasError *create_map(lua_State *L, int index, CassCollection **collection)
     {
         const int key_index = lua_gettop(L) - 1;
         const int value_index = lua_gettop(L);
-        rc = append_collection(L, key_index, *collection);
+        lua_rawgeti(L, value_index, 1);
+        rc = append_collection(L, lua_gettop(L), *collection);
         if (rc)
         {
             return rc;
         }
-        rc = append_collection(L, value_index, *collection);
+        lua_rawgeti(L, value_index, 2);
+        rc = append_collection(L, lua_gettop(L), *collection);
         if (rc)
         {
             return rc;
