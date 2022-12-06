@@ -1,6 +1,5 @@
-require("busted.runner")()
-local pretty = require("pl.pretty")
-local lucas = require("lucas")
+local pretty = require"pl.pretty"
+local lucas = require"lucas"
 
 describe("collections", function()
     it("select map", function()

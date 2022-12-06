@@ -1,8 +1,7 @@
-require("busted.runner")()
-local pretty = require("pl.pretty")
-local tablex = require("pl.tablex")
-local lucas = require("lucas")
-local compat = require("lucas.compatibility")
+local pretty = require"pl.pretty"
+local tablex = require"pl.tablex"
+local lucas = require"lucas"
+local compat = require"lucas.compatibility"
 
 local test_cases = { {
     name = "implicit string",
