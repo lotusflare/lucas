@@ -49,7 +49,8 @@ LucasError *append_collection(lua_State *L, int index, CassCollection *collectio
     {
         err = cass_collection_append_int32(collection, lua_tointeger(L, value_index));
     }
-    else if (type == CASS_VALUE_TYPE_BIGINT || type == CASS_VALUE_TYPE_TIMESTAMP)
+    else if (type == CASS_VALUE_TYPE_BIGINT || type == CASS_VALUE_TYPE_TIMESTAMP || type == CASS_VALUE_TYPE_COUNTER ||
+             type == CASS_VALUE_TYPE_TIME)
     {
         err = cass_collection_append_int64(collection, lua_tointeger(L, value_index));
     }
@@ -173,7 +174,8 @@ LucasError *bind_positional_parameter(lua_State *L, int i, CassStatement *statem
     {
         err = cass_statement_bind_int32(statement, i, lua_tointeger(L, index));
     }
-    else if (type == CASS_VALUE_TYPE_BIGINT || type == CASS_VALUE_TYPE_TIMESTAMP)
+    else if (type == CASS_VALUE_TYPE_BIGINT || type == CASS_VALUE_TYPE_TIMESTAMP || type == CASS_VALUE_TYPE_COUNTER ||
+             type == CASS_VALUE_TYPE_TIME)
     {
         err = cass_statement_bind_int64(statement, i, lua_tointeger(L, index));
     }
@@ -276,7 +278,8 @@ LucasError *bind_named_parameter(lua_State *L, const char *name, CassStatement *
     {
         err = cass_statement_bind_int32_by_name(statement, name, lua_tointeger(L, index));
     }
-    else if (type == CASS_VALUE_TYPE_BIGINT || type == CASS_VALUE_TYPE_TIMESTAMP)
+    else if (type == CASS_VALUE_TYPE_BIGINT || type == CASS_VALUE_TYPE_TIMESTAMP || type == CASS_VALUE_TYPE_COUNTER ||
+             type == CASS_VALUE_TYPE_TIME)
     {
         err = cass_statement_bind_int64_by_name(statement, name, lua_tointeger(L, index));
     }
@@ -434,7 +437,8 @@ LucasError *cass_value_to_lua(lua_State *L, const CassValue *cass_value)
         err = cass_value_get_int32(cass_value, &value);
         lua_pushinteger(L, value);
     }
-    else if (vt == CASS_VALUE_TYPE_BIGINT || vt == CASS_VALUE_TYPE_TIMESTAMP)
+    else if (vt == CASS_VALUE_TYPE_BIGINT || vt == CASS_VALUE_TYPE_TIMESTAMP || vt == CASS_VALUE_TYPE_COUNTER ||
+             vt == CASS_VALUE_TYPE_TIME)
     {
         cass_int64_t value;
         err = cass_value_get_int64(cass_value, &value);
