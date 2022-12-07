@@ -1,7 +1,9 @@
-local pretty = require"pl.pretty"
-local tablex = require"pl.tablex"
-local lucas = require"lucas"
-local compat = require"lucas.compatibility"
+local pretty = require("pl.pretty")
+local tablex = require("pl.tablex")
+local lucas = require("lucas")
+local compat = require("lucas.compatibility")
+local cassandra = require("cassandra")
+local os = require("os")
 
 local test_cases = { {
     name = "implicit string",
@@ -17,18 +19,12 @@ local test_cases = { {
     expected = lucas.boolean(true),
 }, {
     name = "explicit string",
-    input = {
-        __cql_type = 10,
-        val = "foo",
-    },
+    input = cassandra.text("foo"),
     expected = lucas.text("foo"),
 }, {
     name = "implicit list<int>",
-    input = {
-        __cql_type = 32,
-        val = { 100, 6 },
-    },
-    expected = { 32, { lucas.int(100), lucas.int(6) } },
+    input = cassandra.list({ 100, 6 }),
+    expected = lucas.list({ lucas.int(100), lucas.int(6) }),
 }, {
     name = "implicit null",
     input = {},
@@ -36,28 +32,25 @@ local test_cases = { {
 }, {
     name = "implicit map<text, text>",
     input = { foo = "bar" },
-    expected = { 33, { { lucas.text("foo"), lucas.text("bar") } } },
+    expected = lucas.map({ { lucas.text("foo"), lucas.text("bar") } }),
 }, {
     name = "explicit map<text, boolean>",
-    input = {
-        __cql_type = 32,
-        val = { foo = true },
-    },
-    expected = { 33, { { lucas.text("foo"), lucas.boolean(true) } } },
+    input = cassandra.map({ foo = true }),
+    expected = lucas.map({ { lucas.text("foo"), lucas.boolean(true) } }),
 }, {
     name = "implicit map<text, boolean>",
     input = { foo = true },
-    expected = { 33, { { lucas.text("foo"), lucas.boolean(true) } } },
+    expected = lucas.map({ { lucas.text("foo"), lucas.boolean(true) } }),
 }, {
     name = "set<text>",
-    input = {
-        __cql_type = 34,
-        val = { "Gomo_UnliData_30D_freeSIM" },
-    },
-    expected = lucas.set(
-        lucas.text("Gomo_UnliData_30D_freeSIM"),
-        lucas.text("sdfsd")
-    ),
+    input = cassandra.set({ "Gomo_UnliData_30D_freeSIM" }),
+    expected = lucas.set({ lucas.text("Gomo_UnliData_30D_freeSIM") }),
+}, {
+    name = "map<timeuuid, int>",
+    input = cassandra.map({
+        [cassandra.timestamp(os.time())] = cassandra.int(5),
+    }),
+    expected = lucas.map({ [lucas.timestamp(os.time())] = lucas.int(5) }),
 } }
 
 describe("compatibility", function()
