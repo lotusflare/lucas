@@ -1,5 +1,5 @@
-local lucas = require"lucas"
-local pretty = require"pl.pretty"
+local lucas = require("lucas")
+local pretty = require("pl.pretty")
 
 describe("batch", function()
     it("insert", function()

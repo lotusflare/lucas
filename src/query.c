@@ -100,17 +100,14 @@ LucasError *create_map(lua_State *L, int index, CassCollection **collection)
 
     for (int last_top = lua_gettop(L); lua_next(L, index) != 0; lua_pop(L, lua_gettop(L) - last_top))
     {
+        const int key_index = lua_gettop(L) - 1;
         const int value_index = lua_gettop(L);
-
-        lua_rawgeti(L, value_index, 1);
-        rc = append_collection(L, lua_gettop(L), *collection);
+        rc = append_collection(L, key_index, *collection);
         if (rc)
         {
             return rc;
         }
-
-        lua_rawgeti(L, value_index, 2);
-        rc = append_collection(L, lua_gettop(L), *collection);
+        rc = append_collection(L, value_index, *collection);
         if (rc)
         {
             return rc;
@@ -489,16 +486,16 @@ LucasError *cass_value_to_lua(lua_State *L, const CassValue *cass_value)
         iterator = cass_iterator_from_collection(cass_value);
         lua_newtable(L);
         int list_table = lua_gettop(L);
-        for (int i = 1; cass_iterator_next(iterator); i++)
+        int i = 1;
+        while (cass_iterator_next(iterator))
         {
-            lua_pushinteger(L, i);
             rc = cass_value_to_lua(L, cass_iterator_get_value(iterator));
             if (rc)
             {
                 rc = lucas_wrap_error(rc, "unable to convert cassandra list or set item to lua type");
                 goto cleanup;
             }
-            lua_settable(L, list_table);
+            lua_rawseti(L, list_table, i++);
         }
     }
     else
@@ -548,9 +545,10 @@ LucasError *iterate_result(lua_State *L, CassStatement *statement, const char *p
 
     lua_newtable(L);
     const int root_table = lua_gettop(L);
-    for (int i = 1; cass_iterator_next(iterator); i++)
+    int counter = 1;
+
+    while (cass_iterator_next(iterator))
     {
-        lua_pushinteger(L, i);
         lua_newtable(L);
         int sub_table = lua_gettop(L);
         const CassRow *row = cass_iterator_get_row(iterator);
@@ -573,7 +571,7 @@ LucasError *iterate_result(lua_State *L, CassStatement *statement, const char *p
             }
             lua_settable(L, sub_table);
         }
-        lua_settable(L, root_table);
+        lua_rawseti(L, root_table, counter++);
     }
 
     lua_newtable(L);

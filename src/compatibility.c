@@ -31,6 +31,13 @@ LucasError *cast(lua_State *L, int value_index)
         lua_pushvalue(L, value_index);
         lua_rawseti(L, table, 2);
     }
+    else if (type == LUA_TTABLE)
+    {
+        lua_getfield(L, value_index, "__cql_type");
+        lua_rawseti(L, table, 1);
+        lua_getfield(L, value_index, "val");
+        lua_rawseti(L, table, 2);
+    }
     else
     {
         return lucas_new_errorf("invalid type");
@@ -56,23 +63,20 @@ LucasError *convert_list(lua_State *L, int index, int table, CassValueType *type
         const int value_index = lua_gettop(L);
         lua_pushinteger(L, ++item_count);
 
-        if (key_type == LUA_TSTRING)
+        if (key_type == LUA_TSTRING || key_type == LUA_TTABLE)
         {
+            printf("test\n");
             is_map = true;
-            lua_newtable(L);
-            int map_table = lua_gettop(L);
             rc = cast(L, key_index);
             if (rc)
             {
                 return rc;
             }
-            lua_rawseti(L, map_table, 1);
             rc = cast(L, value_index);
             if (rc)
             {
                 return rc;
             }
-            lua_rawseti(L, map_table, 2);
         }
         else if (key_type == LUA_TNUMBER)
         {
@@ -86,7 +90,6 @@ LucasError *convert_list(lua_State *L, int index, int table, CassValueType *type
         {
             return lucas_new_errorf("invalid key type");
         }
-
         lua_settable(L, collection_table);
     }
 

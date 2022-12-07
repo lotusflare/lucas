@@ -1,5 +1,5 @@
-local pretty = require"pl.pretty"
-local lucas = require"lucas"
+local pretty = require("pl.pretty")
+local lucas = require("lucas")
 
 describe("collections", function()
     it("select map", function()
@@ -66,10 +66,9 @@ describe("collections", function()
             {
                 lucas.bigint(30),
                 lucas.map({
-                    {
-                        lucas.uuid("7778132f-64e0-4db3-8d30-3cf40b93c5fc"),
-                        lucas.text("hello world"),
-                    },
+                    [lucas.uuid(
+                        "7778132f-64e0-4db3-8d30-3cf40b93c5fc"
+                    )] = lucas.text("hello world"),
                 }),
                 lucas.set({ lucas.int(1), lucas.int(2) }),
                 lucas.list({ lucas.tinyint(5), lucas.tinyint(8) }),
