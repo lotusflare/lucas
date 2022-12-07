@@ -48,6 +48,16 @@ local test_cases = { {
     name = "implicit map<text, boolean>",
     input = { foo = true },
     expected = { 33, { { lucas.text("foo"), lucas.boolean(true) } } },
+}, {
+    name = "set<text>",
+    input = {
+        __cql_type = 34,
+        val = { "Gomo_UnliData_30D_freeSIM" },
+    },
+    expected = lucas.set(
+        lucas.text("Gomo_UnliData_30D_freeSIM"),
+        lucas.text("sdfsd")
+    ),
 } }
 
 describe("compatibility", function()
