@@ -1,5 +1,4 @@
-require("busted.runner")()
-local lucas = require("lucas")
+local lucas = require"lucas"
 
 describe("batch", function()
     it("insert", function()

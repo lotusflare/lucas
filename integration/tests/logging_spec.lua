@@ -1,7 +1,6 @@
-require("busted.runner")()
-local lucas = require("lucas")
-local spy = require("luassert.spy")
-local pretty = require("pl.pretty")
+local lucas = require"lucas"
+local spy = require"luassert.spy"
+local pretty = require"pl.pretty"
 
 assert:register("matcher", "contains", function(state, args)
     local needle = args[1]

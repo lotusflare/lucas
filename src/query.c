@@ -1,5 +1,6 @@
 #pragma once
 
+#include "query.h"
 #include "cassandra.h"
 #include "errors.c"
 #include "logging.c"
@@ -12,7 +13,84 @@
 #include <stdlib.h>
 #include <string.h>
 
-LucasError *create_map(lua_State *L, int index, CassStatement *statement, CassCollection **collection)
+LucasError *append_collection(lua_State *L, int index, CassCollection *collection)
+{
+    CassError err = CASS_OK;
+    LucasError *rc = NULL;
+    lua_rawgeti(L, index, 1);
+    lua_rawgeti(L, index, 2);
+    const int type_index = lua_gettop(L) - 1;
+    const int value_index = lua_gettop(L);
+    const CassValueType type = lua_tointeger(L, type_index);
+
+    if (type == CASS_VALUE_TYPE_UUID || type == CASS_VALUE_TYPE_TIMEUUID)
+    {
+        CassUuid uuid;
+        err = cass_uuid_from_string(lua_tostring(L, value_index), &uuid);
+        if (err != CASS_OK)
+        {
+            goto cleanup;
+        }
+        err = cass_collection_append_uuid(collection, uuid);
+    }
+    else if (type == CASS_VALUE_TYPE_BOOLEAN)
+    {
+        err = cass_collection_append_bool(collection, lua_toboolean(L, value_index));
+    }
+    else if (type == CASS_VALUE_TYPE_TINY_INT)
+    {
+        err = cass_collection_append_int8(collection, lua_tointeger(L, value_index));
+    }
+    else if (type == CASS_VALUE_TYPE_SMALL_INT)
+    {
+        err = cass_collection_append_int16(collection, lua_tointeger(L, value_index));
+    }
+    else if (type == CASS_VALUE_TYPE_INT)
+    {
+        err = cass_collection_append_int32(collection, lua_tointeger(L, value_index));
+    }
+    else if (type == CASS_VALUE_TYPE_BIGINT || type == CASS_VALUE_TYPE_TIMESTAMP)
+    {
+        err = cass_collection_append_int64(collection, lua_tointeger(L, value_index));
+    }
+    else if (type == CASS_VALUE_TYPE_FLOAT)
+    {
+        err = cass_collection_append_float(collection, lua_tonumber(L, value_index));
+    }
+    else if (type == CASS_VALUE_TYPE_DOUBLE)
+    {
+        err = cass_collection_append_double(collection, lua_tonumber(L, value_index));
+    }
+    else if (type == CASS_VALUE_TYPE_ASCII || type == CASS_VALUE_TYPE_TEXT || type == CASS_VALUE_TYPE_VARCHAR)
+    {
+        err = cass_collection_append_string(collection, lua_tostring(L, value_index));
+    }
+    else if (type == CASS_VALUE_TYPE_MAP)
+    {
+        rc = create_map(L, value_index, &collection);
+    }
+    else if (type == CASS_VALUE_TYPE_LIST)
+    {
+        rc = create_collection(L, value_index, CASS_COLLECTION_TYPE_LIST, &collection);
+    }
+    else if (type == CASS_VALUE_TYPE_SET)
+    {
+        rc = create_collection(L, value_index, CASS_COLLECTION_TYPE_SET, &collection);
+    }
+    else
+    {
+        rc = lucas_new_errorf("invalid type to append to collection");
+    }
+
+cleanup:
+    if (err != CASS_OK)
+    {
+        rc = lucas_new_errorf_from_cass_error(err, "could not append to collection");
+    }
+    return rc;
+}
+
+LucasError *create_map(lua_State *L, int index, CassCollection **collection)
 {
     CassError err = CASS_OK;
     LucasError *rc = NULL;
@@ -21,51 +99,20 @@ LucasError *create_map(lua_State *L, int index, CassStatement *statement, CassCo
 
     for (int last_top = lua_gettop(L); lua_next(L, index) != 0; lua_pop(L, lua_gettop(L) - last_top))
     {
-        const int key_index = lua_gettop(L) - 1;
-        const int key_type = lua_type(L, key_index);
         const int value_index = lua_gettop(L);
-        const int value_type = lua_type(L, value_index);
 
-        if (key_type == LUA_TSTRING)
+        lua_rawgeti(L, value_index, 1);
+        rc = append_collection(L, lua_gettop(L), *collection);
+        if (rc)
         {
-            err = cass_collection_append_string(*collection, lua_tostring(L, key_index));
-        }
-        else if (key_type == LUA_TNUMBER)
-        {
-            err = cass_collection_append_int32(*collection, lua_tointeger(L, key_index));
-        }
-        else if (key_type == LUA_TBOOLEAN)
-        {
-            err = cass_collection_append_bool(*collection, lua_toboolean(L, key_index));
-        }
-        else
-        {
-            rc = lucas_new_errorf("invalid key type for collection");
-            goto cleanup;
+            return rc;
         }
 
-        if (value_type == LUA_TSTRING)
+        lua_rawgeti(L, value_index, 2);
+        rc = append_collection(L, lua_gettop(L), *collection);
+        if (rc)
         {
-            err = cass_collection_append_string(*collection, lua_tostring(L, value_index));
-        }
-        else if (value_type == LUA_TNUMBER)
-        {
-            err = cass_collection_append_int32(*collection, lua_tointeger(L, value_index));
-        }
-        else if (value_type == LUA_TBOOLEAN)
-        {
-            err = cass_collection_append_bool(*collection, lua_toboolean(L, value_index));
-        }
-        else
-        {
-            rc = lucas_new_errorf("invalid value type for collection");
-            goto cleanup;
-        }
-
-        if (err != CASS_OK)
-        {
-            rc = lucas_new_errorf_from_cass_error(err, "could not append to map");
-            goto cleanup;
+            return rc;
         }
     }
 
@@ -73,46 +120,24 @@ cleanup:
     return rc;
 }
 
-LucasError *create_collection(lua_State *L, int index, CassStatement *statement, CassCollectionType collection_type,
-                              CassCollection **collection)
+LucasError *create_collection(lua_State *L, int index, CassCollectionType type, CassCollection **collection)
 {
+    CassError err = CASS_OK;
     LucasError *rc = NULL;
-    size_t collection_size = lua_objlen(L, lua_gettop(L));
-    *collection = cass_collection_new(collection_type, collection_size);
+    size_t size = lua_objlen(L, lua_gettop(L));
+    *collection = cass_collection_new(type, size);
     lua_pushnil(L);
 
     for (int last_top = lua_gettop(L); lua_next(L, index) != 0; lua_pop(L, lua_gettop(L) - last_top))
     {
         const int value_index = lua_gettop(L);
-        const int value_type = lua_type(L, value_index);
-        CassError err = CASS_OK;
-
-        if (value_type == LUA_TSTRING)
+        rc = append_collection(L, value_index, *collection);
+        if (rc)
         {
-            err = cass_collection_append_string(*collection, lua_tostring(L, value_index));
-        }
-        else if (value_type == LUA_TNUMBER)
-        {
-            err = cass_collection_append_int32(*collection, lua_tointeger(L, value_index));
-        }
-        else if (value_type == LUA_TBOOLEAN)
-        {
-            err = cass_collection_append_bool(*collection, lua_toboolean(L, value_index));
-        }
-        else
-        {
-            rc = lucas_new_errorf("invalid value type for list");
-            goto cleanup;
-        }
-
-        if (err != CASS_OK)
-        {
-            rc = lucas_new_errorf_from_cass_error(err, "could not append to collection");
-            goto cleanup;
+            return rc;
         }
     }
 
-cleanup:
     return rc;
 }
 
@@ -126,10 +151,11 @@ LucasError *bind_positional_parameter(lua_State *L, int i, CassStatement *statem
     {
         CassUuid uuid;
         err = cass_uuid_from_string(lua_tostring(L, index), &uuid);
-        if (err == CASS_OK)
+        if (err != CASS_OK)
         {
-            err = cass_statement_bind_uuid(statement, i, uuid);
+            goto cleanup;
         }
+        err = cass_statement_bind_uuid(statement, i, uuid);
     }
     else if (type == CASS_VALUE_TYPE_BOOLEAN)
     {
@@ -165,7 +191,7 @@ LucasError *bind_positional_parameter(lua_State *L, int i, CassStatement *statem
     }
     else if (type == CASS_VALUE_TYPE_MAP)
     {
-        rc = create_map(L, index, statement, &collection);
+        rc = create_map(L, index, &collection);
         if (rc)
         {
             goto cleanup;
@@ -174,7 +200,7 @@ LucasError *bind_positional_parameter(lua_State *L, int i, CassStatement *statem
     }
     else if (type == CASS_VALUE_TYPE_LIST)
     {
-        rc = create_collection(L, index, statement, CASS_COLLECTION_TYPE_LIST, &collection);
+        rc = create_collection(L, index, CASS_COLLECTION_TYPE_LIST, &collection);
         if (rc)
         {
             goto cleanup;
@@ -183,7 +209,7 @@ LucasError *bind_positional_parameter(lua_State *L, int i, CassStatement *statem
     }
     else if (type == CASS_VALUE_TYPE_SET)
     {
-        rc = create_collection(L, index, statement, CASS_COLLECTION_TYPE_SET, &collection);
+        rc = create_collection(L, index, CASS_COLLECTION_TYPE_SET, &collection);
         if (rc)
         {
             goto cleanup;
@@ -204,13 +230,12 @@ LucasError *bind_positional_parameter(lua_State *L, int i, CassStatement *statem
         goto cleanup;
     }
 
+cleanup:
     if (err != CASS_OK)
     {
         rc = lucas_new_errorf_from_cass_error(err, "could not bind positional parameter at index %d", i);
         goto cleanup;
     }
-
-cleanup:
     if (collection)
     {
         cass_collection_free(collection);
@@ -229,10 +254,11 @@ LucasError *bind_named_parameter(lua_State *L, const char *name, CassStatement *
     {
         CassUuid uuid;
         err = cass_uuid_from_string(lua_tostring(L, index), &uuid);
-        if (err == CASS_OK)
+        if (err != CASS_OK)
         {
-            err = cass_statement_bind_uuid_by_name(statement, name, uuid);
+            goto cleanup;
         }
+        err = cass_statement_bind_uuid_by_name(statement, name, uuid);
     }
     else if (type == CASS_VALUE_TYPE_BOOLEAN)
     {
@@ -268,7 +294,7 @@ LucasError *bind_named_parameter(lua_State *L, const char *name, CassStatement *
     }
     else if (type == CASS_VALUE_TYPE_MAP)
     {
-        rc = create_map(L, index, statement, &collection);
+        rc = create_map(L, index, &collection);
         if (rc)
         {
             goto cleanup;
@@ -277,7 +303,7 @@ LucasError *bind_named_parameter(lua_State *L, const char *name, CassStatement *
     }
     else if (type == CASS_VALUE_TYPE_LIST)
     {
-        rc = create_collection(L, index, statement, CASS_COLLECTION_TYPE_LIST, &collection);
+        rc = create_collection(L, index, CASS_COLLECTION_TYPE_LIST, &collection);
         if (rc)
         {
             goto cleanup;
@@ -286,7 +312,7 @@ LucasError *bind_named_parameter(lua_State *L, const char *name, CassStatement *
     }
     else if (type == CASS_VALUE_TYPE_SET)
     {
-        rc = create_collection(L, index, statement, CASS_COLLECTION_TYPE_SET, &collection);
+        rc = create_collection(L, index, CASS_COLLECTION_TYPE_SET, &collection);
         if (rc)
         {
             goto cleanup;
@@ -307,13 +333,12 @@ LucasError *bind_named_parameter(lua_State *L, const char *name, CassStatement *
         goto cleanup;
     }
 
+cleanup:
     if (err != CASS_OK)
     {
         rc = lucas_new_errorf_from_cass_error(err, "could not bind named parameter %s", name);
         goto cleanup;
     }
-
-cleanup:
     return rc;
 }
 

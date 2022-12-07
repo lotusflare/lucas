@@ -10,6 +10,15 @@
 
 typedef CassLogLevel LucasLogLevel;
 
+typedef enum LucasLogLevel
+{
+    LucasLogDebug = 1,
+    LucasLogInfo = 2,
+    LucasLogWarn = 3,
+    LucasLogError = 4,
+    LucasLogCritical = 5,
+} LucasLogLevel2;
+
 void log_lua(const char *message, LucasLogLevel severity, int timestamp)
 {
     pthread_mutex_lock(&lock);

@@ -38,13 +38,14 @@ int batch(lua_State *L)
     const int ARG_BATCHES = 1;
     const size_t parameter_count = lua_objlen(L, ARG_BATCHES);
 
-    CassBatch *batch = cass_batch_new(CASS_BATCH_TYPE_UNLOGGED);
+    CassBatch *batch = NULL;
     const CassPrepared *prepared = NULL;
     CassStatement *statement = NULL;
     LucasError *rc = NULL;
     CassFuture *future = NULL;
     CassError err = CASS_OK;
 
+    batch = cass_batch_new(CASS_BATCH_TYPE_UNLOGGED);
     lua_pushnil(L);
     for (int last_top = lua_gettop(L); lua_next(L, ARG_BATCHES) != 0; lua_pop(L, lua_gettop(L) - last_top))
     {
