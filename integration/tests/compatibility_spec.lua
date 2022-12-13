@@ -22,7 +22,7 @@ local test_cases = { {
     input = cassandra.text("foo"),
     expected = lucas.text("foo"),
 }, {
-    name = "implicit list<int>",
+    name = "untyped explicit list<int>",
     input = cassandra.list({ 100, 6 }),
     expected = lucas.list({ lucas.int(100), lucas.int(6) }),
 }, {
@@ -34,7 +34,7 @@ local test_cases = { {
     input = { foo = "bar" },
     expected = lucas.map({ { lucas.text("foo"), lucas.text("bar") } }),
 }, {
-    name = "explicit map<text, boolean>",
+    name = "untyped explicit map<text, boolean>",
     input = cassandra.map({ foo = true }),
     expected = lucas.map({ { lucas.text("foo"), lucas.boolean(true) } }),
 }, {
@@ -51,6 +51,22 @@ local test_cases = { {
         [cassandra.timestamp(os.time())] = cassandra.int(5),
     }),
     expected = lucas.map({ [lucas.timestamp(os.time())] = lucas.int(5) }),
+}, {
+    name = "jjhg",
+    input = cassandra.map({
+        birthday = "10/1/1979",
+        first_name = "first",
+        gender = "M",
+        last_name = "last",
+        usc = "123456789",
+    }),
+    expected = lucas.map({
+        [lucas.text("birthday")] = lucas.text("10/1/1979"),
+        [lucas.text("first_name")] = lucas.text("first"),
+        [lucas.text("gender")] = lucas.text("M"),
+        [lucas.text("last_name")] = lucas.text("last"),
+        [lucas.text("usc")] = lucas.text("123456789"),
+    }),
 } }
 
 describe("compatibility", function()

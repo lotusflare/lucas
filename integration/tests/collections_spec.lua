@@ -31,8 +31,8 @@ describe("collections", function()
             contact_points = os.getenv("CASSANDRA_HOST"),
             port = os.getenv("CASSANDRA_PORT"),
         })
-        lucas.query(
-            "INSERT INTO testing.collections (id, int_set) VALUES (:id, :int_set)",
+        local insert_results = lucas.query(
+            "INSERT INTO testing.collections (id, int_set) VALUES (:id, :int_set) IF NOT EXISTS",
             {
                 id = lucas.bigint(10),
                 int_set = lucas.set({
@@ -42,7 +42,7 @@ describe("collections", function()
                 }),
             }
         )
-        local results =
+        local select_results =
             lucas.query(
                 "SELECT * FROM testing.collections WHERE id = ? ALLOW FILTERING",
                 { lucas.bigint(10) }
@@ -52,7 +52,7 @@ describe("collections", function()
                 id = 10,
                 int_set = { 1, 3, 5 },
             } },
-            results
+            select_results
         )
     end)
 
