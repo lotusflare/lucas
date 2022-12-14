@@ -1,4 +1,7 @@
-#!/bin/sh -e
+#!/bin/bash
+
+set -x
+set -e
 
 fix=false
 

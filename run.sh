@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 
 clean=false
 build=false

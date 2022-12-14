@@ -9,4 +9,5 @@
         "editor.formatOnPaste":false,
         "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
     },
+    "nuxt.isNuxtApp": false,
 }
