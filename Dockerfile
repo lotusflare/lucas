@@ -18,6 +18,5 @@ COPY . /app
 WORKDIR /app
 RUN if [ -z "${SKIP_BUILD}" ]; then \
         ./format.sh \
-        && cmake -S . -B build \
-        && cmake --build build; \
+        ./build.sh \
     fi;

@@ -18,4 +18,4 @@ jobs:
           sudo apt-get install -yq boxes
 
       - name: Integration tests
-        run: ./run.sh -bt
+        run: ./start.sh -bt
