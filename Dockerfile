@@ -18,5 +18,5 @@ COPY . /app
 WORKDIR /app
 RUN if [ -z "${SKIP_BUILD}" ]; then \
         ./format.sh \
-        && ./build.sh \
+        && ./build.sh; \
     fi;
