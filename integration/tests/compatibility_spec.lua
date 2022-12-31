@@ -21,37 +21,31 @@ local test_cases = { {
     name = "explicit string",
     input = cassandra.text("foo"),
     expected = lucas.text("foo"),
-},
--- {
---     name = "untyped explicit list<int>",
---     input = cassandra.list({ 100, 6 }),
---     expected = lucas.list({ lucas.int(100), lucas.int(6) }),
--- },
-{
+}, {
+    name = "untyped explicit list<int>",
+    input = cassandra.list({ 100, 6 }),
+    expected = lucas.list({ lucas.int(100), lucas.int(6) }),
+}, {
     name = "implicit null",
     input = {},
     expected = lucas.null(),
-},
--- {
---     name = "implicit map<text, text>",
---     input = { foo = "bar" },
---     expected = lucas.map({ { lucas.text("foo"), lucas.text("bar") } }),
--- },
--- {
---     name = "untyped explicit map<text, boolean>",
---     input = cassandra.map({ foo = true }),
---     expected = lucas.map({ { lucas.text("foo"), lucas.boolean(true) } }),
--- },
---  {
---     name = "implicit map<text, boolean>",
---     input = { foo = true },
---     expected = lucas.map({ { lucas.text("foo"), lucas.boolean(true) } }),
--- },
--- {
---     name = "set<text>",
---     input = cassandra.set({ "Gomo_UnliData_30D_freeSIM" }),
---     expected = lucas.set({ lucas.text("Gomo_UnliData_30D_freeSIM") }),
--- },
+}, {
+    name = "implicit map<text, text>",
+    input = { foo = "bar" },
+    expected = lucas.map({ { lucas.text("foo"), lucas.text("bar") } }),
+}, {
+    name = "untyped explicit map<text, boolean>",
+    input = cassandra.map({ foo = true }),
+    expected = lucas.map({ { lucas.text("foo"), lucas.boolean(true) } }),
+}, {
+    name = "implicit map<text, boolean>",
+    input = { foo = true },
+    expected = lucas.map({ { lucas.text("foo"), lucas.boolean(true) } }),
+}, {
+    name = "set<text>",
+    input = cassandra.set({ "Gomo_UnliData_30D_freeSIM" }),
+    expected = lucas.set({ lucas.text("Gomo_UnliData_30D_freeSIM") }),
+} }
 -- {
 --     name = "map<timeuuid, int>",
 --     input = cassandra.map({
@@ -76,16 +70,15 @@ local test_cases = { {
 --         [lucas.text("usc")] = lucas.text("123456789"),
 --     }),
 -- }
- }
 
 describe("compatibility", function()
     for _, tc in ipairs(test_cases) do
         it(string.format("(%s)", tc.name), function()
             local converted = compat.convert(tc.input)
-            print("***converted***")
-            pretty.dump(converted)
-            print("***expected***")
-            pretty.dump(tc.expected)
+            -- print("***converted***")
+            -- pretty.dump(converted)
+            -- print("***expected***")
+            -- pretty.dump(tc.expected)
             assert.are.same(tc.expected, converted)
         end)
     end
