@@ -47,7 +47,7 @@ int batch(lua_State *L)
 
     batch = cass_batch_new(CASS_BATCH_TYPE_UNLOGGED);
     lua_pushnil(L);
-    for (int last_top = lua_gettop(L); lua_next(L, ARG_BATCHES) != 0; lua_pop(L, lua_gettop(L) - last_top))
+    for (int last_top = lua_gettop(L); lua_next(L, ARG_BATCHES) != 0; lua_settop(L, last_top))
     {
         const int tuple_index = lua_gettop(L);
         lua_rawgeti(L, tuple_index, 1);

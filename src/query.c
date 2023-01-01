@@ -98,7 +98,7 @@ LucasError *create_map(lua_State *L, int index, CassCollection **collection)
     *collection = cass_collection_new(CASS_COLLECTION_TYPE_MAP, 0);
     lua_pushnil(L);
 
-    for (int last_top = lua_gettop(L); lua_next(L, index) != 0; lua_pop(L, lua_gettop(L) - last_top))
+    for (int last_top = lua_gettop(L); lua_next(L, index) != 0; lua_settop(L, last_top))
     {
         const int key_index = lua_gettop(L) - 1;
         const int value_index = lua_gettop(L);
@@ -126,7 +126,7 @@ LucasError *create_collection(lua_State *L, int index, CassCollectionType type, 
     *collection = cass_collection_new(type, size);
     lua_pushnil(L);
 
-    for (int last_top = lua_gettop(L); lua_next(L, index) != 0; lua_pop(L, lua_gettop(L) - last_top))
+    for (int last_top = lua_gettop(L); lua_next(L, index) != 0; lua_settop(L, last_top))
     {
         const int value_index = lua_gettop(L);
         rc = append_collection(L, value_index, *collection);
@@ -347,7 +347,7 @@ LucasError *bind_parameters(lua_State *L, int index, CassStatement *statement)
     LucasError *rc = NULL;
     lua_pushnil(L);
 
-    for (int last_top = lua_gettop(L); lua_next(L, index) != 0; lua_pop(L, lua_gettop(L) - last_top))
+    for (int last_top = lua_gettop(L); lua_next(L, index) != 0; lua_settop(L, last_top))
     {
         const int key_index = lua_gettop(L) - 1;
         const int key_type = lua_type(L, key_index);
