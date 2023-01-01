@@ -44,43 +44,38 @@ describe("compatibility", function()
     end
 end)
 
-
-describe("maps", function ()
-    local test_cases = {
-        {
-            name = "implicit map<text, boolean>",
-            input = cassandra.map({ foo = true }),
-            expected = lucas.map({ [lucas.text("foo")] = lucas.boolean(true) }),
-        }, {
-            name = "implicit map<text, boolean>",
-            input = { foo = true },
-            expected = lucas.map({ [lucas.text("foo")] = lucas.boolean(true) }),
-        },
-        {
-            name = "map<timeuuid, int>",
-            input = cassandra.map({
-                [cassandra.timestamp(os.time())] = cassandra.int(5),
-            }),
-            expected = lucas.map({ [lucas.timestamp(os.time())] = lucas.int(5) }),
-        },
-        {
-            name = "implicit map<text, text>",
-            input = cassandra.map({
-                birthday = "10/1/1979",
-                first_name = "first",
-                gender = "M",
-                last_name = "last",
-                usc = "123456789",
-            }),
-            expected = lucas.map({
-                [lucas.text("birthday")] = lucas.text("10/1/1979"),
-                [lucas.text("first_name")] = lucas.text("first"),
-                [lucas.text("gender")] = lucas.text("M"),
-                [lucas.text("last_name")] = lucas.text("last"),
-                [lucas.text("usc")] = lucas.text("123456789"),
-            }),
-        }
-    }
+describe("maps", function()
+    local test_cases = { {
+        name = "implicit map<text, boolean>",
+        input = cassandra.map({ foo = true }),
+        expected = lucas.map({ [lucas.text("foo")] = lucas.boolean(true) }),
+    }, {
+        name = "implicit map<text, boolean>",
+        input = { foo = true },
+        expected = lucas.map({ [lucas.text("foo")] = lucas.boolean(true) }),
+    }, {
+        name = "map<timeuuid, int>",
+        input = cassandra.map({
+            [cassandra.timestamp(os.time())] = cassandra.int(5),
+        }),
+        expected = lucas.map({ [lucas.timestamp(os.time())] = lucas.int(5) }),
+    }, {
+        name = "implicit map<text, text>",
+        input = cassandra.map({
+            birthday = "10/1/1979",
+            first_name = "first",
+            gender = "M",
+            last_name = "last",
+            usc = "123456789",
+        }),
+        expected = lucas.map({
+            [lucas.text("birthday")] = lucas.text("10/1/1979"),
+            [lucas.text("first_name")] = lucas.text("first"),
+            [lucas.text("gender")] = lucas.text("M"),
+            [lucas.text("last_name")] = lucas.text("last"),
+            [lucas.text("usc")] = lucas.text("123456789"),
+        }),
+    } }
 
     for _, tc in ipairs(test_cases) do
         it(string.format("(%s)", tc.name), function()
