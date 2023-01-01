@@ -3,7 +3,7 @@
 #include "query.h"
 #include "cassandra.h"
 #include "errors.c"
-#include "logging.c"
+#include "logs.c"
 #include "state.c"
 #include "types.c"
 #include <luajit-2.1/lauxlib.h>

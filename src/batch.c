@@ -1,6 +1,6 @@
 #include "cassandra.h"
 #include "errors.c"
-#include "logging.c"
+#include "logs.c"
 #include "query.c"
 #include "state.c"
 #include "types.c"

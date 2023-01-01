@@ -1,4 +1,4 @@
-#include "compatibility.h"
+#include "compatible.h"
 #include "cassandra.h"
 #include "errors.c"
 #include "types.c"
@@ -25,7 +25,7 @@ bool get_cql_type(lua_State *L, int index, CassValueType *cvt)
     return has_type;
 }
 
-LucasError *cast(lua_State *L, int value_index)
+LucasError *handle(lua_State *L, int value_index)
 {
     lua_newtable(L);
     const int table = lua_gettop(L);
@@ -60,13 +60,13 @@ LucasError *cast(lua_State *L, int value_index)
 
     if (type == LUA_TTABLE)
     {
-        return convert_table(L, value_index, table);
+        return handle_table(L, value_index, table);
     }
 
     return lucas_new_errorf("invalid type");
 }
 
-LucasError *convert_list(lua_State *L, int index, int table, CassValueType *cvt_override)
+LucasError *handle_collection(lua_State *L, int index, int table, CassValueType *cvt_override)
 {
     lua_newtable(L);
     const int collection_table = lua_gettop(L);
@@ -86,12 +86,12 @@ LucasError *convert_list(lua_State *L, int index, int table, CassValueType *cvt_
         if (key_type == LUA_TSTRING || key_type == LUA_TTABLE)
         {
             is_map = true;
-            rc = cast(L, key_index);
+            rc = handle(L, key_index);
             if (rc)
             {
                 return rc;
             }
-            rc = cast(L, value_index);
+            rc = handle(L, value_index);
             if (rc)
             {
                 return rc;
@@ -100,7 +100,7 @@ LucasError *convert_list(lua_State *L, int index, int table, CassValueType *cvt_
         else if (key_type == LUA_TNUMBER)
         {
             lua_pushinteger(L, item_count);
-            rc = cast(L, value_index);
+            rc = handle(L, value_index);
             if (rc)
             {
                 return rc;
@@ -125,7 +125,7 @@ LucasError *convert_list(lua_State *L, int index, int table, CassValueType *cvt_
     return NULL;
 }
 
-LucasError *convert_table(lua_State *L, int index, int return_table)
+LucasError *handle_table(lua_State *L, int index, int return_table)
 {
     bool is_empty = table_empty(L, index);
     if (is_empty)
@@ -139,13 +139,13 @@ LucasError *convert_table(lua_State *L, int index, int return_table)
     bool has_type = get_cql_type(L, index, &cvt);
     if (!has_type)
     {
-        return convert_list(L, index, return_table, NULL);
+        return handle_collection(L, index, return_table, NULL);
     }
 
     if (cvt == CASS_VALUE_TYPE_LIST || cvt == CASS_VALUE_TYPE_MAP || cvt == CASS_VALUE_TYPE_SET)
     {
         lua_getfield(L, index, "val");
-        convert_list(L, lua_gettop(L), return_table, &cvt);
+        handle_collection(L, lua_gettop(L), return_table, &cvt);
         lua_pop(L, 1);
         return NULL;
     }
@@ -161,7 +161,7 @@ static int convert(lua_State *L)
 {
     const int ARG_PARAM = 1;
     int type = lua_type(L, ARG_PARAM);
-    LucasError *rc = cast(L, ARG_PARAM);
+    LucasError *rc = handle(L, ARG_PARAM);
     if (rc)
     {
         lucas_error_to_lua(L, rc);

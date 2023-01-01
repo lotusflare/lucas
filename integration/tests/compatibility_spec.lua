@@ -1,7 +1,7 @@
 local pretty = require("pl.pretty")
 local tablex = require("pl.tablex")
 local lucas = require("lucas")
-local compat = require("lucas.compatibility")
+local compat = require("lucas.compatible")
 local cassandra = require("cassandra")
 local os = require("os")
 
