@@ -13,3 +13,6 @@ dependencies = {
 build = {
    type = "cmake"
 }
+test = {
+    type = "busted"
+}

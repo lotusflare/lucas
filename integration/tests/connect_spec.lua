@@ -1,4 +1,4 @@
-local lucas = require"lucas"
+local lucas = require("lucas")
 
 describe("connect", function()
     it("no error when server is available", function()

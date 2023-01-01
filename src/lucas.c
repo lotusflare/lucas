@@ -1,8 +1,8 @@
 #include "batch.c"
-#include "compatibility.c"
+#include "compatible.c"
 #include "connect.c"
 #include "errors.c"
-#include "logging.c"
+#include "logs.c"
 #include "luajit-2.1/lauxlib.h"
 #include "luajit-2.1/lua.h"
 #include "metrics.c"
@@ -51,13 +51,13 @@ int luaopen_lucas(lua_State *L)
 
         {NULL, NULL},
     };
-    luaL_Reg lucas_compatibility[] = {
+    luaL_Reg lucas_compatible[] = {
         {"convert", convert},
 
         {NULL, NULL},
     };
     luaL_openlib(L, "lucas", lucas, 0);
-    luaL_openlib(L, "lucas.compatibility", lucas_compatibility, 0);
+    luaL_openlib(L, "lucas.compatible", lucas_compatible, 0);
     cass_log_set_level(CASS_LOG_DISABLED);
     return 2;
 }
