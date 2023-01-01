@@ -2,7 +2,6 @@
 #include "compatibility.h"
 #include "errors.c"
 #include "types.c"
-#include "utility.c"
 #include <luajit-2.1/lauxlib.h>
 #include <luajit-2.1/lua.h>
 #include <stdio.h>
@@ -112,45 +111,46 @@ bool table_empty(lua_State *L, int index)
     return is_empty;
 }
 
+bool get_cql_type(lua_State *L, int index, CassValueType *cvt)
+{
+    int top = lua_gettop(L);
+    lua_getfield(L, index, "__cql_type");
+    bool has_type = lua_type(L, lua_gettop(L)) == LUA_TNIL;
+    *cvt = lua_tointeger(L, lua_gettop(L));
+    lua_settop(L, top);
+    return has_type;
+}
+
 LucasError *convert_table(lua_State *L, int index, int return_table)
 {
-    LucasError *rc = NULL;
-    // check if table is empty
     bool is_empty = table_empty(L, index);
     if (is_empty)
     {
         lua_pushinteger(L, CASS_VALUE_TYPE_NULL);
         lua_rawseti(L, return_table, 1);
-        return rc;
+        return NULL;
     }
 
-    // check if is CQL type
-    lua_getfield(L, index, "__cql_type");
-    CassValueType cvt = lua_tointeger(L, lua_gettop(L));
-    int lt = lua_type(L, lua_gettop(L));
-    lua_pop(L, 1);
-
-    if (cvt == CASS_VALUE_TYPE_LIST || cvt == CASS_VALUE_TYPE_MAP || cvt == CASS_VALUE_TYPE_SET)
+    CassValueType cvt;
+    bool has_type = get_cql_type(L, index, &cvt);
+    if (!has_type)
+    {
+        return convert_list(L, index, return_table, NULL);
+    }
+    else if (cvt == CASS_VALUE_TYPE_LIST || cvt == CASS_VALUE_TYPE_MAP || cvt == CASS_VALUE_TYPE_SET)
     {
         lua_getfield(L, index, "val");
         int val_index = lua_gettop(L);
-        rc = convert_list(L, val_index, return_table, &cvt);
+        LucasError *rc = convert_list(L, val_index, return_table, &cvt);
         lua_pop(L, 1);
-        return NULL;
-    }
-    else if (lt != LUA_TNIL)
-    {
-        lua_getfield(L, index, "__cql_type");
-        lua_rawseti(L, return_table, 1);
-        lua_getfield(L, index, "val");
-        lua_rawseti(L, return_table, 2);
-        return NULL;
+        return rc;
     }
 
-    // type is unknown so pass NULL
-    rc = convert_list(L, index, return_table, NULL);
-
-    return rc;
+    lua_getfield(L, index, "__cql_type");
+    lua_rawseti(L, return_table, 1);
+    lua_getfield(L, index, "val");
+    lua_rawseti(L, return_table, 2);
+    return NULL;
 }
 
 static int convert(lua_State *L)
@@ -158,8 +158,6 @@ static int convert(lua_State *L)
     const int ARG_PARAM = 1;
     int type = lua_type(L, ARG_PARAM);
     LucasError *rc = cast(L, ARG_PARAM);
-
-done:
     if (rc)
     {
         lucas_error_to_lua(L, rc);
