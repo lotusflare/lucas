@@ -105,14 +105,11 @@ LucasError *convert_list(lua_State *L, int index, int table, CassValueType *type
 
 bool table_empty(lua_State *L, int index)
 {
+    int top = lua_gettop(L);
     lua_pushnil(L);
-    if (lua_next(L, index) == 0)
-    {
-        lua_pop(L, 1);
-        return true;
-    }
-    lua_pop(L, 3);
-    return false;
+    bool is_empty = lua_next(L, index) == 0;
+    lua_settop(L, top);
+    return is_empty;
 }
 
 LucasError *convert_table(lua_State *L, int index, int return_table)
