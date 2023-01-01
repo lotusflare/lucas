@@ -52,38 +52,33 @@ LucasError *convert_list(lua_State *L, int index, int table, CassValueType *type
     const int collection_table = lua_gettop(L);
     lua_pushnil(L);
 
-    int item_count = 0;
+    int item_count = 1;
     bool is_map = false;
     LucasError *rc = NULL;
 
     for (int last_top = lua_gettop(L); lua_next(L, index) != 0; lua_pop(L, lua_gettop(L) - last_top))
     {
-        // printf("iterating\n");
         const int key_index = lua_gettop(L) - 1;
         const int key_type = lua_type(L, key_index);
         const int value_index = lua_gettop(L);
-        lua_pushinteger(L, ++item_count);
 
         if (key_type == LUA_TSTRING || key_type == LUA_TTABLE)
         {
             is_map = true;
-            lua_newtable(L);
-            const int tuple_table = lua_gettop(L);
             rc = cast(L, key_index);
             if (rc)
             {
                 return rc;
             }
-            lua_rawseti(L, tuple_table, 1);
             rc = cast(L, value_index);
             if (rc)
             {
                 return rc;
             }
-            lua_rawseti(L, tuple_table, 2);
         }
         else if (key_type == LUA_TNUMBER)
         {
+            lua_pushinteger(L, item_count);
             rc = cast(L, value_index);
             if (rc)
             {
@@ -95,10 +90,8 @@ LucasError *convert_list(lua_State *L, int index, int table, CassValueType *type
             return lucas_new_errorf("invalid key type");
         }
         lua_settable(L, collection_table);
+        item_count++;
     }
-
-    // printf("done iterating\n");
-    // printf("top=%d\n", lua_gettop(L));
 
     // determine type
     if (!type)
@@ -107,21 +100,9 @@ LucasError *convert_list(lua_State *L, int index, int table, CassValueType *type
         type = &cvt_fallback;
     }
 
-    if (item_count > 0)
-    {
-        // printf("count=%d\n", item_count);
-        lua_pushinteger(L, *type);
-        lua_rawseti(L, table, 1);
-        lua_rawseti(L, table, 2);
-    }
-    else
-    {
-        lua_pushinteger(L, CASS_VALUE_TYPE_NULL);
-        lua_rawseti(L, table, 1);
-        lua_pop(L, 1);
-    }
-
-    // printf("returning\n");
+    lua_pushinteger(L, *type);
+    lua_rawseti(L, table, 1);
+    lua_rawseti(L, table, 2);
 
     return NULL;
 }
