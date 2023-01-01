@@ -12,10 +12,20 @@ jobs:
         with:
           submodules: true
 
+      - uses: docker/setup-buildx-action@v2
+
       - name: apt install
         run: |
-          sudo apt-get update -yq
-          sudo apt-get install -yq boxes
+          sudo apt-get update -qq
+          sudo apt-get install -qq boxes
+
+      - uses: docker/build-push-action@v3
+        with:
+          push: false
+          context: .
+          file: Dockerfile
+          cache-from: type=gha
+          cache-to: type=gha
 
       - name: Integration tests
-        run: ./run.sh -bt
+        run: ./start.sh -bt

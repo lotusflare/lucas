@@ -3,7 +3,7 @@
 #include "query.h"
 #include "cassandra.h"
 #include "errors.c"
-#include "logging.c"
+#include "logs.c"
 #include "state.c"
 #include "types.c"
 #include <luajit-2.1/lauxlib.h>
@@ -49,7 +49,8 @@ LucasError *append_collection(lua_State *L, int index, CassCollection *collectio
     {
         err = cass_collection_append_int32(collection, lua_tointeger(L, value_index));
     }
-    else if (type == CASS_VALUE_TYPE_BIGINT || type == CASS_VALUE_TYPE_TIMESTAMP)
+    else if (type == CASS_VALUE_TYPE_BIGINT || type == CASS_VALUE_TYPE_TIMESTAMP || type == CASS_VALUE_TYPE_COUNTER ||
+             type == CASS_VALUE_TYPE_TIME)
     {
         err = cass_collection_append_int64(collection, lua_tointeger(L, value_index));
     }
@@ -97,19 +98,16 @@ LucasError *create_map(lua_State *L, int index, CassCollection **collection)
     *collection = cass_collection_new(CASS_COLLECTION_TYPE_MAP, 0);
     lua_pushnil(L);
 
-    for (int last_top = lua_gettop(L); lua_next(L, index) != 0; lua_pop(L, lua_gettop(L) - last_top))
+    for (int last_top = lua_gettop(L); lua_next(L, index) != 0; lua_settop(L, last_top))
     {
+        const int key_index = lua_gettop(L) - 1;
         const int value_index = lua_gettop(L);
-
-        lua_rawgeti(L, value_index, 1);
-        rc = append_collection(L, lua_gettop(L), *collection);
+        rc = append_collection(L, key_index, *collection);
         if (rc)
         {
             return rc;
         }
-
-        lua_rawgeti(L, value_index, 2);
-        rc = append_collection(L, lua_gettop(L), *collection);
+        rc = append_collection(L, value_index, *collection);
         if (rc)
         {
             return rc;
@@ -128,7 +126,7 @@ LucasError *create_collection(lua_State *L, int index, CassCollectionType type, 
     *collection = cass_collection_new(type, size);
     lua_pushnil(L);
 
-    for (int last_top = lua_gettop(L); lua_next(L, index) != 0; lua_pop(L, lua_gettop(L) - last_top))
+    for (int last_top = lua_gettop(L); lua_next(L, index) != 0; lua_settop(L, last_top))
     {
         const int value_index = lua_gettop(L);
         rc = append_collection(L, value_index, *collection);
@@ -173,7 +171,8 @@ LucasError *bind_positional_parameter(lua_State *L, int i, CassStatement *statem
     {
         err = cass_statement_bind_int32(statement, i, lua_tointeger(L, index));
     }
-    else if (type == CASS_VALUE_TYPE_BIGINT || type == CASS_VALUE_TYPE_TIMESTAMP)
+    else if (type == CASS_VALUE_TYPE_BIGINT || type == CASS_VALUE_TYPE_TIMESTAMP || type == CASS_VALUE_TYPE_COUNTER ||
+             type == CASS_VALUE_TYPE_TIME)
     {
         err = cass_statement_bind_int64(statement, i, lua_tointeger(L, index));
     }
@@ -276,7 +275,8 @@ LucasError *bind_named_parameter(lua_State *L, const char *name, CassStatement *
     {
         err = cass_statement_bind_int32_by_name(statement, name, lua_tointeger(L, index));
     }
-    else if (type == CASS_VALUE_TYPE_BIGINT || type == CASS_VALUE_TYPE_TIMESTAMP)
+    else if (type == CASS_VALUE_TYPE_BIGINT || type == CASS_VALUE_TYPE_TIMESTAMP || type == CASS_VALUE_TYPE_COUNTER ||
+             type == CASS_VALUE_TYPE_TIME)
     {
         err = cass_statement_bind_int64_by_name(statement, name, lua_tointeger(L, index));
     }
@@ -347,7 +347,7 @@ LucasError *bind_parameters(lua_State *L, int index, CassStatement *statement)
     LucasError *rc = NULL;
     lua_pushnil(L);
 
-    for (int last_top = lua_gettop(L); lua_next(L, index) != 0; lua_pop(L, lua_gettop(L) - last_top))
+    for (int last_top = lua_gettop(L); lua_next(L, index) != 0; lua_settop(L, last_top))
     {
         const int key_index = lua_gettop(L) - 1;
         const int key_type = lua_type(L, key_index);
@@ -434,7 +434,8 @@ LucasError *cass_value_to_lua(lua_State *L, const CassValue *cass_value)
         err = cass_value_get_int32(cass_value, &value);
         lua_pushinteger(L, value);
     }
-    else if (vt == CASS_VALUE_TYPE_BIGINT || vt == CASS_VALUE_TYPE_TIMESTAMP)
+    else if (vt == CASS_VALUE_TYPE_BIGINT || vt == CASS_VALUE_TYPE_TIMESTAMP || vt == CASS_VALUE_TYPE_COUNTER ||
+             vt == CASS_VALUE_TYPE_TIME)
     {
         cass_int64_t value;
         err = cass_value_get_int64(cass_value, &value);
@@ -485,16 +486,16 @@ LucasError *cass_value_to_lua(lua_State *L, const CassValue *cass_value)
         iterator = cass_iterator_from_collection(cass_value);
         lua_newtable(L);
         int list_table = lua_gettop(L);
-        for (int i = 1; cass_iterator_next(iterator); i++)
+        int i = 1;
+        while (cass_iterator_next(iterator))
         {
-            lua_pushinteger(L, i);
             rc = cass_value_to_lua(L, cass_iterator_get_value(iterator));
             if (rc)
             {
                 rc = lucas_wrap_error(rc, "unable to convert cassandra list or set item to lua type");
                 goto cleanup;
             }
-            lua_settable(L, list_table);
+            lua_rawseti(L, list_table, i++);
         }
     }
     else
@@ -544,9 +545,10 @@ LucasError *iterate_result(lua_State *L, CassStatement *statement, const char *p
 
     lua_newtable(L);
     const int root_table = lua_gettop(L);
-    for (int i = 1; cass_iterator_next(iterator); i++)
+    int counter = 1;
+
+    while (cass_iterator_next(iterator))
     {
-        lua_pushinteger(L, i);
         lua_newtable(L);
         int sub_table = lua_gettop(L);
         const CassRow *row = cass_iterator_get_row(iterator);
@@ -569,7 +571,7 @@ LucasError *iterate_result(lua_State *L, CassStatement *statement, const char *p
             }
             lua_settable(L, sub_table);
         }
-        lua_settable(L, root_table);
+        lua_rawseti(L, root_table, counter++);
     }
 
     lua_newtable(L);
