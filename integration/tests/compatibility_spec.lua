@@ -5,7 +5,7 @@ local compat = require("lucas.compatibility")
 local cassandra = require("cassandra")
 local os = require("os")
 
-describe("compatibility", function()
+describe("scalars", function()
     local test_cases = { {
         name = "implicit string",
         input = "hello",
@@ -23,17 +23,28 @@ describe("compatibility", function()
         input = cassandra.text("foo"),
         expected = lucas.text("foo"),
     }, {
-        name = "untyped explicit list<int>",
-        input = cassandra.list({ 100, 6 }),
-        expected = lucas.list({ lucas.int(100), lucas.int(6) }),
-    }, {
         name = "implicit null",
         input = {},
         expected = lucas.null(),
-    }, {
+    } }
+
+    for _, tc in ipairs(test_cases) do
+        it(string.format("(%s)", tc.name), function()
+            local converted = compat.convert(tc.input)
+            assert.are.same(tc.expected, converted)
+        end)
+    end
+end)
+
+describe("collections", function()
+    local test_cases = { {
         name = "set<text>",
         input = cassandra.set({ "Gomo_UnliData_30D_freeSIM" }),
         expected = lucas.set({ lucas.text("Gomo_UnliData_30D_freeSIM") }),
+    }, {
+        name = "untyped explicit list<int>",
+        input = cassandra.list({ 100, 6 }),
+        expected = lucas.list({ lucas.int(100), lucas.int(6) }),
     } }
 
     for _, tc in ipairs(test_cases) do
