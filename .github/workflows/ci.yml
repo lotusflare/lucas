@@ -28,4 +28,4 @@ jobs:
           cache-to: type=gha
 
       - name: Integration tests
-        run: ./start.sh -bt
+        run: ./start.sh -t
