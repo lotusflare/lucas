@@ -15,6 +15,17 @@ RUN apt-get -qq -o=Dpkg::Use-Pty=0 update \
     && npm install --global prettier https://github.com/prettier/plugin-lua.git \
     && ln -s /usr/bin/clang-format-12 /usr/bin/clang-format
 
-COPY . /app
 WORKDIR /app
-RUN ./format.sh && ./build.sh
+COPY CMakeLists.txt ./
+COPY vendor/cpp-driver ./vendor/cpp-driver
+COPY .git ./
+RUN ls /app/vendor
+RUN cmake -S . -B cassandra
+RUN cmake --build cassandra
+# RUN [ -n "$SKIP_BUILD" ] \
+#     && cmake -S . -B cassandra \
+#     && cmake --build cassandra
+COPY . /app
+RUN [ -n "$SKIP_BUILD" ] \
+    && ./format.sh \
+    && ./build.sh
