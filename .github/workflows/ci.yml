@@ -13,8 +13,6 @@ jobs:
           submodules: true
           fetch-depth: 0
 
-      - run: git fetch --tags origin
-
       - uses: docker/setup-buildx-action@v2
 
       - name: apt install
@@ -27,8 +25,8 @@ jobs:
           push: false
           context: .
           file: Dockerfile
-          # cache-from: type=gha
-          # cache-to: type=gha
+          cache-from: type=gha
+          cache-to: type=gha
 
       - name: Integration tests
         run: ./start.sh -t
