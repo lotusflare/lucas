@@ -22,8 +22,6 @@ set(VERSION_PATCH "${CMAKE_MATCH_3}")
 set(VERSION_SUFFIX "${CMAKE_MATCH_6}${CMAKE_MATCH_7}")
 message(STATUS "lucas version: ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_SUFFIX}")
 
-# add_subdirectory(vendor/cpp-driver)
-# include_directories(vendor/cpp-driver/include)
 include_directories(include)
 
 add_library("${PROJECT_NAME}" SHARED src/lucas.c)
