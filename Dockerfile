@@ -25,6 +25,5 @@ RUN mkdir -p build \
 
 COPY . /app/
 WORKDIR /app
-RUN [ -n "$SKIP_BUILD" ] \
-    && ./format.sh \
+RUN ./format.sh \
     && ./build.sh
