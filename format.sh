@@ -29,7 +29,7 @@ format() {
     find integration -name '*.lua' | xargs prettier $pargs
 }
 
-if [ -n "${SKIP_BUILD}" ]; then
+if [ -n "$SKIP_BUILD" ]; then
     exit 0
 fi
 
