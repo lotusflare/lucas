@@ -10,6 +10,15 @@
 
 typedef CassLogLevel LucasLogLevel;
 
+typedef enum LucasLogLevel
+{
+    LucasLogDebug = 1,
+    LucasLogInfo = 2,
+    LucasLogWarn = 3,
+    LucasLogError = 4,
+    LucasLogCritical = 5,
+} LucasLogLevel2;
+
 void log_lua(const char *message, LucasLogLevel severity, int timestamp)
 {
     pthread_mutex_lock(&lock);
@@ -37,7 +46,7 @@ void lucas_log(LucasLogLevel level, const char *fmt, ...)
     va_start(args1, fmt);
     va_copy(args2, args1);
 
-    char append[vsnprintf(NULL, 0, fmt, args1)];
+    char append[vsnprintf(NULL, 0, fmt, args1) + 1];
     vsprintf(append, fmt, args2);
     log_lua(append, level, (int)time(NULL));
 

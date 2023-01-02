@@ -21,11 +21,6 @@ int helper(lua_State *L, CassValueType cass_type)
     return 1;
 }
 
-static int type_boolean(lua_State *L)
-{
-    return helper(L, CASS_VALUE_TYPE_BOOLEAN);
-}
-
 static int type_null(lua_State *L)
 {
     lua_newtable(L);
@@ -46,6 +41,11 @@ static int type_unset(lua_State *L)
     lua_rawseti(L, table, 1);
 
     return 1;
+}
+
+static int type_boolean(lua_State *L)
+{
+    return helper(L, CASS_VALUE_TYPE_BOOLEAN);
 }
 
 static int type_ascii(lua_State *L)

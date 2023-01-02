@@ -1,4 +1,3 @@
-require("busted.runner")()
 local lucas = require("lucas")
 local spy = require("luassert.spy")
 local pretty = require("pl.pretty")

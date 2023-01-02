@@ -1,5 +1,5 @@
-require("busted.runner")()
 local lucas = require("lucas")
+local pretty = require("pl.pretty")
 
 describe("batch", function()
     it("insert", function()
@@ -8,9 +8,9 @@ describe("batch", function()
             port = os.getenv("CASSANDRA_PORT"),
         })
 
-        lucas.batch(
-            "INSERT INTO testing.data (operator_name, id, id_type, asset_id, asset_type, approval_status) VALUES (?, ?, ?, ?, ?, ?)",
+        lucas.batch({
             {
+                "INSERT INTO testing.data (operator_name, id, id_type, asset_id, asset_type, approval_status) VALUES (?, ?, ?, ?, ?, ?)",
                 {
                     lucas.varchar("avantel"),
                     lucas.varchar("9380816255dc45dfa1a57541db81df1d"),
@@ -19,6 +19,9 @@ describe("batch", function()
                     lucas.int(2),
                     lucas.int(1),
                 },
+            },
+            {
+                "INSERT INTO testing.data (operator_name, id, id_type, asset_id, asset_type, approval_status) VALUES (?, ?, ?, ?, ?, ?)",
                 {
                     lucas.varchar("tmo"),
                     lucas.varchar("9380816255dc45dfa1a57541db81df1d"),
@@ -27,8 +30,8 @@ describe("batch", function()
                     lucas.int(2),
                     lucas.int(1),
                 },
-            }
-        )
+            },
+        })
 
         local results =
             lucas.query(

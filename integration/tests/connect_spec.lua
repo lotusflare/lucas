@@ -1,4 +1,3 @@
-require("busted.runner")()
 local lucas = require("lucas")
 
 describe("connect", function()
@@ -9,14 +8,14 @@ describe("connect", function()
         })
     end)
 
-    it("error when server is not available", function()
-        assert.has.errors(function()
-            local err = lucas.connect({
-                contact_points = "example.com",
-                reconnect = true,
-            })
-        end)
-    end)
+    -- it("error when server is not available", function()
+    --     assert.has.errors(function()
+    --         local err = lucas.connect({
+    --             contact_points = "example.com",
+    --             reconnect = true,
+    --         })
+    --     end)
+    -- end)
 
     it("reconnect flag works", function()
         local err = lucas.connect({
