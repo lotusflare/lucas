@@ -1,6 +1,7 @@
 FROM ubuntu:20.04
 
-ENV LUA_CPATH="/app/build/?.so;/usr/local/lib/lua/5.1/?.so"
+ENV LD_LIBRARY_PATH="/usr/local/lib/x86_64-linux-gnu"
+ENV LUA_CPATH="/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/x86_64-linux-gnu/?.so"
 ARG DEBIAN_FRONTEND="noninteractive"
 ARG SKIP_BUILD=""
 
@@ -15,6 +16,14 @@ RUN apt-get -qq -o=Dpkg::Use-Pty=0 update \
     && npm install --global prettier https://github.com/prettier/plugin-lua.git \
     && ln -s /usr/bin/clang-format-12 /usr/bin/clang-format
 
-COPY . /app
+COPY ./vendor/ /app/vendor/
+WORKDIR /app/vendor/cpp-driver
+RUN mkdir -p build \
+    && cd build \
+    && cmake .. \
+    && make \
+    && make install
+
+COPY . /app/
 WORKDIR /app
 RUN ./format.sh && ./build.sh

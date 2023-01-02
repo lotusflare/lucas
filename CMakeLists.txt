@@ -15,15 +15,13 @@ execute_process(
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-set(VERSION_REGEX "^v([0-9]+).([0-9]+).([0-9]+)((-[0-9]+)(-g[a-f0-9]+))?(-dirty)?$")
-string(REGEX REPLACE "${VERSION_REGEX}" "\\1" VERSION_MAJOR "${GIT_DESCRIBE}")
-string(REGEX REPLACE "${VERSION_REGEX}" "\\2" VERSION_MINOR "${GIT_DESCRIBE}")
-string(REGEX REPLACE "${VERSION_REGEX}" "\\3" VERSION_PATCH "${GIT_DESCRIBE}")
-string(REGEX REPLACE "${VERSION_REGEX}" "\\6\\7" VERSION_SUFFIX "${GIT_DESCRIBE}")
-message(STATUS "lucas version: ${GIT_DESCRIBE}")
+string(REGEX MATCH "^v([0-9]+).([0-9]+).([0-9]+)((-[0-9]+)(-g[a-f0-9]+))?(-dirty)?$" _ "${GIT_DESCRIBE}")
+set(VERSION_MAJOR "${CMAKE_MATCH_1}")
+set(VERSION_MINOR "${CMAKE_MATCH_2}")
+set(VERSION_PATCH "${CMAKE_MATCH_3}")
+set(VERSION_SUFFIX "${CMAKE_MATCH_6}${CMAKE_MATCH_7}")
+message(STATUS "lucas version: ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_SUFFIX}")
 
-add_subdirectory(vendor/cpp-driver)
-include_directories(vendor/cpp-driver/include)
 include_directories(include)
 
 add_library("${PROJECT_NAME}" SHARED src/lucas.c)
