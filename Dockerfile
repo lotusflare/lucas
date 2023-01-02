@@ -17,12 +17,10 @@ RUN apt-get -qq -o=Dpkg::Use-Pty=0 update \
     && ln -s /usr/bin/clang-format-12 /usr/bin/clang-format
 
 COPY ./vendor/ /app/vendor/
-WORKDIR /app/vendor/cpp-driver
-RUN mkdir -p build \
-    && cd build \
-    && cmake .. \
-    && make \
-    && make install
+WORKDIR /app/vendor/cpp-driver/build
+RUN cmake .. \
+    && cmake --build . \
+    && cmake --install .
 
 COPY . /app/
 WORKDIR /app
