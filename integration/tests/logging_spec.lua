@@ -42,7 +42,7 @@ describe("metrics", function()
             port = os.getenv("CASSANDRA_PORT"),
         })
         local metrics = lucas.metrics()
-        assert.array.has({}, metrics)
+        assert.array.has({ "errors", "requests", "stats" }, metrics)
     end)
 
     it("collects speculative execution metrics", function()
@@ -51,6 +51,21 @@ describe("metrics", function()
             port = os.getenv("CASSANDRA_PORT"),
         })
         local metrics = lucas.speculative_execution_metrics()
-        assert.array.has({}, metrics)
+        assert.array.has(
+            {
+                "count",
+                "max",
+                "mean",
+                "median",
+                "min",
+                "percentage",
+                "percentile_75th",
+                "percentile_95th",
+                "percentile_98th",
+                "percentile_99th",
+                "percentile_999th",
+            },
+            metrics
+        )
     end)
 end)
