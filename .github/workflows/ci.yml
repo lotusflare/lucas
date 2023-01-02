@@ -27,8 +27,8 @@ jobs:
           push: false
           context: .
           file: Dockerfile
-          cache-from: type=gha
-          cache-to: type=gha
+          # cache-from: type=gha
+          # cache-to: type=gha
 
       - name: Integration tests
         run: ./start.sh -t
