@@ -1,6 +1,6 @@
 #!/bin/sh -e
 
-if [ -n "${SKIP_BUILD}" ]; then
+if [ -n "$SKIP_BUILD" ]; then
     exit 0
 fi
 
