@@ -11,8 +11,9 @@ See `integration/tests` for examples.
 `format.sh` checks the code has been formatted.
 - `-f` auto fixes formatting errors.
 
-`run.sh` brings up the test environment.
-
+`start.sh` brings up the test environment.
 - `-c` removes existing containers first (clears database).
 - `-b` force rebuild of the containers.
 - `-t` run the tests.
+
+`build.sh` builds the library.
