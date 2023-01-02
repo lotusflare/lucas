@@ -1,5 +1,6 @@
 FROM ubuntu:20.04
 
+ENV LD_LIBRARY_PATH="/usr/local/lib/x86_64-linux-gnu"
 ENV LUA_CPATH="/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/x86_64-linux-gnu/?.so"
 ARG DEBIAN_FRONTEND="noninteractive"
 ARG SKIP_BUILD=""
