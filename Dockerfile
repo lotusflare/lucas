@@ -25,5 +25,4 @@ RUN mkdir -p build \
 
 COPY . /app/
 WORKDIR /app
-RUN ./format.sh \
-    && ./build.sh
+RUN ./format.sh && ./build.sh
