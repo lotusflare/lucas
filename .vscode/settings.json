@@ -1,7 +1,6 @@
 {
     "files.exclude": {
         ".cache": true,
-        "build*": true
     },
     "editor.inlayHints.enabled": "off",
     "[c]": {

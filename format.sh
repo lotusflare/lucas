@@ -29,9 +29,5 @@ format() {
     find integration -name '*.lua' | xargs prettier $pargs
 }
 
-if [ -n "${SKIP_BUILD}" ]; then
-    exit 0
-fi
-
 format_flags "$@"
 format
