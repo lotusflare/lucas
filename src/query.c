@@ -656,6 +656,7 @@ static int query(lua_State *L)
     int page_size = 0;
     LucasError *rc = NULL;
     CassStatement *statement = NULL;
+    lucas_log(LucasLogDebug, "query submitted: %s", query);
 
     if (lua_type(L, ARG_OPTIONS) == LUA_TTABLE)
     {
