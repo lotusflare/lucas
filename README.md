@@ -1,3 +1,5 @@
+[![Build](https://github.com/lotusflare/lucas/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/lotusflare/lucas/actions/workflows/ci.yml)
+
 # Lucas
 
 _Lucas_ is a Lua library which wraps the [DataStax Cassandra C/C++ driver](https://github.com/datastax/cpp-driver) using the Lua C API.
