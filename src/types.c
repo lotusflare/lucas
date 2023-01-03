@@ -165,8 +165,7 @@ static int type_set(lua_State *L)
 
 static int type_udt(lua_State *L)
 {
-    lucas_error_to_lua(L, lucas_new_errorf("udt type not supported"));
-    return 0;
+    return helper(L, CASS_VALUE_TYPE_UDT);
 }
 
 static int type_tuple(lua_State *L)

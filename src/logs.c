@@ -8,8 +8,6 @@
 #include <stdarg.h>
 #include <time.h>
 
-typedef CassLogLevel LucasLogLevel;
-
 typedef enum LucasLogLevel
 {
     LucasLogDebug = 1,
@@ -17,7 +15,7 @@ typedef enum LucasLogLevel
     LucasLogWarn = 3,
     LucasLogError = 4,
     LucasLogCritical = 5,
-} LucasLogLevel2;
+} LucasLogLevel;
 
 void log_lua(const char *message, LucasLogLevel severity, int timestamp)
 {
@@ -30,14 +28,9 @@ void log_lua(const char *message, LucasLogLevel severity, int timestamp)
     pthread_mutex_unlock(&lock);
 }
 
-void cassandra_callback(const CassLogMessage *log, void *data)
-{
-    log_lua(log->message, log->severity, log->time_ms / 1000);
-}
-
 void lucas_log(LucasLogLevel level, const char *fmt, ...)
 {
-    if (log_context == NULL)
+    if (!log_context)
     {
         return;
     }
@@ -54,12 +47,39 @@ void lucas_log(LucasLogLevel level, const char *fmt, ...)
     va_end(args2);
 }
 
+LucasLogLevel lucas_log_level_from_cass(CassLogLevel cass_level)
+{
+    switch (cass_level)
+    {
+    case CASS_LOG_TRACE:
+    case CASS_LOG_DEBUG:
+        return LucasLogDebug;
+    default:
+        lucas_log(LucasLogWarn, "invalid log level %d", cass_level);
+    case CASS_LOG_INFO:
+        return LucasLogInfo;
+    case CASS_LOG_WARN:
+        return LucasLogWarn;
+    case CASS_LOG_ERROR:
+        return LucasLogError;
+    case CASS_LOG_CRITICAL:
+        return LucasLogCritical;
+    }
+}
+
+void cassandra_callback(const CassLogMessage *log, void *data)
+{
+    LucasLogLevel level = lucas_log_level_from_cass(log->severity);
+    log_lua(log->message, level, log->time_ms / 1000);
+}
+
 int logger(lua_State *L)
 {
-    if (log_context != NULL)
+    if (log_context)
     {
         lua_close(log_context);
     }
+
     luaL_checktype(L, 1, LUA_TFUNCTION);
     log_context = lua_newthread(L);
     luaL_ref(L, LUA_REGISTRYINDEX);

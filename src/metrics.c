@@ -1,5 +1,6 @@
 
 #include "cassandra.h"
+#include "logs.c"
 #include "luajit-2.1/lauxlib.h"
 #include "luajit-2.1/lua.h"
 #include "state.c"
