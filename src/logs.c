@@ -125,7 +125,7 @@ int logger(lua_State *L)
     log_context = lua_newthread(L);
     luaL_ref(L, LUA_REGISTRYINDEX);
     lua_pushvalue(L, ARG_CALLBACK);
-    lua_xmove(L, log_context, 1);
+    lua_xmove(L, log_context, lua_gettop(L));
     cass_log_set_callback(cassandra_callback, NULL);
     cass_log_set_level(cass_log_level_from_lucas(log_visibility));
     return 0;
