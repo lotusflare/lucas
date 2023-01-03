@@ -17,6 +17,8 @@ typedef enum LucasLogLevel
     LucasLogCritical = 5,
 } LucasLogLevel;
 
+LucasLogLevel log_visibility = LucasLogInfo;
+
 void log_lua(const char *message, LucasLogLevel severity, int timestamp)
 {
     pthread_mutex_lock(&lock);
@@ -31,6 +33,11 @@ void log_lua(const char *message, LucasLogLevel severity, int timestamp)
 void lucas_log(LucasLogLevel level, const char *fmt, ...)
 {
     if (!log_context)
+    {
+        return;
+    }
+
+    if (level < log_visibility)
     {
         return;
     }
@@ -86,5 +93,6 @@ int logger(lua_State *L)
     lua_xmove(L, log_context, 1);
     cass_log_set_callback(cassandra_callback, NULL);
     cass_log_set_level(CASS_LOG_DEBUG);
+    log_visibility = LucasLogDebug;
     return 0;
 }
