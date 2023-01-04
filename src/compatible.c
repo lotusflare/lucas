@@ -1,6 +1,7 @@
 #include "compatible.h"
 #include "cassandra.h"
 #include "errors.c"
+#include "logs.c"
 #include "types.c"
 #include <luajit-2.1/lauxlib.h>
 #include <luajit-2.1/lua.h>
@@ -108,7 +109,7 @@ LucasError *handle_collection(lua_State *L, int index, int table, CassValueType 
         }
         else
         {
-            return lucas_new_errorf("invalid key type");
+            return lucas_new_errorf("invalid key type: %d", key_type);
         }
         lua_settable(L, collection_table);
         item_count++;
@@ -117,6 +118,7 @@ LucasError *handle_collection(lua_State *L, int index, int table, CassValueType 
     if (!cvt)
     {
         cvt = is_map ? CASS_VALUE_TYPE_MAP : CASS_VALUE_TYPE_LIST;
+        lucas_log(LucasLogDebug, "no collection type specified, defaulting to %d", cvt);
     }
 
     lua_pushinteger(L, cvt);
@@ -130,6 +132,7 @@ LucasError *handle_table(lua_State *L, int index, int return_table)
     bool is_empty = table_empty(L, index);
     if (is_empty)
     {
+        lucas_log(LucasLogDebug, "collection is empty, returning");
         lua_pushinteger(L, CASS_VALUE_TYPE_NULL);
         lua_rawseti(L, return_table, 1);
         return NULL;
