@@ -1,9 +1,10 @@
-name: Build
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 
 on: [push]
 
+name: build
 jobs:
-  test:
+  tests:
     runs-on: ubuntu-22.04
     env:
       DOCKER_BUILDKIT: "1"

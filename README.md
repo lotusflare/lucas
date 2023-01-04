@@ -1,4 +1,4 @@
-[![Build](https://github.com/lotusflare/lucas/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/lotusflare/lucas/actions/workflows/ci.yml)
+[![Build](https://github.com/lotusflare/lucas/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/lotusflare/lucas/actions/workflows/build.yml)
 
 # Lucas
 
