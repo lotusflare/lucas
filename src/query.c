@@ -529,6 +529,11 @@ LucasError *iterate_result(lua_State *L, CassStatement *statement, const char *p
     if (paging_state != NULL)
     {
         err = cass_statement_set_paging_state_token(statement, paging_state, paging_state_size);
+        if (err != CASS_OK)
+        {
+            rc = lucas_new_errorf_from_cass_error(err, "could not set paging state token");
+            goto cleanup;
+        }
     }
 
     future = cass_session_execute(session, statement);
@@ -546,6 +551,7 @@ LucasError *iterate_result(lua_State *L, CassStatement *statement, const char *p
     lua_newtable(L);
     const int root_table = lua_gettop(L);
     int counter = 1;
+    lucas_log(LucasLogDebug, "ready to query iterate results");
 
     while (cass_iterator_next(iterator))
     {
@@ -578,6 +584,7 @@ LucasError *iterate_result(lua_State *L, CassStatement *statement, const char *p
     const int meta_table = lua_gettop(L);
     if (cass_result_has_more_pages(result))
     {
+        lucas_log(LucasLogDebug, "query result is paginated");
         const char *paging_state = NULL;
         size_t paging_state_size = 0;
         err = cass_result_paging_state_token(result, &paging_state, &paging_state_size);
@@ -598,6 +605,7 @@ LucasError *iterate_result(lua_State *L, CassStatement *statement, const char *p
         lua_pushstring(L, "paging_state");
         lua_pushlstring(L, paging_state, paging_state_size);
         lua_settable(L, meta_table);
+        lucas_log(LucasLogDebug, "finished setting paging state token");
     }
 
 cleanup:
