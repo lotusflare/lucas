@@ -8,6 +8,7 @@ _Lucas_ is a Lua library which wraps the [DataStax Cassandra C/C++ driver](https
 
 See `integration/tests` for examples.
 
+
 ## Scripts
 
 `format.sh` checks the code has been formatted.
