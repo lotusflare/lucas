@@ -16,8 +16,8 @@ end)
 describe("logging", function()
     it("callback hook works", function()
         local s = spy.new(function() end)
-        lucas.logger(function(message, severity, timestamp)
-            s(message, severity, timestamp)
+        lucas.logger(function(message, source, severity, timestamp)
+            s(message, source, severity, timestamp)
         end)
         lucas.connect({
             contact_points = os.getenv("CASSANDRA_HOST"),
@@ -29,6 +29,7 @@ describe("logging", function()
         })
         assert.spy(s).was.called_with(
             match.contains("already connected"),
+            "lucas",
             match.is_number(),
             match.is_number()
         )

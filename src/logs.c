@@ -9,19 +9,36 @@
 #include <stdio.h>
 #include <time.h>
 
+#define LOG_SOURCE_MAPPING(XX)                                                                                         \
+    XX(SOURCE_LUCAS, "lucas")                                                                                          \
+    XX(SOURCE_CASSANDRA, "cassandra")
+
+typedef enum LogSource
+{
+#define XX_LOG_SOURCE(source, _) source,
+    LOG_SOURCE_MAPPING(XX_LOG_SOURCE)
+#undef XX_LOG_SOURCE
+} LogSource;
+
+static const char *const LogSourceNames[] = {
+#define XX_SOURCE_NAME(_, name) name,
+    LOG_SOURCE_MAPPING(XX_SOURCE_NAME)
+#undef XX_SOURCE_NAME
+};
+
 typedef enum LucasLogLevel
 {
-    LucasLogCritical = 1,
-    LucasLogError = 2,
-    LucasLogWarn = 3,
-    LucasLogInfo = 4,
-    LucasLogDebug = 5,
-    LucasLogTrace = 6,
+    LOG_CRITICAL = 1,
+    LOG_ERROR = 2,
+    LOG_WARN = 3,
+    LOG_INFO = 4,
+    LOG_DEBUG = 5,
+    LOG_TRACE = 6,
 } LucasLogLevel;
 
-LucasLogLevel log_visibility = LucasLogInfo;
+LucasLogLevel log_visibility = LOG_INFO;
 
-void log_lua(const char *message, LucasLogLevel severity, int timestamp)
+void log_lua(const char *message, const char *source, LucasLogLevel severity, int timestamp)
 {
     if (severity > log_visibility)
     {
@@ -31,9 +48,10 @@ void log_lua(const char *message, LucasLogLevel severity, int timestamp)
     pthread_mutex_lock(&lock);
     lua_pushvalue(log_context, 1);
     lua_pushstring(log_context, message);
+    lua_pushstring(log_context, source);
     lua_pushinteger(log_context, severity);
     lua_pushinteger(log_context, timestamp);
-    int result = lua_pcall(log_context, 3, 0, 0); // results == LUA_OK
+    int result = lua_pcall(log_context, 4, 0, 0); // results == LUA_OK
     pthread_mutex_unlock(&lock);
 }
 
@@ -50,7 +68,7 @@ void lucas_log(LucasLogLevel level, const char *fmt, ...)
 
     char append[vsnprintf(NULL, 0, fmt, args1) + 1];
     vsprintf(append, fmt, args2);
-    log_lua(append, level, (int)time(NULL));
+    log_lua(append, LogSourceNames[SOURCE_LUCAS], level, (int)time(NULL));
 
     va_end(args1);
     va_end(args2);
@@ -61,19 +79,19 @@ LucasLogLevel lucas_log_level_from_cass(CassLogLevel cass_level)
     switch (cass_level)
     {
     case CASS_LOG_TRACE:
-        return LucasLogTrace;
+        return LOG_TRACE;
     case CASS_LOG_DEBUG:
-        return LucasLogDebug;
+        return LOG_DEBUG;
     default:
-        lucas_log(LucasLogWarn, "invalid CassLogLevel log level %d", cass_level);
+        lucas_log(LOG_WARN, "invalid CassLogLevel log level %d", cass_level);
     case CASS_LOG_INFO:
-        return LucasLogInfo;
+        return LOG_INFO;
     case CASS_LOG_WARN:
-        return LucasLogWarn;
+        return LOG_WARN;
     case CASS_LOG_ERROR:
-        return LucasLogError;
+        return LOG_ERROR;
     case CASS_LOG_CRITICAL:
-        return LucasLogCritical;
+        return LOG_CRITICAL;
     }
 }
 
@@ -81,19 +99,19 @@ CassLogLevel cass_log_level_from_lucas(LucasLogLevel cass_level)
 {
     switch (cass_level)
     {
-    case LucasLogTrace:
+    case LOG_TRACE:
         return CASS_LOG_TRACE;
-    case LucasLogDebug:
+    case LOG_DEBUG:
         return CASS_LOG_DEBUG;
     default:
-        lucas_log(LucasLogWarn, "invalid LucasLogLevel log level %d", cass_level);
-    case LucasLogInfo:
+        lucas_log(LOG_WARN, "invalid LogLevel log level %d", cass_level);
+    case LOG_INFO:
         return CASS_LOG_INFO;
-    case LucasLogWarn:
+    case LOG_WARN:
         return CASS_LOG_WARN;
-    case LucasLogError:
+    case LOG_ERROR:
         return CASS_LOG_ERROR;
-    case LucasLogCritical:
+    case LOG_CRITICAL:
         return CASS_LOG_CRITICAL;
     }
 }
@@ -101,7 +119,7 @@ CassLogLevel cass_log_level_from_lucas(LucasLogLevel cass_level)
 void cassandra_callback(const CassLogMessage *log, void *data)
 {
     LucasLogLevel level = lucas_log_level_from_cass(log->severity);
-    log_lua(log->message, level, log->time_ms / 1000);
+    log_lua(log->message, LogSourceNames[SOURCE_CASSANDRA], level, log->time_ms / 1000);
 }
 
 int logger(lua_State *L)

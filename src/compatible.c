@@ -118,7 +118,7 @@ LucasError *handle_collection(lua_State *L, int index, int table, CassValueType 
     if (!cvt)
     {
         cvt = is_map ? CASS_VALUE_TYPE_MAP : CASS_VALUE_TYPE_LIST;
-        lucas_log(LucasLogDebug, "no collection type specified, defaulting to %d", cvt);
+        lucas_log(LOG_DEBUG, "no collection type specified, defaulting to %d", cvt);
     }
 
     lua_pushinteger(L, cvt);
@@ -132,7 +132,7 @@ LucasError *handle_table(lua_State *L, int index, int return_table)
     bool is_empty = table_empty(L, index);
     if (is_empty)
     {
-        lucas_log(LucasLogDebug, "collection is empty, returning");
+        lucas_log(LOG_DEBUG, "collection is empty, returning");
         lua_pushinteger(L, CASS_VALUE_TYPE_NULL);
         lua_rawseti(L, return_table, 1);
         return NULL;
