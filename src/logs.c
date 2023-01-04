@@ -6,38 +6,58 @@
 #include "state.c"
 #include <pthread.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include <time.h>
 
-typedef CassLogLevel LucasLogLevel;
+#define LOG_SOURCE_MAPPING(XX)                                                                                         \
+    XX(SOURCE_LUCAS, "lucas")                                                                                          \
+    XX(SOURCE_CASSANDRA, "cassandra")
+
+typedef enum LogSource
+{
+#define XX_LOG_SOURCE(source, _) source,
+    LOG_SOURCE_MAPPING(XX_LOG_SOURCE)
+#undef XX_LOG_SOURCE
+} LogSource;
+
+static const char *const LogSourceNames[] = {
+#define XX_SOURCE_NAME(_, name) name,
+    LOG_SOURCE_MAPPING(XX_SOURCE_NAME)
+#undef XX_SOURCE_NAME
+};
 
 typedef enum LucasLogLevel
 {
-    LucasLogDebug = 1,
-    LucasLogInfo = 2,
-    LucasLogWarn = 3,
-    LucasLogError = 4,
-    LucasLogCritical = 5,
-} LucasLogLevel2;
+    LOG_CRITICAL = 1,
+    LOG_ERROR = 2,
+    LOG_WARN = 3,
+    LOG_INFO = 4,
+    LOG_DEBUG = 5,
+    LOG_TRACE = 6,
+} LucasLogLevel;
 
-void log_lua(const char *message, LucasLogLevel severity, int timestamp)
+LucasLogLevel log_visibility = LOG_INFO;
+
+void log_lua(const char *message, const char *source, LucasLogLevel severity, int timestamp)
 {
+    if (severity > log_visibility)
+    {
+        return;
+    }
+
     pthread_mutex_lock(&lock);
     lua_pushvalue(log_context, 1);
     lua_pushstring(log_context, message);
+    lua_pushstring(log_context, source);
     lua_pushinteger(log_context, severity);
     lua_pushinteger(log_context, timestamp);
-    lua_pcall(log_context, 3, 0, 0);
+    int result = lua_pcall(log_context, 4, 0, 0); // results == LUA_OK
     pthread_mutex_unlock(&lock);
-}
-
-void cassandra_callback(const CassLogMessage *log, void *data)
-{
-    log_lua(log->message, log->severity, log->time_ms / 1000);
 }
 
 void lucas_log(LucasLogLevel level, const char *fmt, ...)
 {
-    if (log_context == NULL)
+    if (!log_context)
     {
         return;
     }
@@ -48,23 +68,83 @@ void lucas_log(LucasLogLevel level, const char *fmt, ...)
 
     char append[vsnprintf(NULL, 0, fmt, args1) + 1];
     vsprintf(append, fmt, args2);
-    log_lua(append, level, (int)time(NULL));
+    log_lua(append, LogSourceNames[SOURCE_LUCAS], level, (int)time(NULL));
 
     va_end(args1);
     va_end(args2);
 }
 
+LucasLogLevel lucas_log_level_from_cass(CassLogLevel cass_level)
+{
+    switch (cass_level)
+    {
+    case CASS_LOG_TRACE:
+        return LOG_TRACE;
+    case CASS_LOG_DEBUG:
+        return LOG_DEBUG;
+    default:
+        lucas_log(LOG_WARN, "invalid CassLogLevel log level %d", cass_level);
+    case CASS_LOG_INFO:
+        return LOG_INFO;
+    case CASS_LOG_WARN:
+        return LOG_WARN;
+    case CASS_LOG_ERROR:
+        return LOG_ERROR;
+    case CASS_LOG_CRITICAL:
+        return LOG_CRITICAL;
+    }
+}
+
+CassLogLevel cass_log_level_from_lucas(LucasLogLevel cass_level)
+{
+    switch (cass_level)
+    {
+    case LOG_TRACE:
+        return CASS_LOG_TRACE;
+    case LOG_DEBUG:
+        return CASS_LOG_DEBUG;
+    default:
+        lucas_log(LOG_WARN, "invalid LogLevel log level %d", cass_level);
+    case LOG_INFO:
+        return CASS_LOG_INFO;
+    case LOG_WARN:
+        return CASS_LOG_WARN;
+    case LOG_ERROR:
+        return CASS_LOG_ERROR;
+    case LOG_CRITICAL:
+        return CASS_LOG_CRITICAL;
+    }
+}
+
+void cassandra_callback(const CassLogMessage *log, void *data)
+{
+    LucasLogLevel level = lucas_log_level_from_cass(log->severity);
+    log_lua(log->message, LogSourceNames[SOURCE_CASSANDRA], level, log->time_ms / 1000);
+}
+
 int logger(lua_State *L)
 {
-    if (log_context != NULL)
+    const int arg_count = lua_gettop(L);
+    const int ARG_CALLBACK = 1;
+    const int ARG_LEVEL = 2;
+
+    if (arg_count > 1)
+    {
+        luaL_checktype(L, ARG_LEVEL, LUA_TNUMBER);
+        log_visibility = lua_tointeger(L, ARG_LEVEL);
+    }
+
+    if (log_context)
     {
         lua_close(log_context);
     }
-    luaL_checktype(L, 1, LUA_TFUNCTION);
+
+    luaL_checktype(L, ARG_CALLBACK, LUA_TFUNCTION);
     log_context = lua_newthread(L);
     luaL_ref(L, LUA_REGISTRYINDEX);
-    lua_xmove(L, log_context, 1);
+    lua_pushvalue(L, ARG_CALLBACK);
+    lua_xmove(L, log_context, lua_gettop(L));
     cass_log_set_callback(cassandra_callback, NULL);
-    cass_log_set_level(CASS_LOG_DEBUG);
+    cass_log_set_level(cass_log_level_from_lucas(log_visibility));
     return 0;
 }

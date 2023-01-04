@@ -37,6 +37,7 @@ int batch(lua_State *L)
 {
     const int ARG_BATCHES = 1;
     const size_t parameter_count = lua_objlen(L, ARG_BATCHES);
+    lucas_log(LOG_DEBUG, "batch query submitted, size: %d", parameter_count);
 
     CassBatch *batch = NULL;
     const CassPrepared *prepared = NULL;

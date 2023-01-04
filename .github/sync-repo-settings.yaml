@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/googleapis/repo-automation-bots/main/packages/sync-repo-settings/src/schema.json
+
+rebaseMergeAllowed: false
+squashMergeAllowed: true
+mergeCommitAllowed: false
+deleteBranchOnMerge: true
+
+branchProtectionRules:
+- pattern: master
+  dismissesStaleReviews: false
+  isAdminEnforced: true
+  requiredApprovingReviewCount: 1
+  requiresCodeOwnerReviews: true
+  requiresStrictStatusChecks: true
+  requiredStatusCheckContexts:
+    - tests
+  requiresCommitSignatures: false
+  requiresStatusChecks: true
+  restrictsPushes: false
+  restrictsReviewDismissals: false
+  requiresLinearHistory: true

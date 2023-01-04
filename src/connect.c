@@ -78,7 +78,7 @@ bool get_reconnect(lua_State *L, int i)
 
 static int connect(lua_State *L)
 {
-    lucas_log(CASS_LOG_INFO, "Attempting to connect");
+    lucas_log(LOG_INFO, "Attempting to connect");
     const int ARG_OPTIONS = 1;
     CassFuture *future = NULL;
     LucasError *rc = NULL;
@@ -95,11 +95,12 @@ static int connect(lua_State *L)
 
     if (!reconnect && session != NULL)
     {
-        lucas_log(CASS_LOG_INFO, "already connected");
+        lucas_log(LOG_WARN, "already connected");
         return 0;
     }
     if (session != NULL)
     {
+        lucas_log(LOG_WARN, "freeing existing session");
         cass_session_free(session);
     }
     session = cass_session_new();
@@ -132,6 +133,8 @@ static int connect(lua_State *L)
     cass_cluster_set_connect_timeout(cluster, connect_timeout);
     cass_cluster_set_application_name(cluster, application_name);
     cass_cluster_set_latency_aware_routing(cluster, use_latency_aware_routing);
+    lucas_log(LOG_INFO, "session configuration done, ready to connect");
+
     future = cass_session_connect(session, cluster);
     cass_future_wait(future);
     err = cass_future_error_code(future);
@@ -140,6 +143,7 @@ static int connect(lua_State *L)
         rc = lucas_new_errorf_from_cass_error(err, "could not connect to cluster");
         goto cleanup;
     }
+    lucas_log(LOG_INFO, "session connect success");
 
 cleanup:
     if (future)

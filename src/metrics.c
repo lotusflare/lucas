@@ -1,5 +1,6 @@
 
 #include "cassandra.h"
+#include "logs.c"
 #include "luajit-2.1/lauxlib.h"
 #include "luajit-2.1/lua.h"
 #include "state.c"
@@ -30,6 +31,7 @@ int speculative_execution_metrics(lua_State *L)
 {
     CassSpeculativeExecutionMetrics metrics;
     cass_session_get_speculative_execution_metrics(session, &metrics);
+    lucas_log(LOG_INFO, "preparing speculative execution metrics");
 
     Metric spec_metrics[] = {
         {"count", metrics.count},
@@ -55,6 +57,7 @@ int metrics(lua_State *L)
     cass_session_get_metrics(session, &metrics);
     lua_newtable(L);
     const int parent_table = lua_gettop(L);
+    lucas_log(LOG_INFO, "preparing metrics");
 
     Metric stats_metrics[] = {
         {"total_connections", metrics.stats.total_connections},
