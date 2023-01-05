@@ -76,6 +76,21 @@ bool get_reconnect(lua_State *L, int i)
     return lua_toboolean(L, lua_gettop(L));
 }
 
+int get_connection_heartbeat_interval(lua_State *L, int i)
+{
+    return 1000;
+}
+
+int get_constant_reconnect(lua_State *L, int i)
+{
+    return 1000;
+}
+
+int get_protocol_version(lua_State *L, int i)
+{
+    return CASS_PROTOCOL_VERSION_V4;
+}
+
 static int connect(lua_State *L)
 {
     lucas_log(LOG_INFO, "Attempting to connect");
@@ -86,12 +101,15 @@ static int connect(lua_State *L)
     CassError err = CASS_OK;
 
     const char *contact_points = get_contact_points(L, ARG_OPTIONS);
+    const char *application_name = get_application_name(L, ARG_OPTIONS);
     const int port = get_port(L, ARG_OPTIONS);
     const int num_threads_io = get_num_threads_io(L, ARG_OPTIONS);
-    const char *application_name = get_application_name(L, ARG_OPTIONS);
+    const int connect_timeout = get_connect_timeout(L, ARG_OPTIONS);
+    const int connection_heartbeat_interval = get_connection_heartbeat_interval(L, ARG_OPTIONS);
+    const int constant_reconnect = get_constant_reconnect(L, ARG_OPTIONS);
+    const int protocol_version = get_protocol_version(L, ARG_OPTIONS);
     const bool use_latency_aware_routing = get_use_latency_aware_routing(L, ARG_OPTIONS);
     const bool reconnect = get_reconnect(L, ARG_OPTIONS);
-    const int connect_timeout = get_connect_timeout(L, ARG_OPTIONS);
 
     if (!reconnect && session != NULL)
     {
@@ -111,10 +129,10 @@ static int connect(lua_State *L)
         rc = lucas_new_errorf_from_cass_error(err, "could not set contact points %s", contact_points);
         goto cleanup;
     }
-    err = cass_cluster_set_protocol_version(cluster, CASS_PROTOCOL_VERSION_V4);
+    err = cass_cluster_set_protocol_version(cluster, protocol_version);
     if (err != CASS_OK)
     {
-        rc = lucas_new_errorf_from_cass_error(err, "could not set protocol version");
+        rc = lucas_new_errorf_from_cass_error(err, "could not set protocol version to %d", protocol_version);
         goto cleanup;
     }
     err = cass_cluster_set_port(cluster, port);
@@ -129,7 +147,8 @@ static int connect(lua_State *L)
         rc = lucas_new_errorf_from_cass_error(err, "could not set IO thread count to %d", num_threads_io);
         goto cleanup;
     }
-    cass_cluster_set_constant_reconnect(cluster, 1000);
+    cass_cluster_set_connection_heartbeat_interval(cluster, connection_heartbeat_interval);
+    cass_cluster_set_constant_reconnect(cluster, constant_reconnect);
     cass_cluster_set_connect_timeout(cluster, connect_timeout);
     cass_cluster_set_application_name(cluster, application_name);
     cass_cluster_set_latency_aware_routing(cluster, use_latency_aware_routing);
