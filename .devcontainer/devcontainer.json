@@ -4,7 +4,6 @@
         "${localWorkspaceFolder}/docker-compose.yml",
         "${localWorkspaceFolder}/docker-compose.devcontainer.yml"
     ],
-    "initializeCommand": "git submodule update --init",
     "service": "driver",
     "customizations": {
         "vscode": {
