@@ -10,9 +10,16 @@
 #include "state.c"
 #include "types.c"
 
+int version(lua_State *L)
+{
+    lua_pushstring(L, VERSION);
+    return 1;
+}
+
 int luaopen_lucas(lua_State *L)
 {
     luaL_Reg lucas[] = {
+        {"version", version},
         {"connect", connect},
         {"query", query},
         {"batch", batch},

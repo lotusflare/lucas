@@ -20,7 +20,9 @@ set(VERSION_MAJOR "${CMAKE_MATCH_1}")
 set(VERSION_MINOR "${CMAKE_MATCH_2}")
 set(VERSION_PATCH "${CMAKE_MATCH_3}")
 set(VERSION_SUFFIX "${CMAKE_MATCH_6}${CMAKE_MATCH_7}")
-message(STATUS "lucas version: ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_SUFFIX}")
+set(VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_SUFFIX}")
+message(STATUS "lucas version: ${VERSION}")
+add_compile_definitions(VERSION="${VERSION}")
 
 include_directories(include)
 
