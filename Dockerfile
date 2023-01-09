@@ -7,7 +7,7 @@ ARG DEBIAN_FRONTEND="noninteractive"
 RUN apt-get -qq -o=Dpkg::Use-Pty=0 update \
     && apt-get -qq -o=Dpkg::Use-Pty=0 install git boxes clang-12 clangd-12 clang-format-12 make cmake libssl-dev libuv1-dev zlib1g-dev libluajit-5.1-dev luajit luarocks pkg-config \
     && apt-get clean \
-    && wget https://github.com/JohnnyMorganz/StyLua/releases/download/v0.15.3/stylua-linux.zip \
+    && wget -q https://github.com/JohnnyMorganz/StyLua/releases/download/v0.15.3/stylua-linux.zip \
     && unzip stylua-linux.zip -d /usr/bin \
     && rm stylua-linux.zip \
     && git config --global url.https://.insteadOf git:// \
@@ -15,11 +15,12 @@ RUN apt-get -qq -o=Dpkg::Use-Pty=0 update \
     && luarocks install busted \
     && luarocks install luasocket \
     && luarocks install lua-cassandra \
-    && ln -s /usr/bin/clang-format-12 /usr/bin/clang-format
+    && ln -s /usr/bin/clang-format-12 /usr/bin/clang-format \
+    && ln -s /usr/bin/clang-12 /usr/bin/clang \
+    && ln -s /usr/bin/clang++-12 /usr/bin/clang
 
 COPY ./vendor/ /app/vendor/
 WORKDIR /app/vendor/cpp-driver/build
-RUN which clang
 RUN cmake .. \
     && cmake --build . \
     && cmake --install .
