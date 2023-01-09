@@ -14,7 +14,7 @@ services:
   driver:
     build:
       context: .
-      target: builder
+      target: build
     environment:
       CASSANDRA_HOST: cassandra
       CASSANDRA_PORT: 9042

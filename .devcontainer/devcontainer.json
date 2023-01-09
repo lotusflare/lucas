@@ -1,10 +1,7 @@
 {
     "build": {
         "dockerfile": "${localWorkspaceFolder}/Dockerfile",
-        "target": "builder",
-        "args": {
-            "SKIP_BUILD": "1"
-        }
+        "target": "base"
     },
     "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
     "workspaceFolder": "/app",
