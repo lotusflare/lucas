@@ -15,7 +15,6 @@ RUN apt-get -qq -o=Dpkg::Use-Pty=0 update \
     && luarocks install busted \
     && luarocks install luasocket \
     && luarocks install lua-cassandra
-    # && ln -s /usr/bin/clang-format-12 /usr/bin/clang-format
 
 COPY ./vendor/ /app/vendor/
 WORKDIR /app/vendor/cpp-driver/build
