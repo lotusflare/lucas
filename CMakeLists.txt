@@ -6,8 +6,8 @@ project(lucas)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_C_STANDARD 11)
 # set(CMAKE_C_STANDARD 2x)
-set(CC clang)
-set(CXX clang++)
+set(CMAKE_CXX_COMPILER clang)
+set(CMAKE_CXX_COMPILER clang++)
 
 find_package(Git)
 execute_process(

@@ -19,6 +19,7 @@ RUN apt-get -qq -o=Dpkg::Use-Pty=0 update \
 
 COPY ./vendor/ /app/vendor/
 WORKDIR /app/vendor/cpp-driver/build
+RUN which clang
 RUN cmake .. \
     && cmake --build . \
     && cmake --install .
