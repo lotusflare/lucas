@@ -1,6 +1,7 @@
 {
     "build": {
         "dockerfile": "${localWorkspaceFolder}/Dockerfile",
+        "target": "builder",
         "args": {
             "SKIP_BUILD": "1"
         }

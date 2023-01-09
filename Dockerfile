@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:20.04 AS builder
 
 ENV LD_LIBRARY_PATH="/usr/local/lib/x86_64-linux-gnu"
 ENV LUA_CPATH="/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/x86_64-linux-gnu/?.so"
@@ -25,3 +25,6 @@ RUN cmake .. \
 COPY . /app/
 WORKDIR /app
 RUN ./format.sh && ./build.sh
+
+FROM scratch AS artifacts
+COPY --from=builder /app/build/lucas.so* /
