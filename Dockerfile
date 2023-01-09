@@ -24,7 +24,9 @@ RUN cmake .. \
 FROM base AS build
 COPY . /app/
 WORKDIR /app
-RUN ./format.sh && ./build.sh
+RUN ./format.sh
+RUN ./build.sh
 
 FROM scratch AS artifacts
 COPY --from=build /app/build/lucas.so* /
+COPY --from=build /usr/local/lib/x86_64-linux-gnu/libcassandra.so* /
