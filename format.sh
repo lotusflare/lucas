@@ -17,7 +17,7 @@ format_flags() {
 
 format() {
     if $fix; then
-        pargs='-w'
+        pargs=''
         cargs='-i'
     else
         pargs='-c'
@@ -26,7 +26,7 @@ format() {
     print "Running clang-format"
     find src include -name '*.h' -o -name '*.c' | xargs clang-format --verbose $cargs
     print "Running prettier"
-    find integration -name '*.lua' | xargs prettier $pargs
+    find integration -name '*.lua' | xargs stylua --verbose $pargs
 }
 
 format_flags "$@"
