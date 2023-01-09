@@ -19,3 +19,7 @@ branchProtectionRules:
   restrictsPushes: true
   restrictsReviewDismissals: false
   requiresLinearHistory: true
+
+permissionRules:
+  - team: infra-persistence-team
+    permission: push

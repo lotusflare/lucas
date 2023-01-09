@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       DOCKER_BUILDKIT: "1"
+      COMPOSE_DOCKER_CLI_BUILD: "1"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -21,13 +22,14 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -qq boxes
 
-      - uses: docker/build-push-action@v3
-        with:
-          push: false
-          context: .
-          file: Dockerfile
-          cache-from: type=gha
-          cache-to: type=gha
+      # - uses: docker/build-push-action@v3
+      #   with:
+      #     push: false
+      #     load: true
+      #     context: .
+      #     file: Dockerfile
+      #     cache-from: type=gha
+      #     cache-to: type=gha
 
       - name: Integration tests
         run: ./start.sh -t
