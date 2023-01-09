@@ -24,6 +24,7 @@ jobs:
       - uses: docker/build-push-action@v3
         with:
           push: false
+          load: true
           context: .
           file: Dockerfile
           cache-from: type=gha
