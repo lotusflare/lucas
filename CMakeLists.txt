@@ -1,9 +1,11 @@
 project(lucas)
 cmake_minimum_required(VERSION 3.16)
+# cmake_minimum_required(VERSION 3.21)
 set_property(GLOBAL PROPERTY RULE_MESSAGES OFF)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_C_STANDARD 11)
+# set(CMAKE_C_STANDARD 2x)
 set(CC clang)
 set(CXX clang++)
 
