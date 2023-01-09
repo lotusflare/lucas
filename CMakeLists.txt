@@ -1,8 +1,11 @@
-cmake_minimum_required(VERSION 3.22)
 project(lucas)
+cmake_minimum_required(VERSION 3.16)
+# cmake_minimum_required(VERSION 3.21)
+set_property(GLOBAL PROPERTY RULE_MESSAGES OFF)
 
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_C_STANDARD 17)
+set(CMAKE_C_STANDARD 11)
+# set(CMAKE_C_STANDARD 2x)
 set(CC clang)
 set(CXX clang++)
 
@@ -16,16 +19,41 @@ FetchContent_MakeAvailable(googletest)
 
 add_subdirectory(vendor/cpp-driver)
 include_directories(vendor/cpp-driver/include)
-include_directories(include)
-include_directories(src)
+find_package(Git)
+execute_process(
+    COMMAND ${GIT_EXECUTABLE} describe --tags --dirty --match "v[0-9].[0-9].[0-9]"
+    OUTPUT_VARIABLE GIT_DESCRIBE
+    RESULT_VARIABLE GIT_DESCRIBE_RETURN_CODE
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 
-add_library(lucas SHARED src/library.c)
-set_target_properties(lucas PROPERTIES PREFIX "")
-set_target_properties(lucas PROPERTIES PUBLIC_HEADER include/library.h)
-target_link_libraries(lucas cassandra luajit-5.1)
+string(REGEX MATCH "^v([0-9]+).([0-9]+).([0-9]+)((-[0-9]+)(-g([a-f0-9]+)))?(-(dirty))?$" _ "${GIT_DESCRIBE}")
+set(VERSION_MAJOR "${CMAKE_MATCH_1}")
+set(VERSION_MINOR "${CMAKE_MATCH_2}")
+set(VERSION_PATCH "${CMAKE_MATCH_3}")
+set(VERSION_SHA "${CMAKE_MATCH_7}")
+set(VERSION_DIRTY "${CMAKE_MATCH_9}")
+if(VERSION_SHA)
+    set(VERSION_SUFFIX "-${CMAKE_MATCH_7}")
+endif()
+if(VERSION_DIRTY)
+    set(VERSION_SUFFIX "${VERSION_SUFFIX}-${CMAKE_MATCH_9}")
+endif()
+set(VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_SUFFIX}")
+message(STATUS "lucas version: ${VERSION}")
+add_compile_definitions(VERSION="${VERSION}")
+
+include_directories(include)
 
 enable_testing()
 add_executable(lucas_test tests/lucas_test.cpp)
 target_link_libraries(lucas_test GTest::gtest_main)
 include(GoogleTest)
 gtest_discover_tests(lucas_test)
+
+add_library("${PROJECT_NAME}" SHARED src/lucas.c)
+set_target_properties("${PROJECT_NAME}" PROPERTIES VERSION "${VERSION}")
+set_target_properties("${PROJECT_NAME}" PROPERTIES SOVERSION "${VERSION_MAJOR}")
+set_target_properties("${PROJECT_NAME}" PROPERTIES PREFIX "")
+set_target_properties("${PROJECT_NAME}" PROPERTIES PUBLIC_HEADER include/lucas.h)
+target_link_libraries("${PROJECT_NAME}" cassandra luajit-5.1)

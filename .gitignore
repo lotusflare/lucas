@@ -4,3 +4,4 @@ CMakeFiles
 .idea
 .vscode
 .cache
+scratch.lua

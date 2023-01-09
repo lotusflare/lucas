@@ -1,6 +1,7 @@
 {
     "build": {
-        "dockerfile": "../Dockerfile"
+        "dockerfile": "${localWorkspaceFolder}/Dockerfile",
+        "target": "base"
     },
     "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
     "workspaceFolder": "/app",
@@ -8,8 +9,13 @@
         "build:/app/build"
     ],
     "runArgs": [
-        "--network=host"
+        "--network=host",
+        "--env=CASSANDRA_HOST=127.0.0.1",
+        "--env=CASSANDRA_PORT=9043"
     ],
+    "containerEnv": {
+        "CASSANDRA_HOST": "cassandra"
+    },
     "customizations": {
         "vscode": {
             "extensions": [

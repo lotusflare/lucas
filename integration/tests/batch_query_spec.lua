@@ -1,13 +1,16 @@
-require"busted.runner"()
 local lucas = require("lucas")
+local pretty = require("pl.pretty")
 
 describe("batch", function()
     it("insert", function()
-        local err = lucas.connect("127.0.0.1")
+        lucas.connect({
+            contact_points = os.getenv("CASSANDRA_HOST"),
+            port = os.getenv("CASSANDRA_PORT"),
+        })
 
-        lucas.batch(
-            "INSERT INTO testing.data (operator_name, id, id_type, asset_id, asset_type, approval_status) VALUES (?, ?, ?, ?, ?, ?)",
+        lucas.batch({
             {
+                "INSERT INTO testing.data (operator_name, id, id_type, asset_id, asset_type, approval_status) VALUES (?, ?, ?, ?, ?, ?)",
                 {
                     lucas.varchar("avantel"),
                     lucas.varchar("9380816255dc45dfa1a57541db81df1d"),
@@ -16,6 +19,9 @@ describe("batch", function()
                     lucas.int(2),
                     lucas.int(1),
                 },
+            },
+            {
+                "INSERT INTO testing.data (operator_name, id, id_type, asset_id, asset_type, approval_status) VALUES (?, ?, ?, ?, ?, ?)",
                 {
                     lucas.varchar("tmo"),
                     lucas.varchar("9380816255dc45dfa1a57541db81df1d"),
@@ -24,8 +30,8 @@ describe("batch", function()
                     lucas.int(2),
                     lucas.int(1),
                 },
-            }
-        )
+            },
+        })
 
         local results =
             lucas.query(
@@ -33,11 +39,12 @@ describe("batch", function()
                 {}
             )
 
-        assert.are.same(
+        assert.array.has(
             { {
                 approval_status = 1,
                 asset_id = "015e3714-a98b-11ec-9f51-0242ac150008",
                 asset_type = 2,
+                created_at = 35184372088832,
                 id = "9380816255dc45dfa1a57541db81df1d",
                 id_type = 1,
                 operator_name = "tmo",

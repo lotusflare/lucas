@@ -1,26 +1,11 @@
 {
     "files.exclude": {
-        ".cache": true
-    },
-    "files.watcherExclude": {
-        "build": true
-    },
-    "files.associations": {
-        "library.h": "c",
-        ".clang-format": "yaml",
-        "*.tcc": "c",
-        "system_error": "c",
-        "array": "c",
-        "functional": "c",
-        "regex": "c",
-        "tuple": "c",
-        "type_traits": "c",
-        "utility": "c",
-        "typeinfo": "c"
+        ".cache": true,
     },
     "editor.inlayHints.enabled": "off",
     "[c]": {
         "editor.formatOnSave": true,
+        "editor.formatOnPaste": false,
         "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
-    }
+    },
 }

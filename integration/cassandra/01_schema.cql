@@ -3,16 +3,23 @@ CREATE KEYSPACE IF NOT EXISTS testing WITH replication = {
     'replication_factor': 1
 };
 
-CREATE TABLE testing.data(
+CREATE TABLE IF NOT EXISTS testing.data(
     operator_name text,
     id text,
     id_type int,
+    created_at timestamp,
     asset_id timeuuid,
     asset_type int,
     approval_status int,
     misc map<text, text>,
+    list list<int>,
     PRIMARY KEY ((operator_name, id), asset_type)
 );
 
-INSERT INTO testing.data (operator_name, id, id_type, asset_id, asset_type, approval_status)
-VALUES ('avantel', '9380816255dc45dfa1a57541db81df1d', 1, 015e3714-a98b-11ec-9f51-0242ac150008, 1, 2);
+CREATE TABLE IF NOT EXISTS testing.collections(
+    id bigint,
+    uuid_to_text_map map<uuid, text>,
+    int_set set<int>,
+    tinyint_list list<tinyint>,
+    PRIMARY KEY (id)
+);
