@@ -17,16 +17,16 @@ format_flags() {
 
 format() {
     if $fix; then
-        pargs='-w'
+        pargs='--verbose'
         cargs='-i'
     else
-        pargs='-c'
+        pargs='--output-format summary -c'
         cargs='-n'
     fi
     print "Running clang-format"
     find src include -name '*.h' -o -name '*.c' | xargs clang-format --verbose $cargs
     print "Running prettier"
-    find integration -name '*.lua' | xargs prettier $pargs
+    find integration -name '*.lua' | xargs stylua $pargs
 }
 
 format_flags "$@"
