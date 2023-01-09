@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/docker/compose/master/compose/config/compose_spec.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
 
 services:
   cassandra:
@@ -14,8 +14,10 @@ services:
   driver:
     build:
       context: .
-      cache_to: ["type=gha"]
-      cache_from: ["type=gha"]
+      cache_to:
+        - "type=gha"
+      cache_from:
+        - "type=gha"
     environment:
       CASSANDRA_HOST: cassandra
       CASSANDRA_PORT: 9042
