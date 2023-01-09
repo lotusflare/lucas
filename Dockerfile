@@ -1,9 +1,8 @@
-FROM ubuntu:20.04
+FROM ubuntu:20.04 AS base
 
 ENV LD_LIBRARY_PATH="/usr/local/lib/x86_64-linux-gnu"
 ENV LUA_CPATH="/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/x86_64-linux-gnu/?.so"
 ARG DEBIAN_FRONTEND="noninteractive"
-ARG SKIP_BUILD=""
 
 RUN apt-get -qq -o=Dpkg::Use-Pty=0 update \
     && apt-get -qq -o=Dpkg::Use-Pty=0 install git boxes clang-12 clangd-12 clang-format-12 make cmake libssl-dev libuv1-dev zlib1g-dev libluajit-5.1-dev luajit luarocks pkg-config nodejs npm \
@@ -22,6 +21,12 @@ RUN cmake .. \
     && cmake --build . \
     && cmake --install .
 
+FROM base AS build
 COPY . /app/
 WORKDIR /app
-RUN ./format.sh && ./build.sh
+RUN ./format.sh
+RUN ./build.sh
+
+FROM scratch AS artifacts
+COPY --from=build /app/build/lucas.so* /
+COPY --from=build /usr/local/lib/x86_64-linux-gnu/libcassandra.so* /
