@@ -14,6 +14,8 @@ services:
   driver:
     build:
       context: .
+      cache_to: ["type=gha"]
+      cache_from: ["type=gha"]
     environment:
       CASSANDRA_HOST: cassandra
       CASSANDRA_PORT: 9042

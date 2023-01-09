@@ -21,14 +21,14 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -qq boxes
 
-      - uses: docker/build-push-action@v3
-        with:
-          push: false
-          load: true
-          context: .
-          file: Dockerfile
-          cache-from: type=gha
-          cache-to: type=gha
+      # - uses: docker/build-push-action@v3
+      #   with:
+      #     push: false
+      #     load: true
+      #     context: .
+      #     file: Dockerfile
+      #     cache-from: type=gha
+      #     cache-to: type=gha
 
       - name: Integration tests
         run: ./start.sh -t
