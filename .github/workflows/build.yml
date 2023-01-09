@@ -29,6 +29,7 @@ jobs:
           load: true
           builder: ${{ steps.buildx.outputs.name }}
           context: .
+          target: build
           file: Dockerfile
           cache-from: type=gha
           cache-to: type=gha
