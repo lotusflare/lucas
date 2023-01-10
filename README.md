@@ -8,6 +8,12 @@ _Lucas_ is a Lua library which wraps the [DataStax Cassandra C/C++ driver](https
 
 See `integration/tests` for examples.
 
+## Contributing
+
+- Follow the [conventional commit message](https://www.conventionalcommits.org) specification
+- Use integration tests to demonstrate usage and prevent regressions
+- Contribute with docs
+- Open an issue
 
 ## Scripts
 
