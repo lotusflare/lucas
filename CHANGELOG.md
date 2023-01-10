@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/lotusflare/lucas/compare/v0.6.0...v0.7.0) (2023-01-10)
+
+
+### Features
+
+* more config options, CI and repo improvements ([7a88ba1](https://github.com/lotusflare/lucas/commit/7a88ba1b8a20233a1d18c76df16d18c688171c0d))
+
 ## [0.6.0](https://github.com/lotusflare/lucas/compare/v0.5.1...v0.6.0) (2023-01-04)
 
 
