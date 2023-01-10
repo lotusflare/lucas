@@ -10,6 +10,11 @@ See `integration/tests` for examples.
 
 ## Contributing
 
+- Follow the [conventional commit message](https://www.conventionalcommits.org) specification
+- Use integration tests to demonstrate usage and prevent regressions
+- Contribute with docs
+- Open an issue
+
 ### Commit Conventions
 
 This project follows the [conventional commit message](https://www.conventionalcommits.org) specification. This makes the project history easier to read and enables the generating of release notes.
