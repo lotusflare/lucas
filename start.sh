@@ -1,6 +1,6 @@
 #!/bin/sh -e
 
-source ./print.sh
+. ./print.sh
 
 clean=false
 build=false
