@@ -1,12 +1,10 @@
-#!/bin/bash -e
+#!/bin/sh -e
+
+source ./print.sh
 
 clean=false
 build=false
 test=false
-
-print() {
-    echo $1 | (command -v boxes > /dev/null && boxes -d stone || cat)
-}
 
 clean() {
     if $clean; then

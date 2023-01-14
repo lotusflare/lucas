@@ -1,10 +1,8 @@
 #!/bin/sh -e
 
-fix=false
+source ./print.sh
 
-print() {
-    echo $1 | (command -v boxes > /dev/null && boxes -d stone || cat)
-}
+fix=false
 
 format_flags() {
     while getopts 'f' option; do
@@ -25,7 +23,7 @@ format() {
     fi
     print "Running clang-format"
     find src include -name '*.h' -o -name '*.c' | xargs clang-format --verbose $cargs
-    print "Running prettier"
+    print "Running stylua"
     find integration -name '*.lua' | xargs stylua $pargs
 }
 
