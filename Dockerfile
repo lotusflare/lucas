@@ -24,11 +24,11 @@ RUN cmake .. \
 
 FROM base AS build
 COPY . /app/
-WORKDIR /app
-RUN ./format.sh
 WORKDIR /app/build
 RUN cmake .. \
     && cmake --build .
+WORKDIR /app
+RUN ./format.sh
 
 FROM scratch AS artifacts
 COPY --from=build /app/build/lucas.so* /
