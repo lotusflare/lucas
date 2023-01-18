@@ -668,6 +668,7 @@ static int query(lua_State *L)
     }
     if (page_size == 0)
     {
+        lucas_log(LOG_DEBUG, "page size not specified, defaulting to 500");
         page_size = 500;
     }
     if (session == NULL)
