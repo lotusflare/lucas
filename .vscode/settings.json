@@ -2,10 +2,20 @@
     "files.exclude": {
         ".cache": true,
     },
+    "files.watcherExclude": {
+        "build": true,
+        "vendor": true,
+        ".cache": true
+    },
     "editor.inlayHints.enabled": "off",
     "[c]": {
         "editor.formatOnSave": true,
         "editor.formatOnPaste": false,
         "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
     },
+    "[lua]": {
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": false,
+        "editor.defaultFormatter": "JohnnyMorganz.stylua"
+    }
 }

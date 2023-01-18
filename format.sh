@@ -1,10 +1,8 @@
 #!/bin/sh -e
 
-fix=false
+. ./print.sh
 
-print() {
-    echo $1 | (command -v boxes > /dev/null && boxes -d stone || cat)
-}
+fix=false
 
 format_flags() {
     while getopts 'f' option; do
@@ -17,16 +15,18 @@ format_flags() {
 
 format() {
     if $fix; then
-        pargs='--verbose'
-        cargs='-i'
+        lua_args='-v'
+        clang_args='--verbose -i'
     else
-        pargs='--output-format summary -c'
-        cargs='-n'
+        lua_args='-c --output-format summary'
+        clang_args='--verbose -n'
     fi
+
     print "Running clang-format"
-    find src include -name '*.h' -o -name '*.c' | xargs clang-format --verbose $cargs
-    print "Running prettier"
-    find integration -name '*.lua' | xargs stylua $pargs
+    find src include -name '*.h' -o -name '*.c' | xargs clang-format $clang_args
+
+    print "Running stylua"
+    find integration -name '*.lua' | xargs stylua $lua_args
 }
 
 format_flags "$@"
