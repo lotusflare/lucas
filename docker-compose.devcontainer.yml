@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/docker/compose/master/compose/config/compose_spec.json
+
+services:
+  driver:
+    build:
+      target: base
+    volumes:
+      - "./:/app"
+    command: /bin/sh -c "while sleep 1000; do :; done"
