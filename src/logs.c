@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cassandra.h"
+#include "errors.c"
 #include "luajit-2.1/lauxlib.h"
 #include "luajit-2.1/lua.h"
 #include "state.c"
@@ -45,13 +46,18 @@ void log_lua(const char *message, const char *source, LucasLogLevel severity, in
         return;
     }
 
+    int initial = lua_gettop(log_context);
     pthread_mutex_lock(&lock);
     lua_pushvalue(log_context, 1);
     lua_pushstring(log_context, message);
     lua_pushstring(log_context, source);
     lua_pushinteger(log_context, severity);
     lua_pushinteger(log_context, timestamp);
-    int result = lua_pcall(log_context, 4, 0, 0); // results == LUA_OK
+    if (lua_pcall(log_context, 4, 0, 0) != LUA_OK)
+    {
+        printf("error: %s\n", lua_tostring(log_context, -1));
+    }
+    lua_settop(log_context, initial);
     pthread_mutex_unlock(&lock);
 }
 
@@ -95,16 +101,16 @@ LucasLogLevel lucas_log_level_from_cass(CassLogLevel cass_level)
     }
 }
 
-CassLogLevel cass_log_level_from_lucas(LucasLogLevel cass_level)
+CassLogLevel cass_log_level_from_lucas(LucasLogLevel lucas_level)
 {
-    switch (cass_level)
+    switch (lucas_level)
     {
     case LOG_TRACE:
         return CASS_LOG_TRACE;
     case LOG_DEBUG:
         return CASS_LOG_DEBUG;
     default:
-        lucas_log(LOG_WARN, "invalid LogLevel log level %d", cass_level);
+        lucas_log(LOG_WARN, "invalid LucasLogLevel log level %d", lucas_level);
     case LOG_INFO:
         return CASS_LOG_INFO;
     case LOG_WARN:
