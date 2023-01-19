@@ -2,11 +2,11 @@
 
 services:
   cassandra:
-    image: cassandra:4.0
+    image: cassandra:4.1
     environment:
       CASSANDRA_LISTEN_ADDRESS: cassandra
     healthcheck:
-      test: ["CMD", "nodetool", "status"]
+      test: ["CMD", "cqlsh"]
       timeout: 2m
 
   driver:
