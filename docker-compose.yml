@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/docker/compose/master/compose/config/compose_spec.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
 
 services:
   cassandra:
@@ -12,5 +12,6 @@ services:
   driver:
     build:
       context: .
+      target: build
     environment:
       CASSANDRA_HOST: cassandra

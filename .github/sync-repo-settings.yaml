@@ -8,14 +8,18 @@ deleteBranchOnMerge: true
 branchProtectionRules:
 - pattern: master
   dismissesStaleReviews: false
-  isAdminEnforced: true
+  isAdminEnforced: false
   requiredApprovingReviewCount: 1
-  requiresCodeOwnerReviews: true
+  requiresCodeOwnerReviews: false
   requiresStrictStatusChecks: true
   requiredStatusCheckContexts:
     - tests
   requiresCommitSignatures: false
   requiresStatusChecks: true
-  restrictsPushes: false
+  restrictsPushes: true
   restrictsReviewDismissals: false
   requiresLinearHistory: true
+
+permissionRules:
+  - team: infra-persistence-team
+    permission: push

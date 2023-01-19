@@ -105,12 +105,12 @@ LucasError *create_map(lua_State *L, int index, CassCollection **collection)
         rc = append_collection(L, key_index, *collection);
         if (rc)
         {
-            return rc;
+            return lucas_wrap_error(rc, "failed adding collection key");
         }
         rc = append_collection(L, value_index, *collection);
         if (rc)
         {
-            return rc;
+            return lucas_wrap_error(rc, "failed adding collection value");
         }
     }
 
@@ -132,7 +132,7 @@ LucasError *create_collection(lua_State *L, int index, CassCollectionType type, 
         rc = append_collection(L, value_index, *collection);
         if (rc)
         {
-            return rc;
+            return lucas_wrap_error(rc, "could not add element to collection");
         }
     }
 
@@ -226,14 +226,12 @@ LucasError *bind_positional_parameter(lua_State *L, int i, CassStatement *statem
     else
     {
         rc = lucas_new_errorf("invalid type %d for parameter %d", type, i);
-        goto cleanup;
     }
 
 cleanup:
     if (err != CASS_OK)
     {
         rc = lucas_new_errorf_from_cass_error(err, "could not bind positional parameter at index %d", i);
-        goto cleanup;
     }
     if (collection)
     {
@@ -330,14 +328,12 @@ LucasError *bind_named_parameter(lua_State *L, const char *name, CassStatement *
     else
     {
         rc = lucas_new_errorf("invalid type %d for parameter %s", type, name);
-        goto cleanup;
     }
 
 cleanup:
     if (err != CASS_OK)
     {
         rc = lucas_new_errorf_from_cass_error(err, "could not bind named parameter %s", name);
-        goto cleanup;
     }
     return rc;
 }
@@ -486,8 +482,7 @@ LucasError *cass_value_to_lua(lua_State *L, const CassValue *cass_value)
         iterator = cass_iterator_from_collection(cass_value);
         lua_newtable(L);
         int list_table = lua_gettop(L);
-        int i = 1;
-        while (cass_iterator_next(iterator))
+        for (int i = 1; cass_iterator_next(iterator); i++)
         {
             rc = cass_value_to_lua(L, cass_iterator_get_value(iterator));
             if (rc)
@@ -495,22 +490,19 @@ LucasError *cass_value_to_lua(lua_State *L, const CassValue *cass_value)
                 rc = lucas_wrap_error(rc, "unable to convert cassandra list or set item to lua type");
                 goto cleanup;
             }
-            lua_rawseti(L, list_table, i++);
+            lua_rawseti(L, list_table, i);
         }
     }
     else
     {
         rc = lucas_new_errorf("unrecognized cassandra type");
-        goto cleanup;
-    }
-
-    if (err != CASS_OK)
-    {
-        rc = lucas_new_errorf_from_cass_error(err, "could not get value from cassandra");
-        goto cleanup;
     }
 
 cleanup:
+    if (err != CASS_OK)
+    {
+        rc = lucas_new_errorf_from_cass_error(err, "could not get value from cassandra");
+    }
     if (iterator)
     {
         cass_iterator_free(iterator);
@@ -526,7 +518,7 @@ LucasError *iterate_result(lua_State *L, CassStatement *statement, const char *p
     CassFuture *future = NULL;
     const CassResult *result = NULL;
 
-    if (paging_state != NULL)
+    if (paging_state)
     {
         err = cass_statement_set_paging_state_token(statement, paging_state, paging_state_size);
         if (err != CASS_OK)
@@ -663,6 +655,7 @@ static int query(lua_State *L)
     const char *paging_state = NULL;
     int page_size = 0;
     LucasError *rc = NULL;
+    CassError err = CASS_OK;
     CassStatement *statement = NULL;
     lucas_log(LOG_DEBUG, "query submitted: %s", query);
 
@@ -675,28 +668,36 @@ static int query(lua_State *L)
     }
     if (page_size == 0)
     {
+        lucas_log(LOG_DEBUG, "page size not specified, defaulting to 500");
         page_size = 500;
     }
     if (session == NULL)
     {
-        rc = lucas_new_errorf("not connected");
+        rc = lucas_new_errorf("session is not connected");
         goto cleanup;
     }
     rc = create_prepared_statement(L, query, &statement);
     if (rc)
     {
+        rc = lucas_wrap_error(rc, "failed to create prepared statement");
         goto cleanup;
     }
-    CassError err = cass_statement_set_paging_size(statement, page_size);
+    err = cass_statement_set_paging_size(statement, page_size);
     if (err != CASS_OK)
     {
         rc = lucas_new_errorf_from_cass_error(err, "could not set paging size to %d", page_size);
         goto cleanup;
     }
-    bind_parameters(L, ARG_QUERY_PARAMS, statement);
+    rc = bind_parameters(L, ARG_QUERY_PARAMS, statement);
+    if (rc)
+    {
+        rc = lucas_wrap_error(rc, "failed to bind parameters");
+        goto cleanup;
+    }
     rc = iterate_result(L, statement, paging_state, paging_state_size);
     if (rc)
     {
+        rc = lucas_wrap_error(rc, "failed to handle query results");
         goto cleanup;
     }
 

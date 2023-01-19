@@ -12,7 +12,8 @@
                 "ms-vscode.cmake-tools",
                 "redhat.vscode-yaml",
                 "llvm-vs-code-extensions.vscode-clangd",
-                "twxs.cmake"
+                "twxs.cmake",
+                "JohnnyMorganz.stylua"
             ]
         }
     },
