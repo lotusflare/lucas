@@ -142,6 +142,7 @@ int logger(lua_State *L)
 
     if (log_context)
     {
+        lucas_log(LOG_WARN, "closing existing log context");
         lua_close(log_context);
     }
 
