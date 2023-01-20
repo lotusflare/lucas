@@ -18,20 +18,19 @@ RUN apt-get -qq -o=Dpkg::Use-Pty=0 update \
     && luarocks install lua-cassandra
 
 COPY ./vendor/ /app/vendor/
-WORKDIR /app
-RUN pushd vendor/cpp-driver/build \
-    && cmake .. \
+WORKDIR /app/vendor/cpp-driver/build
+RUN cmake .. \
     && cmake --build . \
-    && cmake --install . \
-    && popd
+    && cmake --install .
+WORKDIR /app
 
 FROM base AS build
 COPY . /app/
-RUN pushd build \
-    && cmake .. \
-    && cmake --build . \
-    && popd \
-    && ./format.sh
+WORKDIR /app/build
+RUN cmake .. \
+    && cmake --build .
+WORKDIR /app
+RUN ./format.sh
 
 FROM scratch AS artifacts
 COPY --from=build /app/build/lucas.so* /
