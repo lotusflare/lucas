@@ -3,6 +3,7 @@ FROM ubuntu:20.04 AS base
 ENV LD_LIBRARY_PATH="/usr/local/lib/x86_64-linux-gnu"
 ENV LUA_CPATH="/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/x86_64-linux-gnu/?.so"
 ARG DEBIAN_FRONTEND="noninteractive"
+SHELL ["/bin/bash", "-c"]
 
 RUN apt-get -qq -o=Dpkg::Use-Pty=0 update \
     && apt-get -qq -o=Dpkg::Use-Pty=0 install git boxes clang clangd clang-format make cmake libssl-dev libuv1-dev zlib1g-dev libluajit-5.1-dev luajit luarocks pkg-config \
@@ -21,6 +22,7 @@ WORKDIR /app/vendor/cpp-driver/build
 RUN cmake .. \
     && cmake --build . \
     && cmake --install .
+WORKDIR /app
 
 FROM base AS build
 COPY . /app/
