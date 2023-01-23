@@ -55,7 +55,7 @@ void log_lua(const char *message, const char *source, LucasLogLevel severity, in
     lua_pushinteger(log_context, timestamp);
     if (lua_pcall(log_context, 4, 0, 0) != LUA_OK)
     {
-        printf("error: %s\n", lua_tostring(log_context, -1));
+        fprintf(stderr, "lucas: failed to call log handler: %s\n", lua_tostring(log_context, -1));
     }
     lua_settop(log_context, initial);
     pthread_mutex_unlock(&lock);

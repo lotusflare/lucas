@@ -7,7 +7,7 @@ services:
       CASSANDRA_LISTEN_ADDRESS: cassandra
     mem_limit: 2g
     healthcheck:
-      test: ["CMD", "cqlsh"]
+      test: ["CMD", "nodetool", "status"]
       timeout: 2m
 
   driver:
