@@ -399,9 +399,13 @@ LucasError *cass_value_to_lua(lua_State *L, const CassValue *cass_value)
     }
     else if (vt == CASS_VALUE_TYPE_ASCII || vt == CASS_VALUE_TYPE_TEXT || vt == CASS_VALUE_TYPE_VARCHAR)
     {
-        const char *value = NULL;
-        size_t length = 0;
+        const char *value;
+        size_t length;
         err = cass_value_get_string(cass_value, &value, &length);
+        if (err != CASS_OK)
+        {
+            goto cleanup;
+        }
         lua_pushlstring(L, value, length);
     }
     else if (vt == CASS_VALUE_TYPE_UUID || vt == CASS_VALUE_TYPE_TIMEUUID)
@@ -409,6 +413,10 @@ LucasError *cass_value_to_lua(lua_State *L, const CassValue *cass_value)
         CassUuid value;
         char value_as_string[CASS_UUID_STRING_LENGTH];
         err = cass_value_get_uuid(cass_value, &value);
+        if (err != CASS_OK)
+        {
+            goto cleanup;
+        }
         cass_uuid_string(value, value_as_string);
         lua_pushstring(L, value_as_string);
     }
@@ -416,18 +424,30 @@ LucasError *cass_value_to_lua(lua_State *L, const CassValue *cass_value)
     {
         cass_int8_t value;
         err = cass_value_get_int8(cass_value, &value);
+        if (err != CASS_OK)
+        {
+            goto cleanup;
+        }
         lua_pushinteger(L, value);
     }
     else if (vt == CASS_VALUE_TYPE_SMALL_INT)
     {
         cass_int16_t value;
         err = cass_value_get_int16(cass_value, &value);
+        if (err != CASS_OK)
+        {
+            goto cleanup;
+        }
         lua_pushinteger(L, value);
     }
     else if (vt == CASS_VALUE_TYPE_INT)
     {
         cass_int32_t value;
         err = cass_value_get_int32(cass_value, &value);
+        if (err != CASS_OK)
+        {
+            goto cleanup;
+        }
         lua_pushinteger(L, value);
     }
     else if (vt == CASS_VALUE_TYPE_BIGINT || vt == CASS_VALUE_TYPE_TIMESTAMP || vt == CASS_VALUE_TYPE_COUNTER ||
@@ -435,24 +455,39 @@ LucasError *cass_value_to_lua(lua_State *L, const CassValue *cass_value)
     {
         cass_int64_t value;
         err = cass_value_get_int64(cass_value, &value);
+        if (err != CASS_OK)
+        {
+            goto cleanup;
+        }
         lua_pushinteger(L, value);
     }
     else if (vt == CASS_VALUE_TYPE_BOOLEAN)
     {
         cass_bool_t value;
-        err = cass_value_get_bool(cass_value, &value);
+        if (cass_value_get_bool(cass_value, &value) != CASS_OK)
+        {
+            goto cleanup;
+        }
         lua_pushboolean(L, value);
     }
     else if (vt == CASS_VALUE_TYPE_FLOAT)
     {
         cass_float_t value;
         err = cass_value_get_float(cass_value, &value);
+        if (err != CASS_OK)
+        {
+            goto cleanup;
+        }
         lua_pushnumber(L, value);
     }
     else if (vt == CASS_VALUE_TYPE_DOUBLE)
     {
         cass_double_t value;
         err = cass_value_get_double(cass_value, &value);
+        if (err != CASS_OK)
+        {
+            goto cleanup;
+        }
         lua_pushnumber(L, value);
     }
     else if (vt == CASS_VALUE_TYPE_MAP)
