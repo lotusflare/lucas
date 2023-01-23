@@ -22,4 +22,6 @@ branchProtectionRules:
 
 permissionRules:
   - team: infra-persistence-team
+    permission: admin
+  - team: server
     permission: push

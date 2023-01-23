@@ -6,6 +6,8 @@ services:
     environment:
       CASSANDRA_LISTEN_ADDRESS: cassandra
     mem_limit: 2g
+    ports:
+      - "9043:9042"
     healthcheck:
       test: ["CMD", "cqlsh"]
       timeout: 2m
