@@ -655,6 +655,7 @@ static int query(lua_State *L)
     const char *paging_state = NULL;
     int page_size = 0;
     LucasError *rc = NULL;
+    CassError err = CASS_OK;
     CassStatement *statement = NULL;
     lucas_log(LOG_DEBUG, "query submitted: %s", query);
 
@@ -667,28 +668,36 @@ static int query(lua_State *L)
     }
     if (page_size == 0)
     {
+        lucas_log(LOG_DEBUG, "page size not specified, defaulting to 500");
         page_size = 500;
     }
     if (session == NULL)
     {
-        rc = lucas_new_errorf("not connected");
+        rc = lucas_new_errorf("session is not connected");
         goto cleanup;
     }
     rc = create_prepared_statement(L, query, &statement);
     if (rc)
     {
+        rc = lucas_wrap_error(rc, "failed to create prepared statement");
         goto cleanup;
     }
-    CassError err = cass_statement_set_paging_size(statement, page_size);
+    err = cass_statement_set_paging_size(statement, page_size);
     if (err != CASS_OK)
     {
         rc = lucas_new_errorf_from_cass_error(err, "could not set paging size to %d", page_size);
         goto cleanup;
     }
-    bind_parameters(L, ARG_QUERY_PARAMS, statement);
+    rc = bind_parameters(L, ARG_QUERY_PARAMS, statement);
+    if (rc)
+    {
+        rc = lucas_wrap_error(rc, "failed to bind parameters");
+        goto cleanup;
+    }
     rc = iterate_result(L, statement, paging_state, paging_state_size);
     if (rc)
     {
+        rc = lucas_wrap_error(rc, "failed to handle query results");
         goto cleanup;
     }
 

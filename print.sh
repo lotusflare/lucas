@@ -1,9 +1,9 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
 print() {
     echo $1 | (command -v boxes > /dev/null && boxes -d stone || cat)
 }
 
-print "Building"
-cmake -S . -B build
-cmake --build build
+if [ "$0" = "$BASH_SOURCE" ]; then
+    print "$@"
+fi

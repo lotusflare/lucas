@@ -1,30 +1,19 @@
 {
-    "build": {
-        "dockerfile": "${localWorkspaceFolder}/Dockerfile",
-        "target": "base"
-    },
-    "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
     "workspaceFolder": "/app",
-    "mounts": [
-        "build:/app/build"
+    "dockerComposeFile": [
+        "${localWorkspaceFolder}/docker-compose.yml",
+        "${localWorkspaceFolder}/docker-compose.devcontainer.yml"
     ],
-    "runArgs": [
-        "--network=host",
-        "--env=CASSANDRA_HOST=127.0.0.1",
-        "--env=CASSANDRA_PORT=9043"
-    ],
-    "containerEnv": {
-        "CASSANDRA_HOST": "cassandra"
-    },
+    "service": "driver",
     "customizations": {
         "vscode": {
             "extensions": [
                 "EditorConfig.EditorConfig",
                 "ms-vscode.cmake-tools",
-                "ms-azuretools.vscode-docker",
                 "redhat.vscode-yaml",
                 "llvm-vs-code-extensions.vscode-clangd",
-                "twxs.cmake"
+                "twxs.cmake",
+                "JohnnyMorganz.stylua"
             ]
         }
     },
@@ -34,6 +23,10 @@
         },
         "ghcr.io/devcontainers/features/common-utils:1": {
             "version": "latest"
+        },
+        "ghcr.io/devcontainers/features/docker-from-docker:1": {
+            "version": "latest",
+            "dockerDashComposeVersion": "v2"
         }
     }
 }

@@ -1,7 +1,7 @@
-project(lucas)
 cmake_minimum_required(VERSION 3.16)
 # cmake_minimum_required(VERSION 3.21)
 set_property(GLOBAL PROPERTY RULE_MESSAGES OFF)
+project(lucas)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_C_STANDARD 11)
@@ -52,6 +52,7 @@ include(GoogleTest)
 gtest_discover_tests(lucas_test)
 
 add_library("${PROJECT_NAME}" SHARED src/lucas.c)
+target_include_directories("${PROJECT_NAME}" PRIVATE include)
 set_target_properties("${PROJECT_NAME}" PROPERTIES VERSION "${VERSION}")
 set_target_properties("${PROJECT_NAME}" PROPERTIES SOVERSION "${VERSION_MAJOR}")
 set_target_properties("${PROJECT_NAME}" PROPERTIES PREFIX "")
