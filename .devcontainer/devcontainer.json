@@ -1,9 +1,11 @@
 {
+    "name": "lucas",
     "workspaceFolder": "/app",
     "dockerComposeFile": [
         "${localWorkspaceFolder}/docker-compose.yml",
         "${localWorkspaceFolder}/docker-compose.devcontainer.yml"
     ],
+    "overrideCommand": true,
     "service": "driver",
     "customizations": {
         "vscode": {

@@ -5,6 +5,7 @@ services:
     image: cassandra:4.1
     environment:
       CASSANDRA_LISTEN_ADDRESS: cassandra
+    mem_limit: 2g
     healthcheck:
       test: ["CMD", "cqlsh"]
       timeout: 2m
