@@ -6,6 +6,7 @@
         "${localWorkspaceFolder}/docker-compose.devcontainer.yml"
     ],
     "overrideCommand": true,
+    "postCreateCommand": "git submodule update --init",
     "service": "driver",
     "customizations": {
         "vscode": {
