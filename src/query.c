@@ -464,7 +464,8 @@ LucasError *cass_value_to_lua(lua_State *L, const CassValue *cass_value)
     else if (vt == CASS_VALUE_TYPE_BOOLEAN)
     {
         cass_bool_t value;
-        if (cass_value_get_bool(cass_value, &value) != CASS_OK)
+        err = cass_value_get_bool(cass_value, &value);
+        if (err != CASS_OK)
         {
             goto cleanup;
         }
@@ -555,6 +556,7 @@ LucasError *iterate_result(lua_State *L, CassStatement *statement, const char *p
 
     if (paging_state)
     {
+        lucas_log(LOG_DEBUG, "setting paging token");
         err = cass_statement_set_paging_state_token(statement, paging_state, paging_state_size);
         if (err != CASS_OK)
         {
