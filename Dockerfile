@@ -30,6 +30,7 @@ RUN apt-get -qq -o=Dpkg::Use-Pty=0 update \
     && luarocks install luasec \
     && luarocks install busted \
     && luarocks install luasocket \
+    && luarocks install uuid \
     && luarocks install lua-cassandra
 
 COPY ./vendor/ /app/vendor/
