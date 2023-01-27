@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.3-labs
+# syntax=docker/dockerfile:1
 
 FROM ubuntu:20.04 AS base
 
@@ -37,7 +37,7 @@ luarocks install uuid
 luarocks install lua-cassandra
 EOF
 
-COPY ./vendor/ /app/vendor/
+COPY ./vendor /app/vendor/
 WORKDIR /app/vendor/cpp-driver/build
 RUN <<EOF
 cmake ..
