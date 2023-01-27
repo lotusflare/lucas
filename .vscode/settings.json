@@ -2,6 +2,9 @@
     "files.exclude": {
         ".cache": true,
     },
+    "search.exclude": {
+        "vendor": true,
+    },
     "files.watcherExclude": {
         "build": true,
         "vendor": true,

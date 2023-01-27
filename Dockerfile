@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 FROM ubuntu:20.04 AS base
 
 ENV LD_LIBRARY_PATH="/usr/local/lib/x86_64-linux-gnu"
@@ -5,46 +7,52 @@ ENV LUA_CPATH="/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/x86_64
 ARG DEBIAN_FRONTEND="noninteractive"
 SHELL ["/bin/bash", "-c"]
 
-RUN apt-get -qq -o=Dpkg::Use-Pty=0 update \
-    && apt-get -qq -o=Dpkg::Use-Pty=0 install \
-        git \
-        boxes \
-        clang \
-        clangd \
-        clang-format \
-        make \
-        cmake \
-        libssl-dev \
-        libuv1-dev \
-        zlib1g-dev \
-        libluajit-5.1-dev \
-        luajit \
-        luarocks \
-        pkg-config \
-        valgrind \
-    && apt-get clean \
-    && wget -q https://github.com/JohnnyMorganz/StyLua/releases/download/v0.16.0/stylua-linux.zip \
-    && unzip stylua-linux.zip -d /usr/bin \
-    && rm stylua-linux.zip \
-    && git config --global url.https://.insteadOf git:// \
-    && luarocks install luasec \
-    && luarocks install busted \
-    && luarocks install luasocket \
-    && luarocks install uuid \
-    && luarocks install lua-cassandra
+RUN <<EOF
+apt-get -qq -o=Dpkg::Use-Pty=0 update
+apt-get -qq -o=Dpkg::Use-Pty=0 install \
+  git \
+  boxes \
+  clang \
+  clangd \
+  clang-format \
+  make \
+  cmake \
+  libssl-dev \
+  libuv1-dev \
+  zlib1g-dev \
+  libluajit-5.1-dev \
+  luajit \
+  luarocks \
+  pkg-config \
+  valgrind
+apt-get clean
+wget -q https://github.com/JohnnyMorganz/StyLua/releases/download/v0.16.0/stylua-linux.zip
+unzip stylua-linux.zip -d /usr/bin
+rm stylua-linux.zip
+git config --global url.https://.insteadOf git://
+luarocks install luasec
+luarocks install busted
+luarocks install luasocket
+luarocks install uuid
+luarocks install lua-cassandra
+EOF
 
-COPY ./vendor/ /app/vendor/
+COPY ./vendor /app/vendor/
 WORKDIR /app/vendor/cpp-driver/build
-RUN cmake .. \
-    && cmake --build . \
-    && cmake --install .
+RUN <<EOF
+cmake ..
+cmake --build .
+cmake --install .
+EOF
 WORKDIR /app
 
 FROM base AS build
 COPY . /app/
 WORKDIR /app/build
-RUN cmake .. \
-    && cmake --build .
+RUN <<EOF
+cmake ..
+cmake --build .
+EOF
 WORKDIR /app
 RUN ./format.sh
 
