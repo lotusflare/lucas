@@ -28,4 +28,8 @@ describe("connect", function()
 			reconnect = false,
 		})
 	end)
+
+	it("connect with SSL", function()
+		-- todo
+	end)
 end)

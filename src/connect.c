@@ -6,14 +6,25 @@
 #include "state.c"
 #include "types.c"
 
-int get_port(lua_State *L, int i)
+LucasError *set_port(lua_State *L, int i, CassCluster *cluster)
 {
+    LucasError *rc = NULL;
+    int port;
     lua_getfield(L, i, "port");
     if (lua_type(L, lua_gettop(L)) == LUA_TNIL)
     {
-        return 9042;
+        port = 9042;
     }
-    return lua_tointeger(L, lua_gettop(L));
+    else
+    {
+        port = lua_tointeger(L, lua_gettop(L));
+    }
+    CassError err = cass_cluster_set_port(cluster, port);
+    if (err != CASS_OK)
+    {
+        rc = lucas_new_errorf_from_cass_error(err, "could not set port to %d", port);
+    }
+    return rc;
 }
 
 int get_num_threads_io(lua_State *L, int i)
@@ -81,14 +92,54 @@ int get_connection_heartbeat_interval(lua_State *L, int i)
     return 1000;
 }
 
-int get_constant_reconnect(lua_State *L, int i)
+void set_constant_reconnect(lua_State *L, int i, CassCluster *cluster)
 {
-    return 1000;
+    const int constant_reconnect = 1000;
+    cass_cluster_set_constant_reconnect(cluster, constant_reconnect);
 }
 
-int get_protocol_version(lua_State *L, int i)
+LucasError *set_protocol_version(lua_State *L, int i, CassCluster *cluster)
 {
-    return CASS_PROTOCOL_VERSION_V4;
+    LucasError *rc = NULL;
+    const int protocol_version = CASS_PROTOCOL_VERSION_V4;
+    CassError err = cass_cluster_set_protocol_version(cluster, protocol_version);
+    if (err != CASS_OK)
+    {
+        rc = lucas_new_errorf_from_cass_error(err, "could not set protocol version to %d", protocol_version);
+    }
+    return rc;
+}
+
+LucasError *set_ssl(lua_State *L, int i, CassCluster *cluster)
+{
+    LucasError *rc = NULL;
+    CassError err = CASS_OK;
+    CassSsl *ssl = cass_ssl_new();
+    lua_getfield(L, i, "ssl");
+
+    lua_getfield(L, lua_gettop(L), "certificate");
+    const char *cert = lua_tostring(L, lua_gettop(L));
+    err = cass_ssl_set_cert(ssl, cert);
+    if (err != CASS_OK)
+    {
+        rc = lucas_new_errorf_from_cass_error(err, "failed to set certificate");
+        goto cleanup;
+    }
+
+    lua_getfield(L, lua_gettop(L), "private_key");
+    const char *private_key = lua_tostring(L, lua_gettop(L));
+    err = cass_ssl_set_private_key(ssl, private_key, NULL);
+    if (err != CASS_OK)
+    {
+        rc = lucas_new_errorf_from_cass_error(err, "failed to set private key");
+        goto cleanup;
+    }
+
+    cass_cluster_set_ssl(cluster, ssl);
+
+cleanup:
+    cass_ssl_free(ssl);
+    return rc;
 }
 
 static int connect(lua_State *L)
@@ -102,12 +153,9 @@ static int connect(lua_State *L)
 
     const char *contact_points = get_contact_points(L, ARG_OPTIONS);
     const char *application_name = get_application_name(L, ARG_OPTIONS);
-    const int port = get_port(L, ARG_OPTIONS);
     const int num_threads_io = get_num_threads_io(L, ARG_OPTIONS);
     const int connect_timeout = get_connect_timeout(L, ARG_OPTIONS);
     const int connection_heartbeat_interval = get_connection_heartbeat_interval(L, ARG_OPTIONS);
-    const int constant_reconnect = get_constant_reconnect(L, ARG_OPTIONS);
-    const int protocol_version = get_protocol_version(L, ARG_OPTIONS);
     const bool use_latency_aware_routing = get_use_latency_aware_routing(L, ARG_OPTIONS);
     const bool reconnect = get_reconnect(L, ARG_OPTIONS);
 
@@ -129,16 +177,14 @@ static int connect(lua_State *L)
         rc = lucas_new_errorf_from_cass_error(err, "could not set contact points %s", contact_points);
         goto cleanup;
     }
-    err = cass_cluster_set_protocol_version(cluster, protocol_version);
-    if (err != CASS_OK)
+    rc = set_protocol_version(L, ARG_OPTIONS, cluster);
+    if (rc)
     {
-        rc = lucas_new_errorf_from_cass_error(err, "could not set protocol version to %d", protocol_version);
         goto cleanup;
     }
-    err = cass_cluster_set_port(cluster, port);
-    if (err != CASS_OK)
+    rc = set_port(L, ARG_OPTIONS, cluster);
+    if (rc)
     {
-        rc = lucas_new_errorf_from_cass_error(err, "could not set port %d", port);
         goto cleanup;
     }
     err = cass_cluster_set_num_threads_io(cluster, num_threads_io);
@@ -147,8 +193,13 @@ static int connect(lua_State *L)
         rc = lucas_new_errorf_from_cass_error(err, "could not set IO thread count to %d", num_threads_io);
         goto cleanup;
     }
+    rc = set_ssl(L, ARG_OPTIONS, cluster);
+    if (rc)
+    {
+        goto cleanup;
+    }
     cass_cluster_set_connection_heartbeat_interval(cluster, connection_heartbeat_interval);
-    cass_cluster_set_constant_reconnect(cluster, constant_reconnect);
+    set_constant_reconnect(L, ARG_OPTIONS, cluster);
     cass_cluster_set_connect_timeout(cluster, connect_timeout);
     cass_cluster_set_application_name(cluster, application_name);
     cass_cluster_set_latency_aware_routing(cluster, use_latency_aware_routing);
