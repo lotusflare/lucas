@@ -122,11 +122,10 @@ LucasError *set_protocol_version(lua_State *L, int i, CassCluster *cluster)
     return rc;
 }
 
-LucasError *set_ssl(lua_State *L, int i, CassCluster *cluster)
+LucasError *set_ssl(lua_State *L, int i, CassSsl *ssl, CassCluster *cluster)
 {
     LucasError *rc = NULL;
     CassError err = CASS_OK;
-    CassSsl *ssl = cass_ssl_new();
     lua_getfield(L, i, "ssl");
     int ssl_index = lua_gettop(L);
     if (lua_type(L, ssl_index) == LUA_TNIL)
@@ -156,7 +155,6 @@ LucasError *set_ssl(lua_State *L, int i, CassCluster *cluster)
     cass_cluster_set_ssl(cluster, ssl);
     lucas_log(LOG_INFO, "ssl configured");
 cleanup:
-    cass_ssl_free(ssl);
     return rc;
 }
 
@@ -177,6 +175,7 @@ static int connect(lua_State *L)
     CassFuture *future = NULL;
     LucasError *rc = NULL;
     CassCluster *cluster = NULL;
+    CassSsl *ssl = NULL;
     CassError err = CASS_OK;
     const bool reconnect = get_reconnect(L, ARG_OPTIONS);
 
@@ -212,7 +211,7 @@ static int connect(lua_State *L)
     {
         goto cleanup;
     }
-    rc = set_ssl(L, ARG_OPTIONS, cluster);
+    rc = set_ssl(L, ARG_OPTIONS, ssl, cluster);
     if (rc)
     {
         goto cleanup;
@@ -235,6 +234,10 @@ static int connect(lua_State *L)
     lucas_log(LOG_INFO, "session connect success");
 
 cleanup:
+    if (ssl)
+    {
+        cass_ssl_free(ssl);
+    }
     if (future)
     {
         cass_future_free(future);
