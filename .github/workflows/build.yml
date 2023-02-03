@@ -48,5 +48,5 @@ jobs:
       - uses: actions/upload-artifact@v3
         if: ${{ failure() }}
         with:
-          name: dump
-          path: ./tmp
+          name: integration-tests-dump
+          path: /tmp/core.*
