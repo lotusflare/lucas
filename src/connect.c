@@ -234,10 +234,10 @@ static int connect(lua_State *L)
     lucas_log(LOG_INFO, "session connect success");
 
 cleanup:
-    if (ssl)
-    {
-        cass_ssl_free(ssl);
-    }
+    // if (ssl)
+    // {
+    //     cass_ssl_free(ssl);
+    // }
     if (future)
     {
         cass_future_free(future);
