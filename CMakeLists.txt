@@ -8,6 +8,7 @@ set(CMAKE_C_STANDARD 11)
 # set(CMAKE_C_STANDARD 2x)
 set(CC clang)
 set(CXX clang++)
+set(CMAKE_BUILD_TYPE Debug)
 
 find_package(Git)
 execute_process(
