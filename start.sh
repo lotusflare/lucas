@@ -23,7 +23,7 @@ build() {
 test() {
     if $test; then
         print "Running tests"
-        docker compose run --rm driver busted
+        docker compose run driver busted
     fi
 }
 
