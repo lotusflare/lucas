@@ -24,9 +24,6 @@ services:
       core:
         soft: -1
         hard: -1
-    privileged: true
-    security_opt:
-      - "seccomp=unconfined"
     volumes:
       - "./tmp:/tmp"
     environment:

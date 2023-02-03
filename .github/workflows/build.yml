@@ -37,7 +37,9 @@ jobs:
           cache-to: type=gha
 
       - name: Integration tests
-        run: ./start.sh -bt
+        run: |
+          echo '/tmp/core.%e.%p' | sudo tee /proc/sys/kernel/core_pattern
+          ./start.sh -bt
 
       - name: Debug
         if: ${{ failure() }}

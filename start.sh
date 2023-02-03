@@ -23,7 +23,7 @@ build() {
 test() {
     if $test; then
         print "Running tests"
-        docker compose run driver bash -c "echo '/tmp/core.%h.%e.%t' > /proc/sys/kernel/core_pattern; busted"
+        docker compose run driver busted
     fi
 }
 
