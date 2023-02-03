@@ -41,6 +41,9 @@ jobs:
           echo '/tmp/core.%e.%p' | sudo tee /proc/sys/kernel/core_pattern
           ./start.sh -bt
           sudo chmod ugo+rwx ./tmp/core.*
+          ls -la ./tmp
+          mkdir dumps
+          cp ./tmp/core.* ./dumps
 
       - name: Debug
         if: ${{ failure() }}
@@ -50,4 +53,4 @@ jobs:
         if: ${{ failure() }}
         with:
           name: integration-tests-dump
-          path: ./tmp/core.*
+          path: dumps
