@@ -31,15 +31,15 @@ describe("connect", function()
 		})
 	end)
 
-	-- it("connect with SSL", function()
-	-- 	lucas.connect({
-	-- 		contact_points = os.getenv("CASSANDRA_HOST"),
-	-- 		port = os.getenv("CASSANDRA_PORT_SSL"),
-	-- 		reconnect = true,
-	-- 		ssl = {
-	-- 			certificate = os.getenv("CASSANDRA_SSL_CERT"),
-	-- 			private_key = os.getenv("CASSANDRA_SSL_KEY"),
-	-- 		},
-	-- 	})
-	-- end)
+	it("connect with SSL", function()
+		lucas.connect({
+			contact_points = os.getenv("CASSANDRA_HOST"),
+			port = os.getenv("CASSANDRA_PORT_SSL"),
+			reconnect = true,
+			ssl = {
+				certificate = os.getenv("CASSANDRA_SSL_CERT"),
+				private_key = os.getenv("CASSANDRA_SSL_KEY"),
+			},
+		})
+	end)
 end)
