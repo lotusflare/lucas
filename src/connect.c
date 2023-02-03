@@ -91,6 +91,44 @@ int get_protocol_version(lua_State *L, int i)
     return CASS_PROTOCOL_VERSION_V4;
 }
 
+LucasError *set_ssl(lua_State *L, int i, CassCluster *cluster)
+{
+    LucasError *rc = NULL;
+    CassError err = CASS_OK;
+    CassSsl *ssl = cass_ssl_new();
+    lua_getfield(L, i, "ssl");
+    int ssl_index = lua_gettop(L);
+    if (lua_type(L, ssl_index) == LUA_TNIL)
+    {
+        lucas_log(LOG_WARN, "ssl options not provided");
+        return NULL;
+    }
+    lua_getfield(L, ssl_index, "certificate");
+    const char *cert = lua_tostring(L, lua_gettop(L));
+    lucas_log(LOG_DEBUG, "cert loaded, size=%d", strlen(cert));
+    err = cass_ssl_set_cert(ssl, cert);
+    if (err != CASS_OK)
+    {
+        rc = lucas_new_errorf_from_cass_error(err, "failed to set certificate");
+        goto cleanup;
+    }
+    lua_getfield(L, ssl_index, "private_key");
+    const char *private_key = lua_tostring(L, lua_gettop(L));
+    lucas_log(LOG_DEBUG, "key loaded, size=%d", strlen(private_key));
+    err = cass_ssl_set_private_key(ssl, private_key, NULL);
+    if (err != CASS_OK)
+    {
+        rc = lucas_new_errorf_from_cass_error(err, "failed to set private key");
+        goto cleanup;
+    }
+    cass_ssl_set_verify_flags(ssl, CASS_SSL_VERIFY_NONE);
+    cass_cluster_set_ssl(cluster, ssl);
+    lucas_log(LOG_INFO, "ssl configured");
+cleanup:
+    cass_ssl_free(ssl);
+    return rc;
+}
+
 static int connect(lua_State *L)
 {
     lucas_log(LOG_INFO, "Attempting to connect");
@@ -147,13 +185,14 @@ static int connect(lua_State *L)
         rc = lucas_new_errorf_from_cass_error(err, "could not set IO thread count to %d", num_threads_io);
         goto cleanup;
     }
+
     cass_cluster_set_connection_heartbeat_interval(cluster, connection_heartbeat_interval);
     cass_cluster_set_constant_reconnect(cluster, constant_reconnect);
     cass_cluster_set_connect_timeout(cluster, connect_timeout);
     cass_cluster_set_application_name(cluster, application_name);
     cass_cluster_set_latency_aware_routing(cluster, use_latency_aware_routing);
     lucas_log(LOG_INFO, "session configuration done, ready to connect");
-
+    set_ssl(L, ARG_OPTIONS, cluster);
     future = cass_session_connect(session, cluster);
     cass_future_wait(future);
     err = cass_future_error_code(future);
