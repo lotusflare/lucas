@@ -197,7 +197,7 @@ static int connect(lua_State *L)
     }
     session = cass_session_new();
     cluster = cass_cluster_new();
-    ssl = cass_ssl_new_no_lib_init();
+    ssl = cass_ssl_new();
     rc = set_contact_points(L, ARG_OPTIONS, cluster);
     if (rc)
     {
