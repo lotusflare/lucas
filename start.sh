@@ -23,7 +23,7 @@ build() {
 test() {
     if $test; then
         print "Running tests"
-        docker compose run driver busted # --lua=luajit
+        docker compose run driver busted --lua=luajit
     fi
 }
 
