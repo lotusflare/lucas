@@ -10,7 +10,6 @@ services:
       - "./integration/cassandra/cassandra.yaml:/etc/cassandra/cassandra.yaml"
       - "./integration/cassandra/node-keystore.jks:/opt/cassandra/keystore.jks"
       - "./integration/cassandra/node-truststore.jks:/opt/cassandra/truststore.jks"
-      - "./tmp:/tmp"
     ports:
       - "9043:9042"
     healthcheck:
@@ -25,6 +24,8 @@ services:
       core:
         soft: -1
         hard: -1
+    volumes:
+      - "./tmp:/tmp"
     environment:
       CASSANDRA_HOST: cassandra
       CASSANDRA_PORT: 9042
