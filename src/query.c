@@ -747,5 +747,5 @@ cleanup:
     {
         lucas_error_to_lua(L, rc);
     }
-    return 2;
+    return 1;
 }
