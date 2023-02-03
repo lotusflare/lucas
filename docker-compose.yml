@@ -20,6 +20,7 @@ services:
     build:
       context: .
       target: build
+    init: true
     ulimits:
       core:
         soft: -1
