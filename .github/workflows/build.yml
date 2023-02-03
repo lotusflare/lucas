@@ -41,4 +41,4 @@ jobs:
 
       - name: Debug
         if: ${{ failure() }}
-        run: docker inspect $(docker compose ps -q driver)
+        run: docker inspect $(docker compose ps -qa driver)
