@@ -13,6 +13,7 @@ describe("connect", function()
 			lucas.connect({
 				contact_points = "example.com",
 				reconnect = true,
+				connect_timeout = 100,
 			})
 		end)
 	end)
