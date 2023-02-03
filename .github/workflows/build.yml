@@ -38,3 +38,7 @@ jobs:
 
       - name: Integration tests
         run: ./start.sh -bt
+
+      - name: Debug
+        if: ${{ failure() }}
+        run: docker inspect $(docker compose ps -q driver)
