@@ -50,10 +50,10 @@ void set_connect_timeout(lua_State *L, int i, CassCluster *cluster)
     cass_cluster_set_connect_timeout(cluster, connect_timeout);
 }
 
-void set_use_latency_aware_routing(lua_State *L, int i, CassCluster *cluster)
+void set_latency_aware_routing(lua_State *L, int i, CassCluster *cluster)
 {
     int latency_aware_routing = false;
-    lua_getfield(L, i, "use_latency_aware_routing");
+    lua_getfield(L, i, "latency_aware_routing");
     if (lua_type(L, lua_gettop(L)) != LUA_TNIL)
     {
         latency_aware_routing = lua_toboolean(L, lua_gettop(L));
@@ -217,7 +217,7 @@ static int connect(lua_State *L)
     {
         goto cleanup;
     }
-    set_use_latency_aware_routing(L, ARG_OPTIONS, cluster);
+    set_latency_aware_routing(L, ARG_OPTIONS, cluster);
     set_connection_heartbeat_interval(L, ARG_OPTIONS, cluster);
     set_constant_reconnect(L, ARG_OPTIONS, cluster);
     set_connect_timeout(L, ARG_OPTIONS, cluster);
