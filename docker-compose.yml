@@ -6,10 +6,6 @@ services:
     environment:
       CASSANDRA_LISTEN_ADDRESS: cassandra
     mem_limit: 4g
-    ulimits:
-      core:
-        soft: -1
-        hard: -1
     volumes:
       - "./integration/cassandra/cassandra.yaml:/etc/cassandra/cassandra.yaml"
       - "./integration/cassandra/node-keystore.jks:/opt/cassandra/keystore.jks"
@@ -19,12 +15,16 @@ services:
       - "9043:9042"
     healthcheck:
       test: ["CMD", "cqlsh"]
-      timeout: 2m
+      timeout: 3m
 
   driver:
     build:
       context: .
       target: build
+    ulimits:
+      core:
+        soft: -1
+        hard: -1
     environment:
       CASSANDRA_HOST: cassandra
       CASSANDRA_PORT: 9042
