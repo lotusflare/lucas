@@ -38,14 +38,13 @@ jobs:
 
       - name: Integration tests
         run: |
-          echo '/tmp/core-%e.%p.%h.%t' | sudo tee /proc/sys/kernel/core_pattern
+          echo '/tmp/core-%e.%p.%t' | sudo tee /proc/sys/kernel/core_pattern
           ./start.sh -bt
 
       - name: Debug
         if: ${{ failure() }}
         run: |
           sudo chown -R $USER:$USER ./tmp
-          ls -la ./tmp
           docker inspect $(docker compose ps -qa driver)
 
       - uses: actions/upload-artifact@v3

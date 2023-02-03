@@ -11,7 +11,7 @@ LucasError *set_port(lua_State *L, int i, CassCluster *cluster)
 {
     int port = 9042;
     lua_getfield(L, i, "port");
-    if (lua_type(L, lua_gettop(L)) != LUA_TNIL)
+    if (!lua_isnil(L, lua_gettop(L)))
     {
         port = lua_tointeger(L, lua_gettop(L));
     }
@@ -27,7 +27,7 @@ LucasError *set_num_threads_io(lua_State *L, int i, CassCluster *cluster)
 {
     int num_threads_io = 1;
     lua_getfield(L, i, "num_threads_io");
-    if (lua_type(L, lua_gettop(L)) != LUA_TNIL)
+    if (!lua_isnil(L, lua_gettop(L)))
     {
         num_threads_io = lua_tointeger(L, lua_gettop(L));
     }
@@ -43,7 +43,7 @@ void set_connect_timeout(lua_State *L, int i, CassCluster *cluster)
 {
     int connect_timeout = 5000;
     lua_getfield(L, i, "connect_timeout");
-    if (lua_type(L, lua_gettop(L)) != LUA_TNIL)
+    if (!lua_isnil(L, lua_gettop(L)))
     {
         connect_timeout = lua_tointeger(L, lua_gettop(L));
     }
@@ -54,7 +54,7 @@ void set_use_latency_aware_routing(lua_State *L, int i, CassCluster *cluster)
 {
     int latency_aware_routing = false;
     lua_getfield(L, i, "use_latency_aware_routing");
-    if (lua_type(L, lua_gettop(L)) != LUA_TNIL)
+    if (!lua_isnil(L, lua_gettop(L)))
     {
         latency_aware_routing = lua_toboolean(L, lua_gettop(L));
     }
@@ -65,7 +65,7 @@ LucasError *set_contact_points(lua_State *L, int i, CassCluster *cluster)
 {
     lua_getfield(L, i, "contact_points");
     const char *contact_points = "127.0.0.1";
-    if (lua_type(L, lua_gettop(L)) != LUA_TNIL)
+    if (!lua_isnil(L, lua_gettop(L)))
     {
         contact_points = lua_tostring(L, lua_gettop(L));
     }
@@ -81,7 +81,7 @@ void set_application_name(lua_State *L, int i, CassCluster *cluster)
 {
     lua_getfield(L, i, "application_name");
     const char *application_name = NULL;
-    if (lua_type(L, lua_gettop(L)) != LUA_TNIL)
+    if (!lua_isnil(L, lua_gettop(L)))
     {
         application_name = lua_tostring(L, lua_gettop(L));
     }
@@ -92,7 +92,7 @@ void set_connection_heartbeat_interval(lua_State *L, int i, CassCluster *cluster
 {
     int heartbeat_interval = 1000;
     lua_getfield(L, i, "heartbeat_interval");
-    if (lua_type(L, lua_gettop(L)) != LUA_TNIL)
+    if (!lua_isnil(L, lua_gettop(L)))
     {
         heartbeat_interval = lua_tointeger(L, lua_gettop(L));
     }
@@ -103,7 +103,7 @@ void set_constant_reconnect(lua_State *L, int i, CassCluster *cluster)
 {
     int constant_reconnect = 1000;
     lua_getfield(L, i, "constant_reconnect");
-    if (lua_type(L, lua_gettop(L)) != LUA_TNIL)
+    if (!lua_isnil(L, lua_gettop(L)))
     {
         constant_reconnect = lua_tointeger(L, lua_gettop(L));
     }
@@ -128,7 +128,7 @@ LucasError *set_ssl(lua_State *L, int i, CassSsl *ssl, CassCluster *cluster)
     CassError err = CASS_OK;
     lua_getfield(L, i, "ssl");
     int ssl_index = lua_gettop(L);
-    if (lua_type(L, ssl_index) == LUA_TNIL)
+    if (lua_isnil(L, ssl_index))
     {
         lucas_log(LOG_WARN, "ssl options not provided");
         return NULL;
@@ -160,12 +160,13 @@ cleanup:
 
 bool get_reconnect(lua_State *L, int i)
 {
+    bool reconnect = false;
     lua_getfield(L, i, "reconnect");
-    if (lua_type(L, lua_gettop(L)) == LUA_TNIL)
+    if (!lua_isnil(L, lua_gettop(L)))
     {
-        return false;
+        reconnect = lua_toboolean(L, lua_gettop(L));
     }
-    return lua_toboolean(L, lua_gettop(L));
+    return reconnect;
 }
 
 static int connect(lua_State *L)

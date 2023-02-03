@@ -20,7 +20,7 @@ bool get_cql_type(lua_State *L, int index, CassValueType *cvt)
 {
     int top = lua_gettop(L);
     lua_getfield(L, index, "__cql_type");
-    bool has_type = lua_type(L, lua_gettop(L)) != LUA_TNIL;
+    bool has_type = !lua_isnil(L, lua_gettop(L));
     *cvt = lua_tointeger(L, lua_gettop(L));
     lua_settop(L, top);
     return has_type;
