@@ -50,4 +50,4 @@ jobs:
         if: ${{ failure() }}
         with:
           name: integration-tests-dump
-          path: /tmp/core.*
+          path: ./tmp/core.*
