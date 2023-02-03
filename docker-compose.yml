@@ -24,6 +24,7 @@ services:
       core:
         soft: -1
         hard: -1
+    privileged: true
     volumes:
       - "./tmp:/tmp"
     environment:
