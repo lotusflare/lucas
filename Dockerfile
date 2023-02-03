@@ -8,6 +8,7 @@ ARG DEBIAN_FRONTEND="noninteractive"
 SHELL ["/bin/bash", "-c"]
 
 RUN <<EOF
+set -eux
 apt-get -qq -o=Dpkg::Use-Pty=0 update
 apt-get -qq -o=Dpkg::Use-Pty=0 install \
   git \

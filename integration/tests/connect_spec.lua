@@ -8,28 +8,35 @@ describe("connect", function()
 		})
 	end)
 
-	-- it("error when server is not available", function()
-	--     assert.has.errors(function()
-	--         local err = lucas.connect({
-	--             contact_points = "example.com",
-	--             reconnect = true,
-	--         })
-	--     end)
-	-- end)
+	it("error when server is not available", function()
+		assert.has.errors(function()
+			lucas.connect({
+				contact_points = "example.com",
+				reconnect = true,
+			})
+		end)
+	end)
 
 	it("reconnect flag works", function()
-		local err = lucas.connect({
+		lucas.connect({
 			contact_points = os.getenv("CASSANDRA_HOST"),
 			port = os.getenv("CASSANDRA_PORT"),
 			reconnect = true,
 		})
-		local err = lucas.connect({
+		lucas.connect({
 			contact_points = "example.com",
 			reconnect = false,
 		})
 	end)
 
 	it("connect with SSL", function()
-		-- todo
+		lucas.connect({
+			contact_points = os.getenv("CASSANDRA_HOST"),
+			port = os.getenv("CASSANDRA_PORT_SSL"),
+			ssl = {
+				certificate = os.getenv("CASSANDRA_SSL_CERT"),
+				private_key = os.getenv("CASSANDRA_SSL_KEY"),
+			},
+		})
 	end)
 end)

@@ -6,3 +6,4 @@ CMakeFiles
 .cache
 scratch.lua
 docker-compose.override.yml
+tmp
