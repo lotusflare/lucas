@@ -42,3 +42,9 @@ jobs:
       - name: Debug
         if: ${{ failure() }}
         run: docker inspect $(docker compose ps -qa driver)
+
+      - uses: actions/upload-artifact@v3
+        if: ${{ failure() }}
+        with:
+          name: dump
+          path: ./tmp

@@ -6,10 +6,15 @@ services:
     environment:
       CASSANDRA_LISTEN_ADDRESS: cassandra
     mem_limit: 4g
+    ulimits:
+      core:
+        soft: -1
+        hard: -1
     volumes:
       - "./integration/cassandra/cassandra.yaml:/etc/cassandra/cassandra.yaml"
       - "./integration/cassandra/node-keystore.jks:/opt/cassandra/keystore.jks"
       - "./integration/cassandra/node-truststore.jks:/opt/cassandra/truststore.jks"
+      - "./tmp:/tmp"
     ports:
       - "9043:9042"
     healthcheck:

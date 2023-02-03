@@ -25,7 +25,8 @@ apt-get -qq -o=Dpkg::Use-Pty=0 install \
   luajit \
   luarocks \
   pkg-config \
-  valgrind
+  valgrind \
+  gdb
 apt-get clean
 wget -q https://github.com/JohnnyMorganz/StyLua/releases/download/v0.16.0/stylua-linux.zip
 unzip stylua-linux.zip -d /usr/bin
