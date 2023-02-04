@@ -181,7 +181,7 @@ static int connect(lua_State *L)
     CassFuture *future = NULL;
     LucasError *rc = NULL;
     CassCluster *cluster = NULL;
-    CassSsl *ssl = NULL;
+    // CassSsl *ssl = NULL;
     CassError err = CASS_OK;
     const bool reconnect = get_reconnect(L, ARG_OPTIONS);
 
@@ -197,7 +197,7 @@ static int connect(lua_State *L)
     }
     session = cass_session_new();
     cluster = cass_cluster_new();
-    ssl = cass_ssl_new();
+    // ssl = cass_ssl_new();
     rc = set_contact_points(L, ARG_OPTIONS, cluster);
     if (rc)
     {
