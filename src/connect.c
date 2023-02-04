@@ -126,6 +126,7 @@ LucasError *set_ssl(lua_State *L, int i, CassSsl *ssl, CassCluster *cluster)
 {
     LucasError *rc = NULL;
     CassError err = CASS_OK;
+
     lua_getfield(L, i, "ssl");
     int ssl_index = lua_gettop(L);
     if (lua_isnil(L, ssl_index))
@@ -133,6 +134,7 @@ LucasError *set_ssl(lua_State *L, int i, CassSsl *ssl, CassCluster *cluster)
         lucas_log(LOG_WARN, "ssl options not provided");
         return NULL;
     }
+
     lua_getfield(L, ssl_index, "certificate");
     if (lua_isnil(L, lua_gettop(L)))
     {
@@ -145,6 +147,7 @@ LucasError *set_ssl(lua_State *L, int i, CassSsl *ssl, CassCluster *cluster)
     {
         return lucas_new_errorf_from_cass_error(err, "failed to set certificate");
     }
+
     lua_getfield(L, ssl_index, "private_key");
     if (lua_isnil(L, lua_gettop(L)))
     {
@@ -152,11 +155,20 @@ LucasError *set_ssl(lua_State *L, int i, CassSsl *ssl, CassCluster *cluster)
     }
     const char *private_key = lua_tostring(L, lua_gettop(L));
     lucas_log(LOG_DEBUG, "key loaded, size=%d", strlen(private_key));
-    err = cass_ssl_set_private_key(ssl, private_key, NULL);
+
+    lua_getfield(L, ssl_index, "password");
+    const char *password = NULL;
+    if (!lua_isnil(L, lua_gettop(L)))
+    {
+        password = lua_tostring(L, lua_gettop(L));
+    }
+
+    err = cass_ssl_set_private_key(ssl, private_key, password);
     if (err != CASS_OK)
     {
         return lucas_new_errorf_from_cass_error(err, "failed to set private key");
     }
+
     cass_ssl_set_verify_flags(ssl, CASS_SSL_VERIFY_NONE);
     cass_cluster_set_ssl(cluster, ssl);
     lucas_log(LOG_INFO, "ssl configured");
@@ -187,7 +199,7 @@ static int connect(lua_State *L)
 
     if (session && !reconnect)
     {
-        lucas_log(LOG_WARN, "already connected");
+        lucas_log(LOG_WARN, "already connected, doing nothing");
         return 0;
     }
     if (session)
