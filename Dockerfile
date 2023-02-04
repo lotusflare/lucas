@@ -23,6 +23,7 @@ apt-get -qq -o=Dpkg::Use-Pty=0 install \
   zlib1g-dev \
   libluajit-5.1-dev \
   luajit \
+  luajit-dbgsym \
   luarocks \
   pkg-config \
   valgrind \
