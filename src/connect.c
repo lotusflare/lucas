@@ -122,46 +122,46 @@ LucasError *set_protocol_version(lua_State *L, int i, CassCluster *cluster)
     return rc;
 }
 
-LucasError *set_ssl(lua_State *L, int i, CassSsl *ssl, CassCluster *cluster)
-{
-    LucasError *rc = NULL;
-    CassError err = CASS_OK;
-    lua_getfield(L, i, "ssl");
-    int ssl_index = lua_gettop(L);
-    if (lua_isnil(L, ssl_index))
-    {
-        lucas_log(LOG_WARN, "ssl options not provided");
-        return NULL;
-    }
-    lua_getfield(L, ssl_index, "certificate");
-    if (lua_isnil(L, lua_gettop(L)))
-    {
-        return lucas_new_errorf("certificate is missing");
-    }
-    const char *cert = lua_tostring(L, lua_gettop(L));
-    lucas_log(LOG_DEBUG, "cert loaded: %s", cert);
-    err = cass_ssl_set_cert(ssl, cert);
-    if (err != CASS_OK)
-    {
-        return lucas_new_errorf_from_cass_error(err, "failed to set certificate");
-    }
-    lua_getfield(L, ssl_index, "private_key");
-    if (lua_isnil(L, lua_gettop(L)))
-    {
-        return lucas_new_errorf("private key is missing");
-    }
-    const char *private_key = lua_tostring(L, lua_gettop(L));
-    lucas_log(LOG_DEBUG, "key loaded, size=%d", strlen(private_key));
-    err = cass_ssl_set_private_key(ssl, private_key, NULL);
-    if (err != CASS_OK)
-    {
-        return lucas_new_errorf_from_cass_error(err, "failed to set private key");
-    }
-    cass_ssl_set_verify_flags(ssl, CASS_SSL_VERIFY_NONE);
-    cass_cluster_set_ssl(cluster, ssl);
-    lucas_log(LOG_INFO, "ssl configured");
-    return NULL;
-}
+// LucasError *set_ssl(lua_State *L, int i, CassSsl *ssl, CassCluster *cluster)
+// {
+//     LucasError *rc = NULL;
+//     CassError err = CASS_OK;
+//     lua_getfield(L, i, "ssl");
+//     int ssl_index = lua_gettop(L);
+//     if (lua_isnil(L, ssl_index))
+//     {
+//         lucas_log(LOG_WARN, "ssl options not provided");
+//         return NULL;
+//     }
+//     lua_getfield(L, ssl_index, "certificate");
+//     if (lua_isnil(L, lua_gettop(L)))
+//     {
+//         return lucas_new_errorf("certificate is missing");
+//     }
+//     const char *cert = lua_tostring(L, lua_gettop(L));
+//     lucas_log(LOG_DEBUG, "cert loaded: %s", cert);
+//     err = cass_ssl_set_cert(ssl, cert);
+//     if (err != CASS_OK)
+//     {
+//         return lucas_new_errorf_from_cass_error(err, "failed to set certificate");
+//     }
+//     lua_getfield(L, ssl_index, "private_key");
+//     if (lua_isnil(L, lua_gettop(L)))
+//     {
+//         return lucas_new_errorf("private key is missing");
+//     }
+//     const char *private_key = lua_tostring(L, lua_gettop(L));
+//     lucas_log(LOG_DEBUG, "key loaded, size=%d", strlen(private_key));
+//     err = cass_ssl_set_private_key(ssl, private_key, NULL);
+//     if (err != CASS_OK)
+//     {
+//         return lucas_new_errorf_from_cass_error(err, "failed to set private key");
+//     }
+//     cass_ssl_set_verify_flags(ssl, CASS_SSL_VERIFY_NONE);
+//     cass_cluster_set_ssl(cluster, ssl);
+//     lucas_log(LOG_INFO, "ssl configured");
+//     return NULL;
+// }
 
 bool get_reconnect(lua_State *L, int i)
 {
