@@ -1,9 +1,10 @@
 {
     "files.exclude": {
         ".cache": true,
+        "tmp": true
     },
     "search.exclude": {
-        "vendor": true,
+        "vendor": true
     },
     "files.watcherExclude": {
         "build": true,

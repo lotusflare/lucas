@@ -192,7 +192,7 @@ static int connect(lua_State *L)
     cass_cluster_set_application_name(cluster, application_name);
     cass_cluster_set_latency_aware_routing(cluster, use_latency_aware_routing);
     lucas_log(LOG_INFO, "session configuration done, ready to connect");
-    // set_ssl(L, ARG_OPTIONS, cluster);
+    set_ssl(L, ARG_OPTIONS, cluster);
     future = cass_session_connect(session, cluster);
     cass_future_wait(future);
     err = cass_future_error_code(future);
