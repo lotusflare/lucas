@@ -218,11 +218,11 @@ static int connect(lua_State *L)
     {
         goto cleanup;
     }
-    rc = set_ssl(L, ARG_OPTIONS, ssl, cluster);
-    if (rc)
-    {
-        goto cleanup;
-    }
+    // rc = set_ssl(L, ARG_OPTIONS, ssl, cluster);
+    // if (rc)
+    // {
+    //     goto cleanup;
+    // }
     set_use_latency_aware_routing(L, ARG_OPTIONS, cluster);
     set_connection_heartbeat_interval(L, ARG_OPTIONS, cluster);
     set_constant_reconnect(L, ARG_OPTIONS, cluster);
