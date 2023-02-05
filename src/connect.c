@@ -122,36 +122,40 @@ LucasError *set_protocol_version(lua_State *L, int i, CassCluster *cluster)
     return rc;
 }
 
-LucasError *set_ssl(lua_State *L, int i, CassSsl *ssl, CassCluster *cluster)
+LucasError *set_ssl(lua_State *L, int i, CassCluster *cluster)
 {
     LucasError *rc = NULL;
     CassError err = CASS_OK;
+    CassSsl *ssl = cass_ssl_new();
 
     lua_getfield(L, i, "ssl");
     int ssl_index = lua_gettop(L);
     if (lua_isnil(L, ssl_index))
     {
         lucas_log(LOG_WARN, "ssl options not provided");
-        return NULL;
+        goto cleanup;
     }
 
     lua_getfield(L, ssl_index, "certificate");
     if (lua_isnil(L, lua_gettop(L)))
     {
-        return lucas_new_errorf("certificate is missing");
+        rc = lucas_new_errorf("certificate is missing");
+        goto cleanup;
     }
     const char *cert = lua_tostring(L, lua_gettop(L));
     lucas_log(LOG_DEBUG, "cert loaded: size=%d", strlen(cert));
     err = cass_ssl_set_cert(ssl, cert);
     if (err != CASS_OK)
     {
-        return lucas_new_errorf_from_cass_error(err, "failed to set certificate");
+        rc = lucas_new_errorf_from_cass_error(err, "failed to set certificate");
+        goto cleanup;
     }
 
     lua_getfield(L, ssl_index, "private_key");
     if (lua_isnil(L, lua_gettop(L)))
     {
-        return lucas_new_errorf("private key is missing");
+        rc = lucas_new_errorf("private key is missing");
+        goto cleanup;
     }
     const char *private_key = lua_tostring(L, lua_gettop(L));
     lucas_log(LOG_DEBUG, "key loaded, size=%d", strlen(private_key));
@@ -166,13 +170,17 @@ LucasError *set_ssl(lua_State *L, int i, CassSsl *ssl, CassCluster *cluster)
     err = cass_ssl_set_private_key(ssl, private_key, password);
     if (err != CASS_OK)
     {
-        return lucas_new_errorf_from_cass_error(err, "failed to set private key");
+        rc = lucas_new_errorf_from_cass_error(err, "failed to set private key");
+        goto cleanup;
     }
 
     cass_ssl_set_verify_flags(ssl, CASS_SSL_VERIFY_NONE);
     cass_cluster_set_ssl(cluster, ssl);
     lucas_log(LOG_INFO, "ssl configured");
-    return NULL;
+
+cleanup:
+    cass_ssl_free(ssl);
+    return rc;
 }
 
 bool get_reconnect(lua_State *L, int i)
@@ -193,7 +201,6 @@ static int connect(lua_State *L)
     CassFuture *future = NULL;
     LucasError *rc = NULL;
     CassCluster *cluster = NULL;
-    CassSsl *ssl = NULL;
     CassError err = CASS_OK;
     const bool reconnect = get_reconnect(L, ARG_OPTIONS);
 
@@ -209,7 +216,7 @@ static int connect(lua_State *L)
     }
     session = cass_session_new();
     cluster = cass_cluster_new();
-    ssl = cass_ssl_new();
+
     rc = set_contact_points(L, ARG_OPTIONS, cluster);
     if (rc)
     {
@@ -230,7 +237,7 @@ static int connect(lua_State *L)
     {
         goto cleanup;
     }
-    rc = set_ssl(L, ARG_OPTIONS, ssl, cluster);
+    rc = set_ssl(L, ARG_OPTIONS, cluster);
     if (rc)
     {
         goto cleanup;
@@ -260,10 +267,6 @@ cleanup:
     if (cluster)
     {
         cass_cluster_free(cluster);
-    }
-    if (ssl)
-    {
-        cass_ssl_free(ssl);
     }
     if (rc)
     {
