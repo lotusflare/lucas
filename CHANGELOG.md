@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.8.0](https://github.com/lotusflare/lucas/compare/v0.7.0...v0.8.0) (2023-02-07)
+
+
+### Features
+
+* install uuid luarocks package ([d318309](https://github.com/lotusflare/lucas/commit/d3183092a0dc462dfe65510e31f4b313865ee7a3))
+* SSL support and switch to Ubuntu 18.04 ([#53](https://github.com/lotusflare/lucas/issues/53)) ([59fe17d](https://github.com/lotusflare/lucas/commit/59fe17d20bf97165b655ade6ad7e72e86194a14b))
+
+
+### Bug Fixes
+
+* add postCreateCommand for Codespaces ([7baad77](https://github.com/lotusflare/lucas/commit/7baad7733c85dd463688e32336f7a915bd3a2261))
+* boolean error handling ([68220d5](https://github.com/lotusflare/lucas/commit/68220d5db2388bf96747a126d00dc73c340e25b0))
+* Update Dockerfile syntax, fix memory allocation, IDE config improvements ([6ebe9a0](https://github.com/lotusflare/lucas/commit/6ebe9a0188d0b2bc8efeb431449d99ce473f0cbd))
+* update repo permissions ([9be45c6](https://github.com/lotusflare/lucas/commit/9be45c6a65f718f246a4c36beb9da7dd1c63d83c))
+
 ## [0.7.0](https://github.com/lotusflare/lucas/compare/v0.6.0...v0.7.0) (2023-01-23)
 
 
