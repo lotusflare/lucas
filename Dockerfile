@@ -1,11 +1,13 @@
 # syntax=docker/dockerfile:1
 
-FROM ubuntu:20.04 AS base
+FROM ubuntu:18.04 AS base
 
 ENV LD_LIBRARY_PATH="/usr/local/lib/x86_64-linux-gnu"
 ENV LUA_CPATH="/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/x86_64-linux-gnu/?.so"
 ARG DEBIAN_FRONTEND="noninteractive"
-SHELL ["/bin/bash", "-c"]
+ARG CLANGD_TAG="15.0.6"
+ARG STYLUA_TAG="v0.16.0"
+SHELL ["/bin/bash", "-c", "-e"]
 
 RUN <<EOF
 apt-get -qq -o=Dpkg::Use-Pty=0 update
@@ -13,7 +15,6 @@ apt-get -qq -o=Dpkg::Use-Pty=0 install \
   git \
   boxes \
   clang \
-  clangd \
   clang-format \
   make \
   cmake \
@@ -24,11 +25,9 @@ apt-get -qq -o=Dpkg::Use-Pty=0 install \
   luajit \
   luarocks \
   pkg-config \
-  valgrind
+  valgrind \
+  gdb
 apt-get clean
-wget -q https://github.com/JohnnyMorganz/StyLua/releases/download/v0.16.0/stylua-linux.zip
-unzip stylua-linux.zip -d /usr/bin
-rm stylua-linux.zip
 git config --global url.https://.insteadOf git://
 luarocks install luasec
 luarocks install busted
@@ -37,12 +36,21 @@ luarocks install uuid
 luarocks install lua-cassandra
 EOF
 
+RUN <<EOF
+wget -q https://github.com/JohnnyMorganz/StyLua/releases/download/$STYLUA_TAG/stylua-linux.zip
+unzip stylua-linux.zip -d /usr/bin
+rm stylua-linux.zip
+wget -q https://github.com/clangd/clangd/releases/download/$CLANGD_TAG/clangd-linux-$CLANGD_TAG.zip
+unzip -j clangd-linux-$CLANGD_TAG.zip clangd_$CLANGD_TAG/bin/clangd -d /usr/bin
+rm clangd-linux-$CLANGD_TAG.zip
+EOF
+
 COPY ./vendor /app/vendor/
 WORKDIR /app/vendor/cpp-driver/build
 RUN <<EOF
 cmake ..
-cmake --build .
-cmake --install .
+make
+make install
 EOF
 WORKDIR /app
 

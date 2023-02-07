@@ -731,6 +731,7 @@ static int query(lua_State *L)
         rc = lucas_wrap_error(rc, "failed to bind parameters");
         goto cleanup;
     }
+
     rc = iterate_result(L, statement, paging_state, paging_state_size);
     if (rc)
     {

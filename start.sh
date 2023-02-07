@@ -23,14 +23,13 @@ build() {
 test() {
     if $test; then
         print "Running tests"
-        docker compose run --rm driver busted
+        docker compose run driver busted --lua=luajit
     fi
 }
 
 cassandra() {
     print "Waiting for Cassandra"
     docker compose up cassandra --wait --quiet-pull
-
     print "Seeding Cassandra"
     for file in $(find integration -name '*.cql' | sort); do
         cat $file | docker compose exec -T cassandra cqlsh

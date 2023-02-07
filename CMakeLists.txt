@@ -1,13 +1,15 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.10)
 # cmake_minimum_required(VERSION 3.21)
 set_property(GLOBAL PROPERTY RULE_MESSAGES OFF)
 project(lucas)
+set(CMAKE_PROJECT_NAME lucas)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_C_STANDARD 11)
 # set(CMAKE_C_STANDARD 2x)
 set(CC clang)
 set(CXX clang++)
+# set(CMAKE_BUILD_TYPE Debug)
 
 find_package(Git)
 execute_process(
@@ -31,7 +33,7 @@ if(VERSION_DIRTY)
 endif()
 set(VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_SUFFIX}")
 message(STATUS "lucas version: ${VERSION}")
-add_compile_definitions(VERSION="${VERSION}")
+add_definitions(-DVERSION="${VERSION}")
 
 add_library("${PROJECT_NAME}" SHARED src/lucas.c)
 target_include_directories("${PROJECT_NAME}" PRIVATE include)
