@@ -42,8 +42,8 @@ COPY ./vendor /app/vendor/
 WORKDIR /app/vendor/cpp-driver/build
 RUN <<EOF
 cmake ..
-cmake --build .
-cmake --install .
+make
+make install
 EOF
 WORKDIR /app
 
