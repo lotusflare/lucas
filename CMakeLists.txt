@@ -33,7 +33,7 @@ if(VERSION_DIRTY)
 endif()
 set(VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_SUFFIX}")
 message(STATUS "lucas version: ${VERSION}")
-add_compile_definitions(VERSION="${VERSION}")
+add_definitions(-DVERSION="${VERSION}")
 
 add_library("${PROJECT_NAME}" SHARED src/lucas.c)
 target_include_directories("${PROJECT_NAME}" PRIVATE include)
