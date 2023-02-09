@@ -4,18 +4,19 @@ FROM ubuntu:18.04 AS base
 
 ENV LD_LIBRARY_PATH="/usr/local/lib/x86_64-linux-gnu"
 ENV LUA_CPATH="/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/x86_64-linux-gnu/?.so"
+ENV LUA_PATH="/app/integration/tests/?.lua;;"
 ARG DEBIAN_FRONTEND="noninteractive"
 ARG CLANGD_TAG="15.0.6"
 ARG STYLUA_TAG="v0.16.0"
-SHELL ["/bin/bash", "-c", "-e"]
+SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 
 RUN <<EOF
 apt-get -qq -o=Dpkg::Use-Pty=0 update
 apt-get -qq -o=Dpkg::Use-Pty=0 install \
   git \
   boxes \
-  clang \
-  clang-format \
+  clang-10 \
+  clang-format-10 \
   make \
   cmake \
   libssl-dev \
@@ -28,6 +29,8 @@ apt-get -qq -o=Dpkg::Use-Pty=0 install \
   valgrind \
   gdb
 apt-get clean
+ln -s /usr/bin/clang-format-10 /usr/bin/clang-format
+ln -s /usr/bin/clang-10 /usr/bin/clang
 git config --global url.https://.insteadOf git://
 luarocks install luasec
 luarocks install busted

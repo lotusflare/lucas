@@ -6,6 +6,10 @@ describe("connect", function()
 			contact_points = os.getenv("CASSANDRA_HOST"),
 			port = os.getenv("CASSANDRA_PORT"),
 			reconnect = true,
+			credentials = {
+				username = os.getenv("CASSANDRA_USER"),
+				password = os.getenv("CASSANDRA_PASS"),
+			},
 		})
 	end)
 
@@ -15,6 +19,10 @@ describe("connect", function()
 				contact_points = "example.com",
 				reconnect = true,
 				connect_timeout = 100,
+				credentials = {
+					username = os.getenv("CASSANDRA_USER"),
+					password = os.getenv("CASSANDRA_PASS"),
+				},
 			})
 		end)
 	end)
@@ -24,6 +32,10 @@ describe("connect", function()
 			contact_points = os.getenv("CASSANDRA_HOST"),
 			port = os.getenv("CASSANDRA_PORT"),
 			reconnect = true,
+			credentials = {
+				username = os.getenv("CASSANDRA_USER"),
+				password = os.getenv("CASSANDRA_PASS"),
+			},
 		})
 		lucas.connect({
 			contact_points = "example.com",
@@ -36,10 +48,14 @@ describe("connect", function()
 			contact_points = os.getenv("CASSANDRA_HOST"),
 			port = os.getenv("CASSANDRA_PORT_SSL"),
 			reconnect = true,
+			credentials = {
+				username = os.getenv("CASSANDRA_USER"),
+				password = os.getenv("CASSANDRA_PASS"),
+			},
 			ssl = {
 				certificate = os.getenv("CASSANDRA_SSL_CERT"),
 				private_key = os.getenv("CASSANDRA_SSL_KEY"),
-				password = "cassandra",
+				password = os.getenv("CASSANDRA_SSL_PASS"),
 			},
 		})
 	end)

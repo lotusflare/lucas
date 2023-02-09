@@ -1,12 +1,10 @@
 local lucas = require("lucas")
 local pretty = require("pl.pretty")
+local helper = require("test_helper")
 
 describe("batch", function()
 	it("insert", function()
-		lucas.connect({
-			contact_points = os.getenv("CASSANDRA_HOST"),
-			port = os.getenv("CASSANDRA_PORT"),
-		})
+		helper.connect()
 
 		lucas.batch({
 			{

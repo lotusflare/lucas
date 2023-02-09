@@ -13,7 +13,7 @@ services:
     ports:
       - "9043:9042"
     healthcheck:
-      test: ["CMD", "cqlsh"]
+      test: ["CMD", "cqlsh", "-u", "cassandra", "-p", "cassandra"]
       timeout: 3m
 
   driver:
@@ -25,12 +25,13 @@ services:
       core:
         soft: -1
         hard: -1
-    volumes:
-      - "./tmp:/tmp"
     environment:
       CASSANDRA_HOST: cassandra
       CASSANDRA_PORT: 9042
       CASSANDRA_PORT_SSL: 9142
+      CASSANDRA_USER: cassandra
+      CASSANDRA_PASS: cassandra
+      CASSANDRA_SSL_PASS: cassandra
       CASSANDRA_SSL_CERT: |
         -----BEGIN CERTIFICATE-----
         MIIDfzCCAmegAwIBAgIESnjhpzANBgkqhkiG9w0BAQsFADBvMRAwDgYDVQQGEwdV

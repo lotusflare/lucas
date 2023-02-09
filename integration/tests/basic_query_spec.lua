@@ -1,12 +1,10 @@
 local pretty = require("pl.pretty")
 local lucas = require("lucas")
+local helper = require("test_helper")
 
 describe("query", function()
 	it("basic select", function()
-		lucas.connect({
-			contact_points = os.getenv("CASSANDRA_HOST"),
-			port = os.getenv("CASSANDRA_PORT"),
-		})
+		helper.connect()
 		local results = lucas.query("SELECT * FROM testing.data", {})
 		assert.array.has({
 			{
@@ -21,10 +19,7 @@ describe("query", function()
 	end)
 
 	it("select with positional parameters", function()
-		lucas.connect({
-			contact_points = os.getenv("CASSANDRA_HOST"),
-			port = os.getenv("CASSANDRA_PORT"),
-		})
+		helper.connect()
 		local results = lucas.query("SELECT * FROM testing.data WHERE asset_type = ? ALLOW FILTERING", { lucas.int(1) })
 		assert.array.has({
 			{
@@ -44,10 +39,7 @@ describe("query", function()
 	end)
 
 	it("select with named parameters", function()
-		lucas.connect({
-			contact_points = os.getenv("CASSANDRA_HOST"),
-			port = os.getenv("CASSANDRA_PORT"),
-		})
+		helper.connect()
 		local results = lucas.query(
 			"SELECT * FROM testing.data WHERE asset_type = :asset_id ALLOW FILTERING",
 			{ asset_id = lucas.int(1) }
