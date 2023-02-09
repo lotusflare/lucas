@@ -23,7 +23,7 @@ format() {
     fi
 
     print "Running clang-format"
-    # find src include -name "*.h" -o -name "*.c" | xargs clang-format $clang_args
+    find src include -name "*.h" -o -name "*.c" | xargs clang-format $clang_args
 
     print "Running stylua"
     find integration -name "*.lua" | xargs stylua $lua_args

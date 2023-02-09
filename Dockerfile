@@ -14,8 +14,8 @@ apt-get -qq -o=Dpkg::Use-Pty=0 update
 apt-get -qq -o=Dpkg::Use-Pty=0 install \
   git \
   boxes \
-  clang \
-  clang-format \
+  clang-10 \
+  clang-format-10 \
   make \
   cmake \
   libssl-dev \
