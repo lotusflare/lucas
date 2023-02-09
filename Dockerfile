@@ -8,7 +8,7 @@ ENV LUA_PATH="/app/integration/tests/?.lua;;"
 ARG DEBIAN_FRONTEND="noninteractive"
 ARG CLANGD_TAG="15.0.6"
 ARG STYLUA_TAG="v0.16.0"
-SHELL ["/bin/bash", "-euxo", "pipefail"]
+SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 
 RUN <<EOF
 apt-get -qq -o=Dpkg::Use-Pty=0 update
