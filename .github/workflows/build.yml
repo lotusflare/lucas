@@ -25,6 +25,16 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -qq boxes
 
+      - uses: docker/metadata-action@v4
+        id: meta
+        env:
+          DOCKER_METADATA_PR_HEAD_SHA: "true"
+        with:
+          images: ghcr.io/lotusflare/lucas
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=semver,pattern={{version}}
+
       - uses: docker/build-push-action@v3
         with:
           push: false
@@ -33,6 +43,7 @@ jobs:
           context: .
           target: build
           file: Dockerfile
+          tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=gha
           cache-to: type=gha
 
