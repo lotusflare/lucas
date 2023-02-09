@@ -4,11 +4,11 @@ FROM ubuntu:18.04 AS base
 
 ENV LD_LIBRARY_PATH="/usr/local/lib/x86_64-linux-gnu"
 ENV LUA_CPATH="/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/x86_64-linux-gnu/?.so"
-ENV LUA_PATH="/app/integration/tests/?.lua"
+ENV LUA_PATH="/app/integration/tests/?.lua;;"
 ARG DEBIAN_FRONTEND="noninteractive"
 ARG CLANGD_TAG="15.0.6"
 ARG STYLUA_TAG="v0.16.0"
-SHELL ["/bin/bash", "-c", "-e"]
+SHELL ["/bin/bash", "-euxo", "pipefail"]
 
 RUN <<EOF
 apt-get -qq -o=Dpkg::Use-Pty=0 update
