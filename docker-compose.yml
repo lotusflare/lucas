@@ -30,6 +30,8 @@ services:
     environment:
       CASSANDRA_HOST: cassandra
       CASSANDRA_PORT: 9042
+      CASSANDRA_USERNAME: cassandra
+      CASSANDRA_PASSWORD: cassandra
       CASSANDRA_PORT_SSL: 9142
       CASSANDRA_SSL_CERT: |
         -----BEGIN CERTIFICATE-----
