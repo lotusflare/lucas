@@ -1,3 +1,4 @@
+#include "auth.c"
 #include "cassandra.h"
 #include "errors.c"
 #include "logs.c"
@@ -238,6 +239,11 @@ static int connect(lua_State *L)
         goto cleanup;
     }
     rc = set_ssl(L, ARG_OPTIONS, cluster);
+    if (rc)
+    {
+        goto cleanup;
+    }
+    rc = set_authenticator(L, ARG_OPTIONS, cluster);
     if (rc)
     {
         goto cleanup;
