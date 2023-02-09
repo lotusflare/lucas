@@ -36,6 +36,10 @@ describe("connect", function()
 			contact_points = os.getenv("CASSANDRA_HOST"),
 			port = os.getenv("CASSANDRA_PORT_SSL"),
 			reconnect = true,
+			credentials = {
+				username = os.getenv("CASSANDRA_USERNAME"),
+				password = os.getenv("CASSANDRA_PASSWORD"),
+			},
 			ssl = {
 				certificate = os.getenv("CASSANDRA_SSL_CERT"),
 				private_key = os.getenv("CASSANDRA_SSL_KEY"),
