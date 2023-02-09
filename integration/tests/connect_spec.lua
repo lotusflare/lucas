@@ -55,7 +55,7 @@ describe("connect", function()
 			ssl = {
 				certificate = os.getenv("CASSANDRA_SSL_CERT"),
 				private_key = os.getenv("CASSANDRA_SSL_KEY"),
-				password = "cassandra",
+				password = os.getenv("CASSANDRA_SSL_PASS"),
 			},
 		})
 	end)
