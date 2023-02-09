@@ -28,6 +28,8 @@ apt-get -qq -o=Dpkg::Use-Pty=0 install \
   valgrind \
   gdb
 apt-get clean
+ln -s /usr/bin/clang-format-10 /usr/bin/clang-format
+ln -s /usr/bin/clang-10 /usr/bin/clang
 git config --global url.https://.insteadOf git://
 luarocks install luasec
 luarocks install busted

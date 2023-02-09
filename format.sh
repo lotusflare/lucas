@@ -19,7 +19,7 @@ format() {
         clang_args="--verbose -i"
     else
         lua_args="-c --output-format summary"
-        clang_args="--verbose"
+        clang_args="--verbose -n"
     fi
 
     print "Running clang-format"
