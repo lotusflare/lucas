@@ -61,12 +61,17 @@ LucasError *set_authenticator(lua_State *L, int i, CassCluster *cluster)
     lua_getfield(L, credentials_index, "password");
     if (lua_isnil(L, lua_gettop(L)))
     {
-        rc = lucas_new_errorf("username is missing");
+        rc = lucas_new_errorf("password is missing");
         goto cleanup;
     }
     const char *password = lua_tostring(L, lua_gettop(L));
 
-    CassAuthenticatorCallbacks auth_callbacks = {on_auth_initial, on_auth_challenge, on_auth_success, on_auth_cleanup};
+    CassAuthenticatorCallbacks auth_callbacks = {
+        on_auth_initial,
+        on_auth_challenge,
+        on_auth_success,
+        on_auth_cleanup,
+    };
     Credentials credentials = {username, password};
     CassError err = cass_cluster_set_authenticator_callbacks(cluster, &auth_callbacks, NULL, &credentials);
     if (err != CASS_OK)
