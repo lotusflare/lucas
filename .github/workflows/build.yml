@@ -38,7 +38,7 @@ jobs:
       - uses: docker/build-push-action@v4
         with:
           push: ${{ steps.meta.outputs.tags != '' }}
-          load: true
+          # load: true
           builder: ${{ steps.buildx.outputs.name }}
           context: .
           target: artifacts
