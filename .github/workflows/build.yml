@@ -38,8 +38,8 @@ jobs:
         with:
           images: ghcr.io/lotusflare/lucas
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
             type=semver,pattern={{version}}
+            type=edge
 
       - uses: docker/build-push-action@v4
         with:
