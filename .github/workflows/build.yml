@@ -25,30 +25,41 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -qq boxes
 
-      - uses: docker/build-push-action@v3
+      - uses: docker/metadata-action@v4
+        id: meta
+        env:
+          DOCKER_METADATA_PR_HEAD_SHA: "true"
         with:
-          push: false
+          images: ghcr.io/lotusflare/lucas
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=semver,pattern={{version}}
+
+      - uses: docker/build-push-action@v4
+        with:
+          push: ${{ steps.meta.outputs.tags != '' }}
           load: true
           builder: ${{ steps.buildx.outputs.name }}
           context: .
-          target: build
+          target: artifacts
           file: Dockerfile
+          tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=gha
           cache-to: type=gha
 
       - name: Integration tests
         run: |
-          echo '/tmp/core-%e.%p.%t' | sudo tee /proc/sys/kernel/core_pattern
           ./start.sh -bt
 
       - name: Debug
         if: ${{ failure() }}
         run: |
-          sudo chown -R $USER:$USER ./tmp
           docker inspect $(docker compose ps -qa driver)
+          docker compose cp driver:/app/core ./core
+          sudo chown -R $USER:$USER ./core
 
       - uses: actions/upload-artifact@v3
         if: ${{ failure() }}
         with:
           name: integration-tests-dump
-          path: ./tmp
+          path: ./core
