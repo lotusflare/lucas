@@ -20,6 +20,7 @@ repos:
     rev: v3.6.0-1
     hooks:
       - id: shfmt
+        pass_filenames: true
 
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v15.0.6

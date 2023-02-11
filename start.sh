@@ -52,6 +52,7 @@ run() {
     clean
     build
     cassandra
+
     test
 }
 
