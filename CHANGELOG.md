@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.9.0](https://github.com/lotusflare/lucas/compare/v0.8.0...v0.9.0) (2023-02-10)
+
+
+### Features
+
+* auth support ([#55](https://github.com/lotusflare/lucas/issues/55)) ([9de825b](https://github.com/lotusflare/lucas/commit/9de825b87d4e630a211e52e479daf153d972b1a9))
+
+
+### Bug Fixes
+
+* add ghcr login ([827cd57](https://github.com/lotusflare/lucas/commit/827cd57c599fba2677099cb29f2582d10488495e))
+* docker push ([3271f27](https://github.com/lotusflare/lucas/commit/3271f2721ab07ae2907f4ea9eb5a233f0259373f))
+* tags ([b68b39b](https://github.com/lotusflare/lucas/commit/b68b39bffa6a73165c3399fdb60ac72e0aba24dd))
+
 ## [0.8.0](https://github.com/lotusflare/lucas/compare/v0.7.0...v0.8.0) (2023-02-07)
 
 
