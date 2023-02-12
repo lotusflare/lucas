@@ -49,6 +49,7 @@ unzip -j clangd-linux-${CLANGD_TAG}.zip clangd_${CLANGD_TAG}/bin/clangd -d /usr/
 rm clangd-linux-${CLANGD_TAG}.zip
 wget -q https://github.com/mvdan/sh/releases/download/${SHFMT_TAG}/shfmt_${SHFMT_TAG}_linux_amd64
 mv shfmt_${SHFMT_TAG}_linux_amd64 /usr/bin/shfmt
+chmod +x /usr/bin/shfmt
 EOF
 
 COPY ./vendor /app/vendor/
