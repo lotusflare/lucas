@@ -16,8 +16,8 @@ repos:
   #       language: script
   #       pass_filenames: false
 
-  - repo: https://github.com/scop/pre-commit-shfmt
-    rev: v3.6.0-1
+  - repo: https://github.com/maxwinterstein/shfmt-py
+    rev: v3.4.3.1
     hooks:
       - id: shfmt
         pass_filenames: true
@@ -29,7 +29,7 @@ repos:
         pass_filenames: true
 
   - repo: https://github.com/JohnnyMorganz/StyLua
-    rev: v0.15.3
+    rev: v0.16.0
     hooks:
       - id: stylua-github
         pass_filenames: true
