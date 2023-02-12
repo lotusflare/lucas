@@ -8,6 +8,7 @@ ENV LUA_PATH="/app/integration/tests/?.lua;;"
 ARG DEBIAN_FRONTEND="noninteractive"
 ARG CLANGD_TAG="15.0.6"
 ARG STYLUA_TAG="v0.16.0"
+ARG SHFMT_TAG="v3.6.0"
 SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 
 RUN <<EOF
@@ -40,12 +41,15 @@ luarocks install lua-cassandra
 EOF
 
 RUN <<EOF
-wget -q https://github.com/JohnnyMorganz/StyLua/releases/download/$STYLUA_TAG/stylua-linux.zip
+wget -q https://github.com/JohnnyMorganz/StyLua/releases/download/${STYLUA_TAG}/stylua-linux.zip
 unzip stylua-linux.zip -d /usr/bin
 rm stylua-linux.zip
-wget -q https://github.com/clangd/clangd/releases/download/$CLANGD_TAG/clangd-linux-$CLANGD_TAG.zip
-unzip -j clangd-linux-$CLANGD_TAG.zip clangd_$CLANGD_TAG/bin/clangd -d /usr/bin
-rm clangd-linux-$CLANGD_TAG.zip
+wget -q https://github.com/clangd/clangd/releases/download/${CLANGD_TAG}/clangd-linux-${CLANGD_TAG}.zip
+unzip -j clangd-linux-${CLANGD_TAG}.zip clangd_${CLANGD_TAG}/bin/clangd -d /usr/bin
+rm clangd-linux-${CLANGD_TAG}.zip
+wget -q https://github.com/mvdan/sh/releases/download/${SHFMT_TAG}/shfmt_${SHFMT_TAG}_linux_amd64
+mv shfmt_${SHFMT_TAG}_linux_amd64 /usr/bin/shfmt
+chmod +x /usr/bin/shfmt
 EOF
 
 COPY ./vendor /app/vendor/

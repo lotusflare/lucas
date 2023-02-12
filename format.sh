@@ -17,9 +17,11 @@ format() {
     if $fix; then
         lua_args="-v"
         clang_args="--verbose -i"
+        shfmt_args="--write"
     else
         lua_args="-c --output-format summary"
         clang_args="--verbose -n"
+        shfmt_args="--diff"
     fi
 
     print "Running clang-format"
@@ -27,6 +29,9 @@ format() {
 
     print "Running stylua"
     find integration -name "*.lua" | xargs stylua $lua_args
+
+    print "Running shfmt"
+    find -maxdepth 1 -name "*.sh" | xargs shfmt $shfmt_args
 }
 
 format_flags "$@"
