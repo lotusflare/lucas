@@ -1,3 +1,17 @@
+/**
+ * @file    lucas.c
+ *
+ * @brief   this file  provides the interface to initialize the Lua Cassandra (LuCas) driver
+ *
+ * @copyright Copyright (c) 2022 LotusFlare, Inc.; Santa Clara, California, USA
+ * All rights reserved.
+ *
+ * This source code is part of the lucas open souece project
+ * and licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
 #include "batch.c"
 #include "compatible.c"
 #include "connect.c"
