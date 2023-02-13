@@ -7,3 +7,5 @@ CMakeFiles
 scratch.lua
 docker-compose.override.yml
 tmp
+node_modules
+
