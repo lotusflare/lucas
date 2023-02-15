@@ -24,5 +24,3 @@ See `integration/tests` for examples.
 - `-c` removes existing containers first (clears database).
 - `-b` force rebuild of the containers first.
 - `-t` run the tests after environment is up.
-
-`build.sh` builds the library.
