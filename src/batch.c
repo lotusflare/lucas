@@ -1,3 +1,9 @@
+///
+/// @file batch.c
+/// @brief Batch queries.
+/// @author Erik Berkun-Drevnig<erik.berkundrevnig@lotusflare.com>
+/// @copyright Copyright (c) 2023 LotusFlare, Inc.
+///
 
 #include "cassandra.h"
 #include "errors.c"
