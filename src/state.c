@@ -1,3 +1,10 @@
+///
+/// @file state.c
+/// @brief Initialize driver state.
+/// @author Erik Berkun-Drevnig<erik.berkundrevnig@lotusflare.com>
+/// @copyright Copyright (c) 2023 LotusFlare, Inc.
+///
+
 #pragma once
 
 #include "cassandra.h"

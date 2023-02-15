@@ -28,7 +28,9 @@ apt-get -qq -o=Dpkg::Use-Pty=0 install \
   luarocks \
   pkg-config \
   valgrind \
-  gdb
+  gdb \
+  doxygen \
+  graphviz
 apt-get clean
 ln -s /usr/bin/clang-format-10 /usr/bin/clang-format
 ln -s /usr/bin/clang-10 /usr/bin/clang

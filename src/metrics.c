@@ -1,3 +1,9 @@
+///
+/// @file metrics.c
+/// @brief Expose internal driver metrics.
+/// @author Erik Berkun-Drevnig<erik.berkundrevnig@lotusflare.com>
+/// @copyright Copyright (c) 2023 LotusFlare, Inc.
+///
 
 #include "cassandra.h"
 #include "logs.c"
