@@ -1,3 +1,10 @@
+///
+/// @file query.c
+/// @brief Querying functionality.
+/// @author Erik Berkun-Drevnig<eberkundrevnig@lotusflare.com>
+/// @copyright Copyright (c) 2023 LotusFlare, Inc.
+///
+
 #pragma once
 
 #include "query.h"

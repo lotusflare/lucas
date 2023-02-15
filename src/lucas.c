@@ -1,3 +1,10 @@
+///
+/// @file lucas.c
+/// @brief Lua module entrypoint.
+/// @author Erik Berkun-Drevnig<eberkundrevnig@lotusflare.com>
+/// @copyright Copyright (c) 2023 LotusFlare, Inc.
+///
+
 #include "batch.c"
 #include "compatible.c"
 #include "connect.c"

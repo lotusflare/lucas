@@ -1,3 +1,10 @@
+///
+/// @file connect.c
+/// @brief Configuring and connecting to the cluster.
+/// @author Erik Berkun-Drevnig<eberkundrevnig@lotusflare.com>
+/// @copyright Copyright (c) 2023 LotusFlare, Inc.
+///
+
 #include "cassandra.h"
 #include "errors.c"
 #include "logs.c"
