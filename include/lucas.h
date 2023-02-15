@@ -1,7 +1,7 @@
 ///
 /// @file lucas.h
 /// @brief Definitions for lucas.c
-/// @author Erik Berkun-Drevnig<eberkundrevnig@lotusflare.com>
+/// @author Erik Berkun-Drevnig<erik.berkundrevnig@lotusflare.com>
 /// @copyright Copyright (c) 2023 LotusFlare, Inc.
 ///
 
