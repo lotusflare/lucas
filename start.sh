@@ -16,7 +16,7 @@ clean() {
 build() {
     if $build; then
         print "Building containers"
-        docker compose build --progress=tty
+        docker compose build
     fi
 }
 
