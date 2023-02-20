@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.3](https://github.com/lotusflare/lucas/compare/v0.9.2...v0.9.3) (2023-02-20)
+
+
+### Bug Fixes
+
+* docker TTY ([ce77f0a](https://github.com/lotusflare/lucas/commit/ce77f0a9d561ea2aa2b770a9b3c318dbc15b04c1))
+
 ## [0.9.2](https://github.com/lotusflare/lucas/compare/v0.9.1...v0.9.2) (2023-02-20)
 
 
