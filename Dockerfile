@@ -35,7 +35,7 @@ apt-get clean
 ln -s /usr/bin/clang-format-10 /usr/bin/clang-format
 ln -s /usr/bin/clang-10 /usr/bin/clang
 git config --global url.https://.insteadOf git://
-luarocks install luasec
+# luarocks install luasec
 luarocks install busted
 luarocks install luasocket
 luarocks install uuid
