@@ -16,8 +16,8 @@ jobs:
           fetch-depth: 0
 
       - uses: docker/setup-qemu-action@v2
-        with:
-          platforms: arm64
+        # with:
+        #   platforms: arm64
 
       - uses: docker/setup-buildx-action@v2
         id: buildx
