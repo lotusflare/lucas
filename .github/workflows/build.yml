@@ -15,6 +15,10 @@ jobs:
           submodules: true
           fetch-depth: 0
 
+      - uses: docker/setup-qemu-action@v2
+        with:
+          platforms: arm64
+
       - uses: docker/setup-buildx-action@v2
         id: buildx
         with:
@@ -42,6 +46,7 @@ jobs:
 
       - uses: docker/build-push-action@v4
         with:
+          platforms: linux/amd64,linux/arm/v8
           push: ${{ steps.meta.outputs.tags != '' }}
           # load: true
           builder: ${{ steps.buildx.outputs.name }}
