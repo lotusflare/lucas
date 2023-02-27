@@ -49,9 +49,6 @@ EOF
 # wget -q https://github.com/clangd/clangd/releases/download/${CLANGD_TAG}/clangd-linux-${CLANGD_TAG}.zip
 # unzip -j clangd-linux-${CLANGD_TAG}.zip clangd_${CLANGD_TAG}/bin/clangd -d /usr/bin
 # rm clangd-linux-${CLANGD_TAG}.zip
-# wget -q https://github.com/mvdan/sh/releases/download/${SHFMT_TAG}/shfmt_${SHFMT_TAG}_linux_amd64
-# mv shfmt_${SHFMT_TAG}_linux_amd64 /usr/bin/shfmt
-# chmod +x /usr/bin/shfmt
 # EOF
 
 COPY ./vendor /app/vendor/
@@ -63,6 +60,9 @@ make install
 EOF
 WORKDIR /app
 
+COPY --from=mvdan/shfmt:v3-alpine /bin/shfmt /usr/bin/shfmt
+
+
 FROM base AS build
 COPY . /app/
 WORKDIR /app/build
@@ -72,15 +72,6 @@ cmake --build .
 EOF
 WORKDIR /app
 # RUN ./format.sh
-
-# RUN <<EOF
-# if [ "${TARGETPLATFORM}" = "linux/amd64" ]; then
-# CLANG_FORMAT_URL="https://github.com/clangd/clangd/releases/download/${CLANGD_TAG}/clangd-linux-${CLANGD_TAG}.zip"
-# SHFMT_URL="https://github.com/mvdan/sh/releases/download/${SHFMT_TAG}/shfmt_${SHFMT_TAG}_linux_amd64"
-# elif [ "${TARGETPLATFORM}" = "linux/amd64" ]; then
-# SHFMT_URL="https://github.com/mvdan/sh/releases/download/${SHFMT_TAG}/shfmt_${SHFMT_TAG}_linux_amd64"
-# fi
-# EOF
 
 FROM scratch AS artifacts
 COPY --from=build /app/build/lucas.so* /
