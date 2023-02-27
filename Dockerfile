@@ -84,4 +84,4 @@ WORKDIR /app
 
 FROM scratch AS artifacts
 COPY --from=build /app/build/lucas.so* /
-COPY --from=build /usr/local/lib/x86_64-linux-gnu/libcassandra.so* /
+COPY --from=build /app/vendor/cpp-driver/build/libcassandra.so* /
