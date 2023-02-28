@@ -2,3 +2,4 @@
 
 handleGHRelease: true
 releaseType: simple
+releaseLabels: [build, feat, fix, perf, revert]
