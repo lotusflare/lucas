@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.5](https://github.com/lotusflare/lucas/compare/v0.9.4...v0.9.5) (2023-02-28)
+
+
+### Bug Fixes
+
+* workflow names ([14ebd46](https://github.com/lotusflare/lucas/commit/14ebd46f60a18592d3d4df1177a19e7770e0c993))
+
 ## [0.9.4](https://github.com/lotusflare/lucas/compare/v0.9.3...v0.9.4) (2023-02-28)
 
 
