@@ -4,9 +4,9 @@ on:
   push:
     tags: ["*"]
 
-name: build
+name: artifacts
 jobs:
-  tests:
+  build:
     runs-on: ubuntu-22.04
     env:
       DOCKER_BUILDKIT: "1"
