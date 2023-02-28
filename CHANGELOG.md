@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.4](https://github.com/lotusflare/lucas/compare/v0.9.3...v0.9.4) (2023-02-28)
+
+
+### Reverts
+
+* config change ([65b68ef](https://github.com/lotusflare/lucas/commit/65b68ef88980d285329f116878f933b719be4938))
+
 ## [0.9.3](https://github.com/lotusflare/lucas/compare/v0.9.2...v0.9.3) (2023-02-20)
 
 
