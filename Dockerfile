@@ -11,9 +11,6 @@ ARG STYLUA_TAG="v0.16.0"
 ARG SHFMT_TAG="v3.6.0"
 SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 
-COPY --from=mvdan/shfmt:v3-alpine /bin/shfmt /usr/bin/shfmt
-# COPY --from=stylua:0.17.0 /stylua /usr/bin/stylua
-
 RUN <<EOF
 apt-get -qq -o=Dpkg::Use-Pty=0 update
 apt-get -qq -o=Dpkg::Use-Pty=0 install \
@@ -43,6 +40,9 @@ luarocks install luasocket
 luarocks install uuid
 luarocks install lua-cassandra
 EOF
+
+COPY --from=mvdan/shfmt:v3-alpine /bin/shfmt /usr/bin/shfmt
+# COPY --from=ghcr.io/JohnnyMorganz/StyLua:stylua:0.17.0 /stylua /usr/bin/stylua
 
 COPY ./vendor /app/vendor/
 WORKDIR /app/vendor/cpp-driver/build
