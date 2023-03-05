@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.6](https://github.com/lotusflare/lucas/compare/v0.9.5...v0.9.6) (2023-03-03)
+
+
+### Bug Fixes
+
+* update supported platforms ([1d95933](https://github.com/lotusflare/lucas/commit/1d95933a8ea05235c8d510f70245183b6f539d13))
+
 ## [0.9.5](https://github.com/lotusflare/lucas/compare/v0.9.4...v0.9.5) (2023-02-28)
 
 
