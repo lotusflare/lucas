@@ -42,7 +42,7 @@ luarocks install lua-cassandra
 EOF
 
 COPY --from=mvdan/shfmt:v3-alpine /bin/shfmt /usr/bin/shfmt
-# COPY --from=ghcr.io/JohnnyMorganz/StyLua:stylua:0.17.0 /stylua /usr/bin/stylua
+COPY --from=johnnymorganz/stylua:0.17.0 /stylua /usr/bin/stylua
 
 COPY ./vendor /app/vendor/
 WORKDIR /app/vendor/cpp-driver/build

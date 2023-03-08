@@ -27,9 +27,8 @@ format() {
     print "Running clang-format"
     find src include -name "*.h" -o -name "*.c" | xargs clang-format $clang_args
 
-    # TODO: Reenable after StyLua is published with Docker: https://github.com/JohnnyMorganz/StyLua/pull/655
-    # print "Running stylua"
-    # find integration -name "*.lua" | xargs stylua $lua_args
+    print "Running stylua"
+    find integration -name "*.lua" | xargs stylua $lua_args
 
     print "Running shfmt"
     find -maxdepth 1 -name "*.sh" | xargs shfmt $shfmt_args
