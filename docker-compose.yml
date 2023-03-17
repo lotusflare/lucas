@@ -21,6 +21,7 @@ services:
       timeout: 3m
 
   driver:
+    mem_limit: "1G"
     build:
       context: .
       target: build
