@@ -12,7 +12,6 @@ services:
       MAX_HEAP_SIZE: 2048M
     volumes:
       - "./integration/cassandra/cassandra.yaml:/etc/cassandra/cassandra.yaml"
-      - "./integration/cassandra/jvm-server.options:/etc/cassandra/jvm-server.options"
       - "./integration/cassandra/node-keystore.jks:/opt/cassandra/keystore.jks"
       - "./integration/cassandra/node-truststore.jks:/opt/cassandra/truststore.jks"
     ports:
