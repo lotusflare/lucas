@@ -8,6 +8,7 @@ services:
     mem_limit: 4g
     volumes:
       - "./integration/cassandra/cassandra.yaml:/etc/cassandra/cassandra.yaml"
+      - "./integration/cassandra/jvm-server.options:/etc/cassandra/jvm-server.options"
       - "./integration/cassandra/node-keystore.jks:/opt/cassandra/keystore.jks"
       - "./integration/cassandra/node-truststore.jks:/opt/cassandra/truststore.jks"
     ports:
