@@ -1,11 +1,15 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
 
+version: "3.9"
 services:
   cassandra:
     image: cassandra:4.1
+    cpus: 2.0
+    mem_limit: "3G"
     environment:
       CASSANDRA_LISTEN_ADDRESS: cassandra
-    mem_limit: 4g
+      HEAP_NEWSIZE: 128M
+      MAX_HEAP_SIZE: 2048M
     volumes:
       - "./integration/cassandra/cassandra.yaml:/etc/cassandra/cassandra.yaml"
       - "./integration/cassandra/node-keystore.jks:/opt/cassandra/keystore.jks"
@@ -17,6 +21,7 @@ services:
       timeout: 3m
 
   driver:
+    mem_limit: "1G"
     build:
       context: .
       target: build
