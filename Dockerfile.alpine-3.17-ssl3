@@ -62,5 +62,8 @@ WORKDIR /app
 RUN /app/format.sh
 
 FROM scratch AS artifacts
+
+LABEL maintainer="LotusFlare Persistence Infra <infra@lotusflare.com>"
+
 COPY --from=build /app/build/lucas.so* /
 COPY --from=build /app/vendor/cpp-driver/build/libcassandra.so* /
