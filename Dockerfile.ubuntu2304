@@ -1,6 +1,11 @@
 # syntax=docker/dockerfile:1
 
-FROM ubuntu:23.04 AS base
+ARG LUCAS_IMAGE_BASE="ubuntu"
+ARG LUCAS_IMAGE_TAG="23.04"
+
+FROM ${LUCAS_IMAGE_BASE}:${LUCAS_IMAGE_TAG} AS base
+
+LABEL maintainer="LotusFlare Persistence Infra <infra@lotusflare.com>"
 
 ENV LD_LIBRARY_PATH="/usr/local/lib/x86_64-linux-gnu"
 ENV LUA_CPATH="/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/x86_64-linux-gnu/?.so"
