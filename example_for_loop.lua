@@ -1,4 +1,5 @@
 local lucas = require("lucas")
+local socket = require("socket")
 
 local function testQueryLucasFromLua()
     lucas.connect({
@@ -13,7 +14,7 @@ local function testQueryLucasFromLua()
     while(true)
     do
 
-        sleep(2)
+        socket.sleep(2)
         local results = lucas.query('SELECT * FROM testing.data', {})
         for index, data in ipairs(results) do
             print(index)
