@@ -19,7 +19,7 @@ INSERT INTO testing.data (
         'car': 'Honda',
         'fruit': 'apple'
     }
-);
+) IF NOT EXISTS;
 
 INSERT INTO testing.collections (
     id,
@@ -34,4 +34,4 @@ INSERT INTO testing.collections (
         0f854625-9bfd-4407-8c28-c4cdb67106f8: 'foo',
         e00e3562-9b62-40dc-ac40-0b6834ffc5e5: 'bar'
     }
-);
+) IF NOT EXISTS;

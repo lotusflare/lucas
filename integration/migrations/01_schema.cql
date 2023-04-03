@@ -1,6 +1,6 @@
 CREATE KEYSPACE IF NOT EXISTS testing WITH replication = {
     'class': 'SimpleStrategy',
-    'replication_factor': 1
+    'replication_factor': 3
 };
 
 CREATE TABLE IF NOT EXISTS testing.data(
