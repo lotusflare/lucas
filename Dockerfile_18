@@ -23,8 +23,7 @@ WORKDIR /app
 
 FROM base AS build
 COPY . /app/
-RUN chmod +x ./scripts/build-w-cmake.sh && ./scripts/build-w-cmake.sh
-RUN chmod +x /app/scripts/install-cqlsh.sh && /app/scripts/install-cqlsh.sh
+RUN chmod +x /app/scripts/install-cqlsh.sh && /app/scripts/install-cqlsh.sh && chmod +x ./scripts/build-w-cmake.sh && ./scripts/build-w-cmake.sh
 WORKDIR /app
 #RUN ./format.sh
 
