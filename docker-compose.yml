@@ -71,27 +71,34 @@ services:
       cassandra2:
         condition: service_healthy
   
-  cass_migrations:
-    container_name: cass_migrations
+  cass_migrations_amd64:
+    container_name: cass_migrations_amd64
     hostname: cass_migrations
-    image: cass_migrations:latest
+    image: cass_migrations_amd64:latest
     build:
       context: .
       target: build
-      dockerfile: Dockerfile_18
+      dockerfile: Dockerfile_u18
     entrypoint: ["bash", "/app/scripts/cass_migrations_entrypoint.sh"]
+    environment:
+       - LUA_CPATH=/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/x86_64-linux-gnu/?.so
+       - LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu
     depends_on:
       cassandra3:
         condition: service_healthy
 
-  driver_18:
-    image: lucas18:latest
-    container_name: lucas_18
+  driver_u18_amd64:
+    platform: linux/amd64
+    image: lucas18_amd64:latest
+    container_name: lucas_u18_amd64
     mem_limit: "1G"
     build:
       context: .
       target: build
-      dockerfile: Dockerfile_18
+      dockerfile: Dockerfile_u18
+      args:
+        - LUA_CPATH=/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/x86_64-linux-gnu/?.so
+        - LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu
     init: true
     command: sleep infinity
     ulimits:
@@ -100,18 +107,25 @@ services:
         hard: -1
     env_file:
       - cassandra.env
+    environment:
+       - LUA_CPATH=/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/x86_64-linux-gnu/?.so
+       - LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu
     depends_on:
       cassandra3:
         condition: service_healthy    
 
-  driver_20:
-    image: lucas20:latest
-    container_name: lucas_20
+  driver_u20_amd64:
+    platform: linux/amd64
+    image: lucas20_amd64:latest
+    container_name: lucas_u20_amd64
     mem_limit: "1G"
     build:
       context: .
       target: build
-      dockerfile: Dockerfile_20
+      dockerfile: Dockerfile_u20
+      args:
+        - LUA_CPATH=/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/x86_64-linux-gnu/?.so
+        - LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu
     init: true
     command: sleep infinity
     ulimits:
@@ -120,18 +134,25 @@ services:
         hard: -1
     env_file:
       - cassandra.env
+    environment:
+       - LUA_CPATH=/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/x86_64-linux-gnu/?.so
+       - LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu
     depends_on:
       cassandra3:
         condition: service_healthy  
 
-  driver_22:
-    image: lucas22:latest
-    container_name: lucas_22
+  driver_u22_amd64:
+    platform: linux/amd64
+    image: lucas22_amd64:latest
+    container_name: lucas_u22_amd64
     mem_limit: "1G"
     build:
       context: .
       target: build
-      dockerfile: Dockerfile_22
+      dockerfile: Dockerfile_u22
+      args:
+        - LUA_CPATH=/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/x86_64-linux-gnu/?.so
+        - LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu
     init: true
     command: sleep infinity
     ulimits:
@@ -140,6 +161,144 @@ services:
         hard: -1
     env_file:
       - cassandra.env
+    environment:
+       - LUA_CPATH=/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/x86_64-linux-gnu/?.so
+       - LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu
+    depends_on:
+      cassandra3:
+        condition: service_healthy
+
+  driver_u18_arm64:
+    platform: linux/arm64
+    image: lucas18_arm64:latest
+    container_name: lucas_u18_arm64
+    mem_limit: "1G"
+    build:
+      context: .
+      target: build
+      dockerfile: Dockerfile_u18
+      args:
+        - LUA_CPATH=/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/aarch64-linux-gnu/?.so
+        - LD_LIBRARY_PATH=/usr/local/lib/aarch64-linux-gnu
+    init: true
+    command: sleep infinity
+    ulimits:
+      core:
+        soft: -1
+        hard: -1
+    env_file:
+      - cassandra.env
+    environment:
+      - LUA_CPATH=/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/aarch64-linux-gnu/?.so
+      - LD_LIBRARY_PATH=/usr/local/lib/aarch64-linux-gnu
+    depends_on:
+      cassandra3:
+        condition: service_healthy    
+
+  driver_u20_arm64:
+    platform: linux/arm64
+    image: lucas20_arm64:latest
+    container_name: lucas_u20_arm64
+    mem_limit: "1G"
+    build:
+      context: .
+      target: build
+      dockerfile: Dockerfile_u20
+      args:
+        - LUA_CPATH=/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/aarch64-linux-gnu/?.so
+        - LD_LIBRARY_PATH=/usr/local/lib/aarch64-linux-gnu
+    init: true
+    command: sleep infinity
+    ulimits:
+      core:
+        soft: -1
+        hard: -1
+    env_file:
+      - cassandra.env
+    environment:
+      - LUA_CPATH=/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/aarch64-linux-gnu/?.so
+      - LD_LIBRARY_PATH=/usr/local/lib/aarch64-linux-gnu
+    depends_on:
+      cassandra3:
+        condition: service_healthy  
+
+  driver_u22_arm64:
+    platform: linux/arm64
+    image: lucas22_arm64:latest
+    container_name: lucas_u22_arm64
+    mem_limit: "1G"
+    build:
+      context: .
+      target: build
+      dockerfile: Dockerfile_u22
+      args:
+        - LUA_CPATH=/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/aarch64-linux-gnu/?.so
+        - LD_LIBRARY_PATH=/usr/local/lib/aarch64-linux-gnu
+    init: true
+    command: sleep infinity
+    ulimits:
+      core:
+        soft: -1
+        hard: -1
+    env_file:
+      - cassandra.env
+    environment:
+      - LUA_CPATH=/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/aarch64-linux-gnu/?.so
+      - LD_LIBRARY_PATH=/usr/local/lib/aarch64-linux-gnu
+    depends_on:
+      cassandra3:
+        condition: service_healthy
+  
+  driver_alpine317_arm64:
+    platform: linux/arm64
+    image: lucas_alpine317_arm64:latest
+    container_name: lucas_alpine317_arm64
+    mem_limit: "1G"
+    build:
+      context: .
+      target: build
+      dockerfile: Dockerfile_alpine_317
+      args:
+        - LUA_CPATH=/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/aarch64-linux-gnu/?.so
+        - LD_LIBRARY_PATH=/usr/local/lib/aarch64-linux-gnu
+    init: true
+    command: sleep infinity
+    ulimits:
+      core:
+        soft: -1
+        hard: -1
+    env_file:
+      - cassandra.env
+    environment:
+      - LUA_CPATH=/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/aarch64-linux-gnu/?.so
+      - LD_LIBRARY_PATH=/usr/local/lib/aarch64-linux-gnu
+    depends_on:
+      cassandra3:
+        condition: service_healthy
+  
+  driver_alpine317_amd64:
+    platform: linux/amd64
+    image: lucas_alpine317_amd64:latest
+    container_name: lucas_alpine317_amd64
+    mem_limit: "1G"
+    build:
+      context: .
+      target: build
+      dockerfile: Dockerfile_alpine_317
+      args:
+        - LUA_CPATH=/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/x86_64-linux-gnu/?.so
+        - LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu
+    init: true
+    command: sleep infinity
+    ulimits:
+      core:
+        soft: -1
+        hard: -1
+    env_file:
+      - cassandra.env
+    environment:
+       - LUA_CPATH=/app/build/?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/x86_64-linux-gnu/?.so
+       - LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu
     depends_on:
       cassandra3:
         condition: service_healthy
