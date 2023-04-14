@@ -24,7 +24,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 180
-  
+
   cassandra2:
     container_name: cassandra2
     hostname: cassandra2
@@ -47,7 +47,7 @@ services:
     depends_on:
       cassandra1:
         condition: service_healthy
-    
+
   cassandra3:
     container_name: cassandra3
     hostname: cassandra3
@@ -70,7 +70,7 @@ services:
     depends_on:
       cassandra2:
         condition: service_healthy
-  
+
   cass_migrations_amd64:
     container_name: cass_migrations_amd64
     hostname: cass_migrations
@@ -112,7 +112,7 @@ services:
        - LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu
     depends_on:
       cassandra3:
-        condition: service_healthy    
+        condition: service_healthy
 
   driver_u20_amd64:
     platform: linux/amd64
@@ -139,7 +139,7 @@ services:
        - LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu
     depends_on:
       cassandra3:
-        condition: service_healthy  
+        condition: service_healthy
 
   driver_u22_amd64:
     platform: linux/amd64
@@ -193,7 +193,7 @@ services:
       - LD_LIBRARY_PATH=/usr/local/lib/aarch64-linux-gnu
     depends_on:
       cassandra3:
-        condition: service_healthy    
+        condition: service_healthy
 
   driver_u20_arm64:
     platform: linux/arm64
@@ -220,7 +220,7 @@ services:
       - LD_LIBRARY_PATH=/usr/local/lib/aarch64-linux-gnu
     depends_on:
       cassandra3:
-        condition: service_healthy  
+        condition: service_healthy
 
   driver_u22_arm64:
     platform: linux/arm64
@@ -248,7 +248,7 @@ services:
     depends_on:
       cassandra3:
         condition: service_healthy
-  
+
   driver_alpine317_arm64:
     platform: linux/arm64
     image: lucas_alpine317_arm64:latest
@@ -275,7 +275,7 @@ services:
     depends_on:
       cassandra3:
         condition: service_healthy
-  
+
   driver_alpine317_amd64:
     platform: linux/amd64
     image: lucas_alpine317_amd64:latest
@@ -302,3 +302,4 @@ services:
     depends_on:
       cassandra3:
         condition: service_healthy
+
