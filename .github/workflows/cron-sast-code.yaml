@@ -1,0 +1,39 @@
+name: cron-sast-code
+
+on:
+  schedule:
+    - cron: '0 1 * * 1'
+  workflow_dispatch: {}
+
+jobs:
+  ecr-login:
+    name: "sast: Scan repo"
+    concurrency:
+      group: sast-scan-${{ github.ref }}
+      cancel-in-progress: true
+    runs-on: general-micro-x86-v2
+    env:
+      ENV_CONFIG_RULES: "-c p/default -c p/secrets -c r/generic.secrets -c p/owasp-top-ten -c p/semgrep-misconfigurations -c p/c -c p/dockerfile -c p/docker-compose"
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Configure AWS credentials for S3
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::111087410577:role/lf_gha_s3_rwd_role
+          role-skip-session-tagging: true
+          role-duration-seconds: 3600
+          unset-current-credentials: true
+          aws-region: us-east-1
+    
+
+      - name: Run scan job
+        uses: lotusflare/actions/linter-sast-code@linter-sast-code-v1
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ env.AWS_SESSION_TOKEN }}
+          branch: ${{ github.head_ref || github.ref_name }}
+          project-name: ${{ github.repository }}
+        env:
+          ENV_CONFIG_RULES: ${{ env.ENV_CONFIG_RULES }}
