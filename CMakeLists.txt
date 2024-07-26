@@ -11,6 +11,16 @@ set(CC clang)
 set(CXX clang++)
 # set(CMAKE_BUILD_TYPE Debug)
 
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG release-1.12.1
+)
+FetchContent_MakeAvailable(googletest)
+
+add_subdirectory(vendor/cpp-driver)
+include_directories(vendor/cpp-driver/include)
 find_package(Git)
 execute_process(
     COMMAND ${GIT_EXECUTABLE} describe --tags --dirty --match "v[0-9].[0-9].[0-9]"
@@ -34,6 +44,14 @@ endif()
 set(VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_SUFFIX}")
 message(STATUS "lucas version: ${VERSION}")
 add_definitions(-DVERSION="${VERSION}")
+
+include_directories(include)
+
+enable_testing()
+add_executable(lucas_test tests/lucas_test.cpp)
+target_link_libraries(lucas_test GTest::gtest_main)
+include(GoogleTest)
+gtest_discover_tests(lucas_test)
 
 add_library("${PROJECT_NAME}" SHARED src/lucas.c)
 target_include_directories("${PROJECT_NAME}" PRIVATE include)
